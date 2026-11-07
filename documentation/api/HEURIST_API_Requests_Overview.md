@@ -148,7 +148,7 @@ Each requested field contains an ordered array of values. `resolveDetails=false`
 The legacy `record_search.php?a=links_details` controller action is unchanged and remains a compatibility mechanism for existing internal clients.
 
 
-## System records
+## Entities
 
 Authenticated clients can search mapped system entities with the same query,
 field-selection, IDs-only and pagination contract used by records:
@@ -156,11 +156,17 @@ field-selection, IDs-only and pagination contract used by records:
 ```text
 GET|POST /api/<database>/sys
 GET      /api/<database>/sys/filter/<id>
-GET      /api/<database>/sys/user/<id>
+GET      /api/<database>/user/<id>
+GET      /api/<database>/group/<id>
+GET      /api/<database>/tag/<id>
+GET      /api/<database>/bookmark/<id>
+GET      /api/<database>/reminder/<id>
+GET      /api/<database>/user/<id>/<field id or concept code>
 ```
 
-The singular `t` predicate selects `filter` or `user`; omission currently
-defaults to `filter`. Stable keywords map to the current legacy storage:
+The `t` predicate selects `filter` or an entity (`user`, `group`, `bookmark`,
+`reminder`, `tag`, `website`, `page`, `report`, `output`) by its name, record type
+id or concept code; omission currently defaults to `filter`. Stable keywords map to the current legacy storage:
 `id`, `title`, `modified`, and (for filters) `owner`. Logical fields are
 `query` for filters and `email` for users; the `f:` prefix is optional.
 

@@ -121,5 +121,5 @@ adds is removed again.
 in the legacy entity folders (`entity/sysUsers/<id>.<ext>`, `thumbnail/<id>.png`), agreed
 2026-10-23 until the switch at the end of plan 20, when images become registered files. No
 other srv code names these folders. `System/Entity/EntityImageService` gives
-`GET | PUT | DELETE /sys/{type}/{id}/image` (PUT: a finished chunked upload).
+`GET | PUT | DELETE /{entity}/{id}/asset` (PUT: a finished chunked upload).
 

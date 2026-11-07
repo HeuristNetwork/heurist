@@ -113,6 +113,10 @@ class ReportController
 
             $template_file = $this->getTemplateFileName($action);
             $template_body = $this->getTemplateBody();
+
+            if (in_array($action, ['get', 'export', 'save', 'delete', 'rename'], true)) {
+                $this->repAction->requireTemplateRights($template_file, !in_array($action, ['get', 'export'], true));
+            }
             
             if ($template_file && $action == null) {
                 $action = 'execute'; //by default
@@ -222,6 +226,11 @@ class ReportController
      */
     private function isExecutionAllowed()
     {
+        // the text of a template is code: never from a guest
+        if (!empty($this->req_params['template_body']) && $this->system->getUserId() < 1) {
+            return false;
+        }
+
         $settings = $this->system->settings->getDatabaseSetting('Reports');
         if (!is_array($settings) || !array_key_exists('allowDynamicReports', $settings)
             || filter_var($settings['allowDynamicReports'], FILTER_VALIDATE_BOOLEAN)) {

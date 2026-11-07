@@ -126,20 +126,15 @@ $entities = array(
 'trl'=>'DefTermsLinks', 'termlinks'=>'DefTermsLinks',
 'rst'=>'DefRecStructure',
 'recstructure'=>'DefRecStructure',
-'rem'=>'UsrReminders',
 'swf'=>'SysWorkflowRules',
-'tag'=>'UsrTags',
 
 'fieldgroups'=>'DefDetailTypeGroups',
 'rectypegroups'=>'DefRecTypeGroups',
 'rectypes'=>'DefRecTypes',
 'fields'=>'DefDetailTypes',
 'terms'=>'DefTerms',
-'reminders'=>'DbUsrReminders',
 
 'dbs'=>'SysDatabases', 'databases'=>'SysDatabases',
-'users'=>'SysUsers',
-'groups'=>'SysGroups',
 'records'=>'Records', //only search allowed
 'login'=>'System',
 'logout'=>'System',
@@ -158,8 +153,6 @@ $entities = array(
 
 // http://127.0.0.1/heurist/hserv/controller/entityScrud.php?db=osmak_9a&entity=rst&a=search&details=structure&rst_ID=12
 // http://127.0.0.1/heurist/api/osmak_1/rst/12
-// http://127.0.0.1/heurist/api/osmak_9a/rem/1
-// http://127.0.0.1/heurist/api/osmak_9a/tag?rtl_RecID=9
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $requestUri = explode('/', trim($path, '/'));
@@ -300,6 +293,22 @@ if($method=='save' || $method=='add'){
         $params['limit'] = 5000;
     }
 
+}
+
+// ----------------------------------------------------
+// Entity URLs (plan 28a): /{entity}/... of an entity in a legacy table is /sys/{entity}/...; of a
+// record-based entity (RecordEntityRegistry) /{entity}/{id}... stays and /sys/{entity}/{id}... is its
+// alias; /{entity} without an id or action is the search /sys/{entity}.
+// ----------------------------------------------------
+if(in_array(@$requestUri[3], Heurist\System\Query\SystemEntitySchemaRegistry::ENTITIES, true)){
+    array_splice($requestUri, 3, 0, 'sys');
+}elseif(Heurist\Records\Entity\RecordEntityRegistry::isEntity((string)@$requestUri[3])
+    && (string)@$requestUri[4] === ''){
+    array_splice($requestUri, 3, 0, 'sys');
+}elseif(@$requestUri[3] === 'sys'
+    && Heurist\Records\Entity\RecordEntityRegistry::isEntity((string)@$requestUri[4])
+    && (string)@$requestUri[5] !== ''){
+    array_splice($requestUri, 3, 1);
 }
 
 // ----------------------------------------------------
@@ -484,15 +493,15 @@ if($is_graph_query){
 // The modern system collection is also a read contract. The optional entity
 // segment selects a mapped system record type: /sys/filter or /sys/user.
 // Writes (plan 20, §10.4) - POST /sys/{type}/0, PUT|PATCH|DELETE /sys/{type}/{id},
-// POST /sys/{type}/{id}/validate|merge, POST /sys/tag/assign - go to
-// SystemEditController; they need a logged-in user.
+// POST /sys/{type}/{id}/validate|merge|assign, POST|DELETE /sys/tag/assign, POST /sys/reminder/execute -
+// go to SystemEditController; they need a logged-in user.
 $is_system_query = ($resource === 'sys');
-// GET /sys/{user|group}/{id}/image is answered by the write controller too (plan 20, 4d)
-$is_system_image = $is_system_query && (string)($requestUri[6] ?? '') === 'image';
-$is_system_write = $is_system_query && (!in_array($http_verb, array('GET','HEAD'), true) || $is_system_image)
+// GET /sys/{user|group}/{id}/asset is answered by the write controller too (plan 20, 4d, plan 28a)
+$is_system_asset = $is_system_query && (string)($requestUri[6] ?? '') === 'asset';
+$is_system_write = $is_system_query && (!in_array($http_verb, array('GET','HEAD'), true) || $is_system_asset)
     && isset($requestUri[5]) && $requestUri[5] !== '';
 if($is_system_write){
-    if(!in_array($http_verb, $is_system_image ? array('GET','PUT','DELETE') : array('POST','PUT','PATCH','DELETE'), true)){
+    if(!in_array($http_verb, $is_system_asset ? array('GET','PUT','DELETE') : array('POST','PUT','PATCH','DELETE'), true)){
         exitWithError('Method not allowed', 405, array('Allow'=>'GET, POST, PUT, PATCH, DELETE'));
     }
     if(in_array($http_verb, array('POST','PUT','PATCH'), true)
@@ -501,11 +510,13 @@ if($is_system_write){
         exitWithError('Invalid JSON request body', 400);
     }
     $is_system_query = false;
-    $method = 'save';
+    // reading an asset is a read: a token with read:data is enough
+    $method = $http_verb === 'GET' ? 'search' : 'save';
 }
 if($is_system_query){
     $hasSystemItem = isset($requestUri[5]) && $requestUri[5] !== '';
-    if($hasSystemItem && (!is_numeric($requestUri[5]) || intval($requestUri[5]) < 1)){
+    // a record id, or a concept code of this database (resolved when the database is open)
+    if($hasSystemItem && preg_match('/^(\d+-)?[1-9]\d*$/', (string)$requestUri[5]) !== 1){
         exitWithError('System record id is invalid', 400);
     }
     $allowedSystemMethods = $hasSystemItem ? array('GET') : array('GET','POST');
@@ -593,10 +604,6 @@ if($is_def_query){
 // Reports manager (plan 12): /api/{db}/reports[/{ref}[/{action}]]
 // See srv/Controller/ReportController.php for the routes. Anonymous users may
 // only list card reports and render one record; the controller checks the rest.
-$is_reports_query = ($resource === 'reports');
-if($is_reports_query && !in_array($http_method, array('GET','POST','PUT','DELETE'), true)){
-    exitWithError('Method not allowed', 405, array('Allow' => 'GET, POST, PUT, DELETE'));
-}
 
 // Background jobs (plan 12): /api/{db}/jobs[/{id}[/cancel|result]], logged-in users only.
 // See srv/Controller/JobController.php.
@@ -613,7 +620,8 @@ if($is_external_query && $http_verb !== 'POST'){
 }
 
 // Record-based entities (plan 27d, plan 28): /api/{db}/{entity}/{id}[/{action}] and /{entity}/{action},
-// e.g. /website/{id}/assign, /page/0/import, /website/setup; logged-in users only. Served by the generic
+// e.g. /website/{id}/assign, /page/0/import, /website/setup. A guest may GET a record or a field, with the
+// visibility rule of /records (plan 28a); everything else needs a login. Served by the generic
 // record controller (srv/Controller/RecordEditController.php::executeEntity) with the entity's hooks and
 // actions (srv/Records/Entity/RecordEntityRegistry.php); POST /{entity}/{id}/execute starts its job.
 $record_entity = Heurist\Records\Entity\RecordEntityRegistry::isEntity((string)$resource) ? (string)$resource : null;
@@ -657,14 +665,13 @@ $skip_auth_processing =
 $allow_anonymous = false;
 if($method === 'search'){
     $publicSearchResources = array(
-        'records', 'graph', 'groups', 'users', 'dbs', 'databases',
+        'records', 'graph', 'dbs', 'databases',
         'rty', 'rectypes',
         'dty', 'fields',
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
         'def',
-        'map', 'time',
-        'reports'
+        'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);
     if($is_files_query && $is_files_content){
@@ -674,6 +681,10 @@ if($method === 'search'){
 // GET /sys: a guest (a published Explorer page, plan 27b §11.3) reads only the saved filters of
 // group 4 "Website filters"; SystemQueryBuilder::appendAccess gives guests nothing else
 if($is_system_query && in_array($http_verb, array('GET','HEAD'), true)){
+    $allow_anonymous = true;
+}
+// GET /{entity}/{id}[/{field}]: RecordEditController::executeEntity refuses everything else for a guest
+if($record_entity !== null && $http_verb === 'GET'){
     $allow_anonymous = true;
 }
 
@@ -695,6 +706,17 @@ if(!$skip_auth_processing){
             'WWW-Authenticate' => 'Bearer realm=\"api\"'
         ]);
     }
+
+    // an entity record by its concept code: {this database id}-{record id} (plan 28 §2.1)
+    if($resource === 'sys' || $record_entity !== null){
+        $entityIdSegment = $resource === 'sys' ? 5 : 4;
+        if(preg_match('/^(\d+)-(\d+)$/', (string)($requestUri[$entityIdSegment] ?? ''), $conceptId)){
+            if(intval($conceptId[1]) !== ServiceFactory::fromLegacySystem($system)->registeredDatabaseId()){
+                exitWithError('Record '.$requestUri[$entityIdSegment].' is not in this database', 404);
+            }
+            $requestUri[$entityIdSegment] = $conceptId[2];
+        }
+    }
 }
 // ----------------------------------------------------
 
@@ -715,8 +737,9 @@ if($is_def_query){
         ? (string)$requestUri[4] : null;
     $systemId = isset($requestUri[5]) && $requestUri[5] !== ''
         ? intval($requestUri[5]) : null;
+    $systemField = isset($requestUri[6]) && $requestUri[6] !== '' ? (string)$requestUri[6] : null;
     $controller = ServiceFactory::fromLegacySystem($system)->systemQueryController();
-    $controller->output($req_params, $systemType, $systemId);
+    $controller->output($req_params, $systemType, $systemId, $systemField);
     $system->dbclose();
     exit;
 
@@ -840,40 +863,30 @@ if($is_def_query){
     $factory = ServiceFactory::fromLegacySystem($system);
     $entityId = (string)($requestUri[4] ?? '');
     $entityJob = Heurist\Records\Entity\RecordEntityRegistry::job($record_entity);
+    $reportEngine = static function() use ($factory, $system): array {
+        return array($factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)), new hserv\report\ReportRecordWriter($system));
+    };
+    $factory->useReportEngine($reportEngine);
+    $controller = $factory->recordEditController(new hserv\web\WebsiteDefinitions($system));
+    $req_params['uploads'] = $_FILES;
+    $entityRequest = array(
+        'contentType' => $contentType,
+        'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
+        'host' => $_SERVER['HTTP_HOST'] ?? ''
+    );
     if((string)($requestUri[5] ?? '') === 'execute' && ctype_digit($entityId) && $entityJob !== null){
         // the entity's job (e.g. website-build); state and result on /jobs/{id}
-        if($http_verb !== 'POST'){
-            exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+        if($controller->allowEntityExecute($record_entity, $http_verb, intval($entityId), $entityRequest)){
+            list($reportRenderer, $reportWriter) = $reportEngine();
+            $controller = $factory->jobController($record_entity === 'output'
+                ? $factory->reportJobHandlers($reportRenderer, $reportWriter) : $factory->websiteJobHandlers());
+            $controller->handleRequest('POST', array(), $req_params, array('type' => $entityJob,
+                'params' => $record_entity === 'output' ? array('output' => intval($entityId)) : array('id' => intval($entityId))));
         }
-        $controller = $factory->jobController($factory->websiteJobHandlers());
-        $controller->handleRequest('POST', array(), $req_params,
-            array('type' => $entityJob, 'params' => array('id' => intval($entityId))));
     }else{
-        $controller = $factory->recordEditController(new hserv\web\WebsiteDefinitions($system));
         $controller->handleEntityRequest($record_entity, $http_verb, array_slice($requestUri, 4), $req_params,
-            is_array($json) ? $json : null, array(
-                'contentType' => $contentType,
-                'origin' => $_SERVER['HTTP_ORIGIN'] ?? '',
-                'host' => $_SERVER['HTTP_HOST'] ?? ''
-            ));
+            is_array($json) ? $json : null, $entityRequest);
     }
-    $system->dbclose();
-    exit;
-
-}elseif($is_reports_query){
-
-    $factory = ServiceFactory::fromLegacySystem($system);
-    $controller = $factory->reportController(
-        $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
-        new hserv\report\ReportRecordWriter($system)
-    );
-    $controller->handleRequest(
-        $http_method,
-        array_slice($requestUri, 4),
-        $req_params,
-        is_array($json) ? $json : null,
-        $_FILES
-    );
     $system->dbclose();
     exit;
 

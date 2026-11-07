@@ -76,7 +76,7 @@ final class ReportRepository
     }
 
     /**
-     * Visible Custom Report records with their visible schedules, sorted by title.
+     * Visible Custom Report records with the number of their visible outputs, sorted by title.
      *
      * @param bool $cardOnly Return only single-record (card) reports.
      * @return array<int,array>
@@ -143,7 +143,7 @@ final class ReportRepository
     }
 
     /**
-     * Load reports (all visible, or one id) with their visible schedules.
+     * Load reports (all visible, or one id) with the number of their visible outputs.
      *
      * @return array<int,array>
      */
@@ -160,11 +160,12 @@ final class ReportRepository
             'description' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
             'summary' => $this->codes->id('DT_SHORT_SUMMARY'),
             'file' => $this->codes->id('DT_FILE_NAME'),
-            'card' => $this->codes->id('DT_IS_CARD_VIEW')
+            'card' => $this->codes->id('DT_IS_CARD_VIEW'),
+            'mime' => $this->codes->id('DT_FILE_EXT')
         );
         $details = $this->loadDetails($ids, array_values($fields));
-        $terms = $this->loadTerms($this->collectValues($details, array($fields['card'])));
-        $schedules = $this->loadSchedules($ids);
+        $terms = $this->loadTerms($this->collectValues($details, array($fields['card'], $fields['mime'])));
+        $outputs = $this->loadOutputs($ids);
 
         $reports = array();
         foreach($rows as $row){
@@ -174,6 +175,7 @@ final class ReportRepository
             $file = trim((string)($this->first($values, $fields['file']) ?? ''));
             if($file !== '' && strtolower(substr($file, -4)) !== '.tpl'){ $file .= '.tpl'; }
             $ownerGroupId = intval($row['rec_OwnerUGrpID']);
+            $mime = $terms[intval($this->first($values, $fields['mime']))] ?? null;
             $reports[] = array(
                 'id' => $id,
                 'title' => $title,
@@ -181,11 +183,13 @@ final class ReportRepository
                     ?? $this->first($values, $fields['summary']) ?? '',
                 'file' => $file,
                 'isCardView' => $this->isYes($terms, $this->first($values, $fields['card'])),
+                // the output type of the template; '' before the field is moved to it (plan 30 §5)
+                'format' => $mime === null ? '' : self::formatFromMime($mime['code'] !== '' ? $mime['code'] : $mime['label']),
                 'ownerGroupId' => $ownerGroupId,
                 'visibility' => (string)$row['rec_NonOwnerVisibility'],
                 'modified' => (string)$row['rec_Modified'],
                 'canEdit' => $this->canEdit($ownerGroupId),
-                'schedules' => $schedules[$id] ?? array()
+                'outputCount' => count($outputs[$id] ?? array())
             );
         }
         usort($reports, static function(array $a, array $b): int {
@@ -195,60 +199,70 @@ final class ReportRepository
     }
 
     /**
-     * One visible Report Schedule record, or null.
+     * One visible output record, or null.
      */
-    public function getSchedule(int $scheduleId): ?array
+    public function getOutput(int $outputId): ?array
     {
-        if($scheduleId < 1 || !$this->isInstalled()){ return null; }
-        $rows = $this->querySchedules(null, $scheduleId, false);
+        if($outputId < 1 || !$this->isInstalled()){ return null; }
+        $rows = $this->queryOutputs(null, $outputId, false);
         return $rows[0] ?? null;
     }
 
     /**
-     * All visible Report Schedule records.
-     *
-     * @return array<int,array>
+     * Number of output records that point to a report, visible or not: a template in use is not deleted.
      */
-    public function listSchedules(): array
+    public function countOutputs(int $reportId): int
     {
-        return $this->isInstalled() ? $this->querySchedules(null, null, false) : array();
+        if(!$this->isInstalled()){ return 0; }
+        return count($this->queryOutputs(array($reportId), null, true));
     }
 
     /**
-     * All Report Schedule records regardless of visibility (cron).
+     * All visible output records.
      *
      * @return array<int,array>
      */
-    public function allSchedules(): array
+    public function listOutputs(): array
     {
-        return $this->isInstalled() ? $this->querySchedules(null, null, true) : array();
+        return $this->isInstalled() ? $this->queryOutputs(null, null, false) : array();
     }
 
     /**
-     * Visible Report Schedule records grouped by the report id they point to.
+     * All output records regardless of visibility (cron).
+     *
+     * @return array<int,array>
+     */
+    public function allOutputs(): array
+    {
+        return $this->isInstalled() ? $this->queryOutputs(null, null, true) : array();
+    }
+
+    /**
+     * Visible output records grouped by the report id they point to.
      *
      * @param array<int,int> $reportIds
      * @return array<int,array<int,array>>
      */
-    private function loadSchedules(array $reportIds): array
+    private function loadOutputs(array $reportIds): array
     {
         if(empty($reportIds)){ return array(); }
         $result = array();
-        foreach($this->querySchedules($reportIds, null, false) as $schedule){
-            $result[$schedule['reportId']][] = $schedule;
+        foreach($this->queryOutputs($reportIds, null, false) as $output){
+            $result[$output['reportId']][] = $output;
         }
         return $result;
     }
 
     /**
-     * Report Schedule records with their details.
+     * Output records with their details. The format of an output is the one of its template (plan 30);
+     * the field on the output is used until the template has it.
      *
-     * @param array<int,int>|null $reportIds Only schedules of these reports.
-     * @param int|null $scheduleId Only this schedule.
+     * @param array<int,int>|null $reportIds Only outputs of these reports.
+     * @param int|null $scheduleId Only this output.
      * @param bool $ignoreAccess Skip the visibility rules (system tasks only).
      * @return array<int,array>
      */
-    private function querySchedules(?array $reportIds, ?int $scheduleId, bool $ignoreAccess): array
+    private function queryOutputs(?array $reportIds, ?int $scheduleId, bool $ignoreAccess): array
     {
         $scheduleType = $this->codes->id('RT_REPORT_SCHEDULE');
         $reportField = $this->codes->id('DT_REPORT');
@@ -274,7 +288,6 @@ final class ReportRepository
         $fields = array(
             'name' => $this->codes->id('DT_NAME'),
             'query' => $this->codes->id('DT_QUERY_STRING'),
-            'file' => $this->codes->id('DT_FILE_NAME'),
             'mime' => $this->codes->id('DT_FILE_EXT'),
             'interval' => $this->codes->id('DT_INTERVAL_MINUTES'),
             'language' => $this->codes->id('DT_LANGUAGE')
@@ -295,7 +308,6 @@ final class ReportRepository
                 'reportId' => intval($row['reportId']),
                 'title' => $this->first($values, $fields['name']) ?? (string)$row['rec_Title'],
                 'query' => (string)($this->first($values, $fields['query']) ?? ''),
-                'file' => (string)($this->first($values, $fields['file']) ?? ''),
                 'format' => self::formatFromMime($mime === null ? '' : ($mime['code'] !== '' ? $mime['code'] : $mime['label'])),
                 'intervalMinutes' => is_numeric($interval) ? intval($interval) : null,
                 // term of the output language (plan 27e) and its code; none: the user's language

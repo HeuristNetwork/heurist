@@ -20,6 +20,7 @@ declare(strict_types=1);
 
 namespace Heurist\Website;
 
+use Heurist\Reports\ReportOutputStore;
 use Heurist\Utilities\LanguageCodes;
 use Heurist\Utilities\Temporal;
 
@@ -156,14 +157,15 @@ final class PageContent
             .'&file='.rawurlencode($key)).'" alt="">';
     }
 
-    /** Content of a generated report: the file of the language, else `def`; only the body of a whole document. */
-    private function report(array $files, string $language): ?string
+    /**
+     * Content of a generated report: the output record of the language, else `def`; only the body of a
+     * whole document. The author of the website chose the output, as a report of the cards (WebsiteRepository).
+     */
+    private function report(array $outputs, string $language): ?string
     {
-        $file = (string)($files[$language] ?? $files['def'] ?? '');
-        if(preg_match('/^[^\/\\\\]+\.html?$/i', $file) !== 1 || $file[0] === '.'){ return null; }
-        $path = rtrim((string)$this->services['generated'], '/\\').'/'.$file;
-        if(!is_file($path)){ return null; }
-        $html = (string)file_get_contents($path);
+        $file = (new ReportOutputStore((string)$this->services['generated']))->find(intval($outputs[$language] ?? $outputs['def'] ?? 0));
+        if($file === null || $file['format'] !== 'html'){ return null; }
+        $html = (string)file_get_contents($file['path']);
         return preg_match('/<body\b[^>]*>(.*)<\/body\s*>/is', $html, $body) === 1 ? $body[1] : $html;
     }
 

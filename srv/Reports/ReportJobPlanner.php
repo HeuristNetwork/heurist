@@ -5,11 +5,10 @@
 * Turns the request of a report job into normalized parameters with the access
 * rules of the current user (prepare*), finds the record ids of a query with the
 * modern search (searchIds), and lists the schedules that cron must regenerate
-* (dueSchedules). The Smarty run itself is done by the hserv job handlers.
+* (dueOutputs). The Smarty run itself is done by the hserv job handlers.
 *
-*   report-preview  {report?: ref, body?: string, ids: int[] (1..50), replevel?: 0-3, language?: code}
-*   report-generate {schedule: id} or
-*                   {report: ref, querySource?: id, query?: json|text, format?: html|..., output?: name}
+*   report-preview  {report?: record id, body?: string, ids: int[] (1..50), replevel?: 0-3, language?: code}
+*   report-generate {output: id}
 *
 * @project     Heurist academic knowledge management system
 * @package     Reports
@@ -28,7 +27,7 @@ namespace Heurist\Reports;
 use DomainException;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Database\MysqlDatabase;
-use Heurist\Records\Presentation\QuerySourcePresentationService;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Records\Query\SearchRequest;
@@ -47,34 +46,28 @@ final class ReportJobPlanner
     private ReportService $reports;
     private ReportRepository $repository;
     private ReportPolicy $policy;
-    private QuerySourcePresentationService $querySources;
     private DatabaseInterface $database;
     private RuntimeContext $runtime;
     private SystemCode $codes;
-    private string $generatedDirectory;
-    private string $generatedUrl;
+    private ReportOutputStore $outputs;
 
     /** Initialise the planner from explicit dependencies. */
     public function __construct(
         ReportService $reports,
         ReportRepository $repository,
         ReportPolicy $policy,
-        QuerySourcePresentationService $querySources,
         DatabaseInterface $database,
         RuntimeContext $runtime,
         SystemCode $codes,
-        string $generatedDirectory = '',
-        string $generatedUrl = ''
+        ReportOutputStore $outputs
     ) {
         $this->reports = $reports;
         $this->repository = $repository;
         $this->policy = $policy;
-        $this->querySources = $querySources;
         $this->database = $database;
         $this->runtime = $runtime;
         $this->codes = $codes;
-        $this->generatedDirectory = $generatedDirectory === '' ? '' : rtrim($generatedDirectory, '/\\').'/';
-        $this->generatedUrl = $generatedUrl === '' ? '' : rtrim($generatedUrl, '/').'/';
+        $this->outputs = $outputs;
     }
 
     /** Connection id of the search connection (KILL QUERY on Stop), 0 if unknown. */
@@ -105,11 +98,11 @@ final class ReportJobPlanner
         $ids = array_slice($ids, 0, ReportPolicy::TEST_RECORD_LIMIT);
 
         $body = isset($params['body']) && is_string($params['body']) ? $params['body'] : '';
-        $reference = trim((string)($params['report'] ?? ''));
+        $reportId = intval($params['report'] ?? 0);
         $title = 'Unsaved template';
         $file = '';
-        if($reference !== ''){
-            $report = $this->reports->resolveReport($reference);
+        if($reportId > 0){
+            $report = $this->reports->report($reportId);
             $title = $report['title'];
             $file = $report['file'];
         }
@@ -134,61 +127,41 @@ final class ReportJobPlanner
     }
 
     /**
-     * Validate a generation of a schedule, or of a report for a Query Source or query.
+     * Validate a generation of an output. The file of an output is public to who sees the output, so
+     * the user needs the right to change the output record.
      *
      * @return array{title:string,params:array}
      */
     public function prepareGenerate(array $params): array
     {
         $this->policy->requireMember();
-        $scheduleId = intval($params['schedule'] ?? 0);
-        $language = '';
-
-        if($scheduleId > 0){
-            $schedule = $this->repository->getSchedule($scheduleId);
-            if($schedule === null){
-                throw new OutOfBoundsException('Schedule '.$scheduleId.' is not available');
-            }
-            $report = $this->reports->resolveReport((string)$schedule['reportId']);
-            $query = self::scheduleQuery($schedule['query']);
-            if($query === null){
-                throw new InvalidArgumentException('The schedule has no query');
-            }
-            $output = ReportService::scheduleOutput($report['file'], $schedule['file']);
-            $format = $schedule['format'];
-            $title = $schedule['title'];
-            $language = $schedule['language'];
-        }else{
-            $report = $this->reports->resolveReport(trim((string)($params['report'] ?? '')));
-            $querySourceId = intval($params['querySource'] ?? 0);
-            if($querySourceId > 0){
-                $query = $this->querySourceQuery($querySourceId);
-            }elseif(isset($params['query']) && $params['query'] !== '' && $params['query'] !== array()){
-                $query = $params['query'];
-            }else{
-                throw new InvalidArgumentException('A schedule, a Query Source or a query is required');
-            }
-            $format = ReportRepository::formatFromMime((string)($params['format'] ?? 'html'));
-            // report file name + optional suffix; a report generated without a
-            // schedule is the user's own file ("_u<user id>")
-            $output = $this->reports->outputName($report, (string)($params['suffix'] ?? '')).'_u'.$this->runtime->userId;
-            $title = $report['title'];
+        $outputId = intval($params['output'] ?? 0);
+        $output = $this->repository->getOutput($outputId);
+        if($output === null){
+            throw new OutOfBoundsException('Output '.$outputId.' is not available');
+        }
+        if(!$output['canEdit']){
+            throw new DomainException('You are not allowed to generate this output');
+        }
+        $report = $this->reports->report($output['reportId']);
+        $query = self::storedQuery($output['query']);
+        if($query === null){
+            throw new InvalidArgumentException('The output has no query');
         }
         if($report['file'] === '' || !$this->reports->templateExists($report['file'])){
             throw new InvalidArgumentException('Template file of report '.$report['title'].' does not exist');
         }
 
         return array(
-            'title' => $title,
+            'title' => $output['title'],
             'params' => array(
                 // the client finds the report of a running job by these (after a page reload)
-                'reportId' => isset($report['id']) && intval($report['id']) > 0 ? intval($report['id']) : null,
+                'reportId' => $report['id'],
                 'templateFile' => $report['file'],
                 'query' => $query,
-                'output' => $this->outputName($output),
-                'format' => $format,
-                'language' => $language,
-                'scheduleId' => $scheduleId > 0 ? $scheduleId : null
+                'format' => $report['format'] !== '' ? $report['format'] : $output['format'],
+                'language' => $output['language'],
+                'outputId' => $outputId
             )
         );
     }
@@ -227,85 +200,58 @@ final class ReportJobPlanner
     }
 
     /**
-     * Schedules whose output is missing or older than their interval (cron).
-     * Schedules without an interval are generated only on request.
+     * Outputs whose file is missing or older than their interval (cron).
+     * Outputs without an interval are generated only on request.
      *
-     * @return array<int,array> Schedule plus `templateFile` and `query`.
+     * @return array<int,array> Output plus `templateFile`, `query` and `format`.
      */
-    public function dueSchedules(): array
+    public function dueOutputs(): array
     {
         $due = array();
-        foreach($this->repository->allSchedules() as $schedule){
-            if(!($schedule['intervalMinutes'] > 0)){ continue; }
-            $templateFile = $this->reportFileForCron($schedule['reportId']);
-            if($templateFile === ''){ continue; }
-            $output = $this->outputName(ReportService::scheduleOutput($templateFile, $schedule['file']));
-            $path = $this->generatedDirectory.$output.'.'.$schedule['format'];
-            if(is_file($path) && time() - filemtime($path) < $schedule['intervalMinutes'] * 60){ continue; }
-            $query = self::scheduleQuery($schedule['query']);
+        foreach($this->repository->allOutputs() as $output){
+            if(!($output['intervalMinutes'] > 0)){ continue; }
+            $report = $this->reportForCron($output['reportId']);
+            if($report === null){ continue; }
+            $file = $this->outputs->find($output['id']);
+            if($file !== null && time() - $file['time'] < $output['intervalMinutes'] * 60){ continue; }
+            $query = self::storedQuery($output['query']);
             if($query === null){ continue; }
-            $schedule['templateFile'] = $templateFile;
-            $schedule['query'] = $query;
-            $schedule['output'] = $output;
-            $due[] = $schedule;
+            $output['templateFile'] = $report['file'];
+            $output['format'] = $report['format'] !== '' ? $report['format'] : $output['format'];
+            $output['query'] = $query;
+            $due[] = $output;
         }
         return $due;
     }
 
-    /** Generated output: path and URL of "<output>.<format>". */
-    public function generatedFile(string $output, string $format): array
+    /** The files of the outputs. */
+    public function outputs(): ReportOutputStore
     {
-        $file = $output.'.'.$format;
-        return array(
-            'file' => $file,
-            'path' => $this->generatedDirectory.$file,
-            'url' => $this->generatedUrl === '' ? '' : $this->generatedUrl.rawurlencode($file)
-        );
+        return $this->outputs;
     }
 
-    /** Folder of generated reports. */
-    public function generatedDirectory(): string
-    {
-        return $this->generatedDirectory;
-    }
-
-    /** Query of a Query Source visible to the current user. */
-    private function querySourceQuery(int $recordId)
-    {
-        $source = $this->querySources->getQuerySource($recordId);
-        if($source === null){
-            throw new OutOfBoundsException('Query Source '.$recordId.' is not available');
-        }
-        return $source['source']['query'];
-    }
-
-    /** Query of a schedule: JSON decoded, else its text; null when it has none. */
-    private static function scheduleQuery(string $value)
+    /** Query of an output: JSON decoded, else its text; null when it has none. */
+    private static function storedQuery(string $value)
     {
         if(trim($value) === ''){ return null; }
         $decoded = json_decode($value, true);
         return is_array($decoded) ? $decoded : ltrim(trim($value), '?');
     }
 
-    /** Template file of a report record regardless of visibility (cron). */
-    private function reportFileForCron(int $reportId): string
+    /** Template file and format of a report record regardless of visibility (cron); null without a file. */
+    private function reportForCron(int $reportId): ?array
     {
         $field = $this->codes->id('DT_FILE_NAME');
-        $value = RecordRepository::shared($this->database)->values(array($reportId), array($field))[$reportId][$field][0] ?? null;
-        $file = trim((string)$value);
-        if($file === ''){ return ''; }
-        return strtolower(substr($file, -4)) === '.tpl' ? $file : $file.'.tpl';
-    }
-
-    /** Output file name without extension: no path, no reserved characters. */
-    private function outputName(string $name): string
-    {
-        $name = pathinfo($name, PATHINFO_FILENAME);
-        $name = trim(preg_replace('/[\/\\\\:*?"<>|\x00-\x1F]+/u', '_', $name), " ._");
-        if($name === ''){
-            throw new InvalidArgumentException('Invalid output file name');
-        }
-        return mb_substr($name, 0, 100);
+        $mime = $this->codes->id('DT_FILE_EXT');
+        $values = RecordRepository::shared($this->database)->values(array($reportId), array($field, $mime))[$reportId] ?? array();
+        $file = trim((string)($values[$field][0] ?? ''));
+        if($file === ''){ return null; }
+        $term = DefinitionLookup::shared($this->database)->terms(array(intval($values[$mime][0] ?? 0)));
+        $term = reset($term);
+        return array(
+            'file' => strtolower(substr($file, -4)) === '.tpl' ? $file : $file.'.tpl',
+            'format' => is_array($term) ? ReportRepository::formatFromMime((string)($term['code'] !== '' ? $term['code'] : $term['term'])) : ''
+        );
     }
 
     /** @return array<int,int> Positive unique ids. */

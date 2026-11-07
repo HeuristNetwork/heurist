@@ -80,7 +80,7 @@ final class TagWriteService extends EntityWriteService
     /** {@inheritdoc} */
     protected function route(): string
     {
-        return 'sys/tag';
+        return 'tag';
     }
 
     /**

@@ -39,7 +39,7 @@ abstract class EntityWriteService
     /** Name of the entity in messages ("file", "tag"). */
     abstract protected function noun(): string;
 
-    /** Route of the entity in messages ("files", "sys/tag"). */
+    /** Route of the entity in messages ("files", "tag"). */
     abstract protected function route(): string;
 
     /**

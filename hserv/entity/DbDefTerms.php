@@ -496,7 +496,7 @@ class DbDefTerms extends DbEntityBase
                 //already exists
                 continue;
             }else{
-                $query = 'select trm_ID from defTerms where trm_ParentTermID=? and trm_Label="?"';
+                $query = 'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID=? AND trm_Label=?';
                 $trmID = mysql__select_value($mysqli, $query, ['is', $parentID, $trmLabel]);
                 if($trmID>0){
                     //already exists

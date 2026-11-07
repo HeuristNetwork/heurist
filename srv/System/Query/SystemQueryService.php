@@ -19,6 +19,7 @@ declare(strict_types=1);
 namespace Heurist\System\Query;
 
 use Heurist\Database\DatabaseInterface;
+use Heurist\Definitions\DefinitionLookup;
 use Heurist\Files\EntityImageStorage;
 use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Query\SearchRequest;
@@ -41,30 +42,168 @@ final class SystemQueryService
     /** Images of users and groups (their rec_ThumbnailURL); null without a file store. */
     private ?EntityImageStorage $entityImages;
 
+    /** @var array<string,int> Record-based entity => local record type id (they are searched on the Records pair). */
+    private array $recordEntities;
+    /** @var callable|null Search with the /records parameters (RecordQueryController::execute). */
+    private $recordSearch;
+    /** @var callable|null `(entity, ids) => items`: the values of a search besides the records. */
+    private $recordItems;
+
     /** @var array<int,string>|null Current user's role per group, loaded once. */
     private ?array $roles = null;
 
+    /**
+     * @param array<string,int> $recordEntities Record-based entity => local record type id.
+     * @param callable|null $recordSearch `(params) => response` of the /records search.
+     * @param callable|null $recordItems `(entity, ids) => items`, added as meta.items.
+     */
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
         ?SystemEntitySchemaRegistry $schemas = null,
-        ?EntityImageStorage $entityImages = null
+        ?EntityImageStorage $entityImages = null,
+        array $recordEntities = array(),
+        ?callable $recordSearch = null,
+        ?callable $recordItems = null
     ) {
         $this->database = $database;
         $this->runtime = $runtime;
         $this->schemas = $schemas ?? new SystemEntitySchemaRegistry();
         $this->entityImages = $entityImages;
+        $this->recordEntities = $recordEntities;
+        $this->recordSearch = $recordSearch;
+        $this->recordItems = $recordItems;
+    }
+
+    /**
+     * The entity of a value of the t predicate or of the path: its name or alias, a record type id
+     * or a record type concept code (plan 28 §2.1).
+     *
+     * @throws QueryValidationException Not an entity of /sys.
+     */
+    public function resolveType(string $value): string
+    {
+        $name = $this->schemas->normalizeType($value);
+        if($this->schemas->has($name) || isset($this->recordEntities[$name])){ return $name; }
+        if(preg_match('/^\d+(-\d+)?$/', $name) === 1){
+            $local = DefinitionLookup::shared($this->database)->localId('rty', $name);
+            if($local > 0){
+                foreach(SystemEntitySchemaRegistry::ENTITIES as $type){
+                    if($this->recordOutput($type)->mapping()->rectypeId() === $local){ return $type; }
+                }
+                $entity = array_search($local, $this->recordEntities, true);
+                if($entity !== false){ return (string)$entity; }
+            }
+        }
+        throw new QueryValidationException('Unsupported system record type: '.$value);
+    }
+
+    /** The entity of a request: of the path, else of the t predicate, else `filter`. */
+    private function requestType($query, ?string $pathType): string
+    {
+        if($pathType !== null && trim($pathType) !== ''){ return $this->resolveType($pathType); }
+        $value = $this->schemas->findTypeValue($query);
+        return $value === null ? 'filter' : $this->resolveType((string)$value);
+    }
+
+    /**
+     * Search of a record-based entity: the /records search with `t` = its record type, so the output
+     * and the visibility are those of /records. When the entity moves to sysRecords only the table
+     * pair of that search changes.
+     */
+    private function searchRecordEntity(string $entity, array $params)
+    {
+        if($this->recordSearch === null){
+            throw new QueryValidationException('Unsupported system record type: '.$entity);
+        }
+        $query = $this->structured($params['query'] ?? $params['q'] ?? null);
+        unset($params['q']);
+        if(($query === null || $query === '') && isset($params['ids'])){ $query = array(array('ids'=>$params['ids'])); }
+        $params['query'] = $this->withRecordType($query, $entity);
+        $response = call_user_func($this->recordSearch, $params);
+        if($this->recordItems !== null && is_array($response) && isset($response['records'])){
+            $ids = array_map(static function($record): int { return intval(is_array($record) ? ($record['rec_ID'] ?? 0) : $record); }, $response['records']);
+            $items = call_user_func($this->recordItems, $entity, $ids);
+            if(!empty($items)){ $response['meta']['items'] = $items; }
+        }
+        return $response;
+    }
+
+    /** A query with its t predicates as the record type id of the entity; one is added when there is none. */
+    private function withRecordType($query, string $entity)
+    {
+        $rectype = $this->recordEntities[$entity];
+        if(is_string($query) && trim($query) !== ''){
+            $found = false;
+            $text = preg_replace_callback(SystemEntitySchemaRegistry::TEXT_TYPE,
+                function(array $match) use ($entity, $rectype, &$found){
+                    $this->assertType($match[2], $entity);
+                    $found = true;
+                    return $match[1].'t:'.$rectype;
+                }, $query);
+            return $found ? $text : 't:'.$rectype.' '.$text;
+        }
+        if(!is_array($query) || empty($query)){ return array(array('t'=>$rectype)); }
+        $found = false;
+        $query = $this->replaceType($query, $entity, $rectype, $found);
+        return $found ? $query : array(array('t'=>$rectype), array('all'=>array_keys($query) === range(0, count($query)-1) ? $query : array($query)));
+    }
+
+    private function replaceType(array $query, string $entity, int $rectype, bool &$found): array
+    {
+        foreach($query as $key => $value){
+            if(is_string($key) && in_array(strtolower($key), array('t','type','typeid','typename'), true)){
+                $this->assertType((string)(is_array($value) ? reset($value) : $value), $entity);
+                $query[$key] = (string)$rectype;
+                $found = true;
+            }elseif(is_array($value)){
+                $query[$key] = $this->replaceType($value, $entity, $rectype, $found);
+            }
+        }
+        return $query;
+    }
+
+    /** @throws QueryValidationException A t value of another entity than the one searched. */
+    private function assertType(string $value, string $entity): void
+    {
+        if($this->resolveType($value) !== $entity){
+            throw new QueryValidationException('System query type does not match '.$entity);
+        }
+    }
+
+    /**
+     * One field of a record: GET /{entity}/{id}/{field} with the envelope of /{entity}/{id}?fields={field}.
+     * The field is a local id or a concept code.
+     *
+     * @return array|null The response; null for an unknown field, or when the record is not available.
+     */
+    public function executeField(array $params, string $pathType, int $recordId, string $field): ?array
+    {
+        $output = $this->recordOutput($this->resolveType($pathType));
+        $fieldId = $output !== null && preg_match('/^\d+(-\d+)?$/', $field) === 1
+            ? DefinitionLookup::shared($this->database)->localId('dty', $field) : 0;
+        if($fieldId < 1 || !isset($output->mapping()->fields()[$fieldId])){ return null; }
+        $params['fields'] = (string)$fieldId;
+        return $this->execute($params, $pathType, $recordId);
     }
 
     /** Execute a collection or item request and return its stable representation. */
     public function execute(array $params, ?string $pathType = null, ?int $recordId = null)
     {
         $rawQuery = $params['query'] ?? $params['q'] ?? null;
-        $type = $this->schemas->typeFromQuery($rawQuery, $pathType);
+        $type = $this->requestType($rawQuery, $pathType);
+        if(isset($this->recordEntities[$type]) && !$this->schemas->has($type)){
+            return $this->searchRecordEntity($type, $params);
+        }
         $schema = $this->schemas->get($type);
-        // a mapped type is also named by its record type id (rec_RecTypeID: t:133, the record manager)
-        $mapped = $this->recordOutput($type);
-        if($mapped !== null){ $schema['rectypeId'] = $mapped->mapping()->rectypeId(); }
+        // the t predicate may name the entity in every way resolveType knows
+        $schema['isType'] = function(string $value) use ($type): bool {
+            try{
+                return $this->resolveType($value) === $type;
+            }catch(QueryValidationException $error){
+                return false;
+            }
+        };
         $builder = new SystemQueryBuilder($this->database, $this->runtime, $schema);
 
         if($recordId !== null){

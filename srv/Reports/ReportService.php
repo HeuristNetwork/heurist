@@ -1,10 +1,11 @@
 <?php
 /**
-* ReportService.php - Reports manager operations
+* ReportService.php - Templates of the Custom Report records
 *
-* A report is addressed by a reference: a Custom Report record id, or a template
-* file name for a file that has no record yet ("unregistered"). Template bodies
-* stay in the smarty-templates folder; the record keeps the file name.
+* Reads, writes, imports, exports and runs the template of a report record, and tells the
+* state of the report definitions (plan 30). A report is named by its record id only; the
+* template file stays behind the record. A template file without a record is not run:
+* it is listed by status() and registered, or deleted, first.
 *
 * @project     Heurist academic knowledge management system
 * @package     Reports
@@ -27,7 +28,7 @@ use Heurist\Runtime\SystemCode;
 use InvalidArgumentException;
 use OutOfBoundsException;
 
-/** Lists, edits, imports, exports and renders reports. */
+/** Templates of report records. */
 final class ReportService
 {
     private ReportRepository $reports;
@@ -35,8 +36,6 @@ final class ReportService
     private ReportPolicy $policy;
     private ReportRendererInterface $renderer;
     private ReportRecordWriterInterface $writer;
-    private string $generatedDirectory;
-    private string $generatedUrl;
     /** @var callable|bool Database may run JavaScript in reports (or a callable that tells it). */
     private $javaScriptAllowed;
     /** @var callable():RecordSaveService|null */
@@ -54,8 +53,6 @@ final class ReportService
         ReportPolicy $policy,
         ReportRendererInterface $renderer,
         ReportRecordWriterInterface $writer,
-        string $generatedDirectory = '',
-        string $generatedUrl = '',
         $javaScriptAllowed = false,
         ?callable $recordSave = null,
         ?SystemCode $codes = null
@@ -68,47 +65,33 @@ final class ReportService
         $this->policy = $policy;
         $this->renderer = $renderer;
         $this->writer = $writer;
-        $this->generatedDirectory = $generatedDirectory === '' ? '' : rtrim($generatedDirectory, '/\\').'/';
-        $this->generatedUrl = $generatedUrl === '' ? '' : rtrim($generatedUrl, '/').'/';
     }
 
     /**
-     * The reports manager list.
-     *
-     * Anonymous users and `scope=card` get only visible report records. Logged-in
-     * users also get the unregistered template files.
-     *
-     * @param string $scope "all", "card" (single-record reports) or "set" (record-set reports).
+     * GET /report/setup: the state of the definitions, what the client needs to know about the report
+     * output, and the template files without a record.
      */
-    public function listReports(string $scope = 'all'): array
+    public function status(): array
     {
-        if(!in_array($scope, array('all', 'card', 'set'), true)){
-            throw new InvalidArgumentException('Parameter "scope" must be all, card or set');
-        }
-        $reports = $this->reports->listReports($scope === 'card');
-        if($scope === 'set'){
-            $reports = array_values(array_filter($reports, static function(array $report): bool {
-                return !$report['isCardView'];
-            }));
-        }
-
-        if($this->policy->isMember()){ $reports = $this->withGeneratedCount($reports); }
-        $result = array(
+        $this->policy->requireMember();
+        return array(
             'installed' => $this->reports->isInstalled(),
-            'reports' => $reports
-        );
-        if($scope !== 'card' && $this->policy->isMember()){
-            $result['unregistered'] = $this->unregisteredFiles();
-            $result['missingDefinitions'] = $this->reports->missingDefinitions();
-            $result['canSetup'] = $this->policy->isManager();
-            $result['allowDynamicReports'] = $this->policy->allowDynamicReports();
-            // what the client needs to know about the report output
-            $result['settings'] = array(
+            'missing' => $this->reports->missingDefinitions(),
+            'canSetup' => $this->policy->isManager(),
+            'allowDynamicReports' => $this->policy->allowDynamicReports(),
+            'settings' => array(
                 'javaScriptAllowed' => $this->javaScriptAllowed(),
                 'testRecordLimit' => ReportPolicy::TEST_RECORD_LIMIT
-            );
-        }
-        return $result;
+            ),
+            'unregistered' => $this->unregisteredFiles()
+        );
+    }
+
+    /** Install the report definitions and convert old schedules. Managers only. */
+    public function setup(): array
+    {
+        $this->policy->requireManager();
+        return array('report' => $this->writer->setup());
     }
 
     /** Whether the database may run JavaScript and CSS blocks in reports (js_in_database_authorised.txt). */
@@ -120,54 +103,72 @@ final class ReportService
         return (bool)$this->javaScriptAllowed;
     }
 
-    /** One report record (by id) or unregistered file (by name). */
-    public function getReport(string $reference): array
-    {
-        $report = $this->resolve($reference);
-        if($report['id'] === null){ $this->policy->requireMember(); }
-        return $report;
-    }
-
-    /** Template body of a report. Logged-in users only. */
-    public function readTemplate(string $reference): array
+    /** Template body of a report: `{report, body}`. Logged-in users only. */
+    public function readTemplate(int $reportId): array
     {
         $this->policy->requireMember();
-        $report = $this->resolve($reference);
+        $report = $this->report($reportId);
         if($report['file'] === ''){
             throw new OutOfBoundsException('The report has no template file');
         }
         return array('report' => $report, 'body' => $this->templates->read($report['file']));
     }
 
-    /** Save the template body of an existing report or unregistered file. */
-    public function saveTemplate(string $reference, string $body): array
+    /** Save the template body of a report. */
+    public function saveTemplate(int $reportId, string $body): array
     {
         $this->policy->requireMember();
-        $report = $this->resolve($reference);
-        $this->requireEdit($report);
+        $report = $this->editable($reportId);
         if($report['file'] === ''){
             throw new InvalidArgumentException('The report has no template file');
         }
         $this->templates->write($report['file'], $body);
-        return $this->resolve($reference);
-    }
-
-    /** Delete a template file without a record. A report is deleted by DELETE /report/{id}. */
-    public function deleteFile(string $reference): array
-    {
-        $this->policy->requireMember();
-        $report = $this->resolve($reference);
-        $this->requireEdit($report);
-        if($report['id'] !== null){
-            throw new InvalidArgumentException('Template '.$report['file'].' has a report record: delete the record');
-        }
-        $this->templates->delete($report['file']);
-        return array('id' => null, 'file' => $report['file'], 'fileDeleted' => true);
+        return $this->report($reportId);
     }
 
     /**
-     * Import an uploaded template (concept codes are converted to local ids) and
-     * create its record when the definitions are installed.
+     * Delete the template file of a report; the record stays. Refused while outputs point to the report.
+     *
+     * @throws DomainException|ReportInUseException
+     */
+    public function deleteTemplate(int $reportId): array
+    {
+        $this->policy->requireMember();
+        $report = $this->editable($reportId);
+        $this->assertNoOutputs($reportId);
+        $deleted = $report['file'] !== '' && $this->templates->exists($report['file']);
+        if($deleted){ $this->templates->delete($report['file']); }
+        return array('id' => $reportId, 'fileDeleted' => $deleted);
+    }
+
+    /** @throws ReportInUseException Outputs point to the report. */
+    public function assertNoOutputs(int $reportId): void
+    {
+        $count = $this->reports->countOutputs($reportId);
+        if($count > 0){ throw new ReportInUseException($count); }
+    }
+
+    /** Delete a template file without a record: DELETE /report/setup?file=name. */
+    public function deleteUnregistered(string $file): array
+    {
+        $this->policy->requireMember();
+        $name = $this->templates->normalize($file);
+        if(isset($this->reports->registeredFiles()[strtolower($name)])){
+            throw new InvalidArgumentException('Template '.$name.' has a report record: delete the record');
+        }
+        if(!$this->templates->exists($name)){
+            throw new OutOfBoundsException('Template file '.$name.' does not exist');
+        }
+        $this->templates->delete($name);
+        return array('file' => $name, 'fileDeleted' => true);
+    }
+
+    /**
+     * Import an uploaded template (concept codes are converted to local ids) and create its record.
+     *
+     * @param array $upload The uploaded file ($_FILES entry).
+     * @param bool $isCardView The new report is a card report.
+     * @return array The new report.
      */
     public function importTemplate(array $upload, bool $isCardView = false): array
     {
@@ -175,10 +176,10 @@ final class ReportService
         if(empty($upload['tmp_name']) || !is_uploaded_file((string)$upload['tmp_name'])){
             throw new InvalidArgumentException('Template file is not uploaded');
         }
-        $file = $this->renderer->importTemplate($upload);
         if(!$this->reports->isInstalled()){
-            return $this->resolve($file);
+            throw new DomainException('The report record types are not installed: POST /report/setup');
         }
+        $file = $this->renderer->importTemplate($upload);
         $details = array(
             $this->codes->id('DT_NAME') => array(substr($file, 0, -4)),
             $this->codes->id('DT_FILE_NAME') => array($file)
@@ -186,7 +187,7 @@ final class ReportService
         if($isCardView){ $details[$this->codes->id('DT_IS_CARD_VIEW')] = array($this->codes->id('TRM_YES')); }
         $saved = ($this->recordSave)()->save('POST', 0, RecordInput::fromBody(
             array('rec_RecTypeID' => $this->codes->id('RT_CUSTOM_REPORT'), 'details' => $details)));
-        return $this->resolve((string)$saved['recordId']);
+        return $this->report(intval($saved['recordId']));
     }
 
     /**
@@ -194,10 +195,10 @@ final class ReportService
      *
      * @return array{file:string,body:string} Download name (.gpl) and body.
      */
-    public function exportTemplate(string $reference): array
+    public function exportTemplate(int $reportId): array
     {
         $this->policy->requireMember();
-        $report = $this->resolve($reference);
+        $report = $this->report($reportId);
         if($report['file'] === '' || !$this->templates->exists($report['file'])){
             throw new OutOfBoundsException('Template file does not exist');
         }
@@ -208,226 +209,72 @@ final class ReportService
     }
 
     /**
-     * Render one record with a report template. Always allowed (plan 12, decision 3);
-     * the engine applies the record visibility of the current user.
+     * Render one record with a report (GET /report/{id}/execute). The report must be visible to the user,
+     * a guest runs card reports only; the engine applies the record visibility of the user. A wrong
+     * template must not run for ever, so the time of a test run is the limit.
      */
-    public function renderRecord(string $reference, int $recordId): string
+    public function execute(int $reportId, int $recordId): string
     {
         if($recordId < 1){
-            throw new InvalidArgumentException('Parameter "rec" must be a record id');
+            throw new InvalidArgumentException('Parameter "recordId" must be a record id');
         }
-        if(ctype_digit($reference)){
-            $report = $this->resolve($reference);
-            $file = $report['file'];
-        }else{
-            // legacy configurations store the template file name
-            $file = $this->templates->normalize($reference);
+        $report = $this->report($reportId);
+        if(!$this->policy->isMember() && !$report['isCardView']){
+            throw new DomainException('Authentication is required');
         }
-        if($file === '' || !$this->templates->exists($file)){
+        if($report['file'] === '' || !$this->templates->exists($report['file'])){
             throw new OutOfBoundsException('Template file does not exist');
         }
-        return $this->renderer->renderRecord($file, $recordId);
+        @set_time_limit($this->policy->previewLimitSeconds());
+        return $this->renderer->renderRecord($report['file'], $recordId);
+    }
+
+    /** A report the current user sees, for the report jobs. */
+    public function report(int $reportId): array
+    {
+        $report = $this->reports->getReport($reportId);
+        if($report === null){
+            throw new OutOfBoundsException('Report '.$reportId.' is not available');
+        }
+        $report['fileExists'] = $report['file'] !== '' && $this->templates->exists($report['file']);
+        return $report;
+    }
+
+    /** True when the template file exists. */
+    public function templateExists(string $file): bool
+    {
+        return $file !== '' && $this->templates->exists($file);
+    }
+
+    /** A report the current user may change. */
+    private function editable(int $reportId): array
+    {
+        $report = $this->report($reportId);
+        if(!$report['canEdit']){
+            throw new DomainException('You are not allowed to change this report');
+        }
+        return $report;
     }
 
     /**
-     * Which report each generated file belongs to (plan 27e §24): the schedule with this output, else the report with the
-     * longest name followed by a space (a suffix), "_" (a user) or ".". A plain prefix would give `Single` also the files of
-     * `Single22` and of `Single _copy`.
+     * Template files without a Custom Report record.
      *
-     * @param string[] $names File names in generated-reports.
-     * @param array<int,array> $reports Reports with `id`, `file`, `schedules`.
-     * @return array<string,string[]> File names by report id, or file name of a report without a record.
+     * @return array<int,array{file:string,title:string,modified:?string}>
      */
-    public static function assignGenerated(array $names, array $reports): array
+    private function unregisteredFiles(): array
     {
-        $outputs = array();
-        $bases = array();
-        foreach($reports as $report){
-            $key = (string)($report['id'] ?? $report['file']);
-            foreach($report['schedules'] ?? array() as $schedule){
-                $output = self::scheduleOutput((string)$report['file'], (string)($schedule['file'] ?? ''));
-                $outputs[strtolower($output.'.'.($schedule['format'] ?? 'html'))] = $key;
-            }
-            $base = strtolower(self::outputBase((string)$report['file']));
-            if($base !== ''){ $bases[$base] = $key; }
-        }
-        // the longest name first
-        uksort($bases, static function($a, $b): int { return strlen((string)$b) - strlen((string)$a); });
+        $registered = $this->reports->registeredFiles();
         $result = array();
-        foreach($names as $name){
-            $lower = strtolower($name);
-            $key = $outputs[$lower] ?? null;
-            foreach($key === null ? $bases : array() as $base => $report){
-                $base = (string)$base;
-                if(strpos($lower, $base) === 0 && in_array($lower[strlen($base)] ?? '', array(' ', '_', '.'), true)){
-                    $key = $report;
-                    break;
-                }
+        foreach($this->templates->listFiles() as $entry){
+            if(!isset($registered[strtolower($entry['file'])])){
+                $result[] = array('file' => $entry['file'], 'title' => substr($entry['file'], 0, -4), 'modified' => $entry['modified'] ?? null);
             }
-            if($key !== null){ $result[(string)$key][] = $name; }
         }
         return $result;
     }
 
-    /** The reports of the list with the number of their generated files. */
-    private function withGeneratedCount(array $reports): array
-    {
-        $files = self::assignGenerated($this->generatedNames(), $this->allReports());
-        foreach($reports as $index => $report){
-            $reports[$index]['generatedCount'] = count($files[(string)($report['id'] ?? $report['file'])] ?? array());
-        }
-        return $reports;
-    }
-
-    /** All reports with a record and the template files without one: every file has its report. */
-    private function allReports(): array
-    {
-        return array_merge($this->reports->listReports(), $this->unregisteredFiles());
-    }
-
-    /** @return string[] File names in generated-reports. */
-    private function generatedNames(): array
-    {
-        if($this->generatedDirectory === '' || !is_dir($this->generatedDirectory)){ return array(); }
-        $names = array();
-        foreach(scandir($this->generatedDirectory) ?: array() as $name){
-            // "job-tmp-*": output of a running generation job (ReportGenerateJob)
-            if($name[0] === '.' || $name[0] === '_' || $name === 'index.html' || strpos($name, 'job-tmp-') === 0
-                || !is_file($this->generatedDirectory.$name)){ continue; }
-            $names[] = $name;
-        }
-        return $names;
-    }
-
     /**
-     * Files in the generated-reports folder.
-     *
-     * @return array<int,array{file:string,size:int,modified:string,url:string}>
-     */
-    public function listGenerated(string $prefix = '', string $report = ''): array
-    {
-        $this->policy->requireMember();
-        $prefix = strtolower(trim($prefix));
-        $names = $this->generatedNames();
-        if($report !== ''){ $names = self::assignGenerated($names, $this->allReports())[$report] ?? array(); }
-        $files = array();
-        foreach($names as $name){
-            $path = $this->generatedDirectory.$name;
-            if($prefix !== '' && strpos(strtolower($name), $prefix) !== 0){ continue; }
-            $files[] = array(
-                'file' => $name,
-                'size' => intval(filesize($path)),
-                'modified' => gmdate('Y-m-d\TH:i:s\Z', intval(filemtime($path))),
-                'url' => $this->generatedUrl === '' ? '' : $this->generatedUrl.rawurlencode($name)
-            );
-        }
-        usort($files, static function(array $a, array $b): int { return strcmp($b['modified'], $a['modified']); });
-        return $files;
-    }
-
-    /**
-     * Delete a generated file. Allowed for managers, for the editors of the
-     * report the file belongs to (name starts with the report's file name) and
-     * for the user who generated it ("_u<user id>" in the name).
-     *
-     * @param string $file File name in generated-reports.
-     * @return array{file:string,deleted:bool}
-     */
-    public function deleteGenerated(string $file): array
-    {
-        $this->policy->requireMember();
-        $file = basename(trim($file));
-        if($file === '' || $file[0] === '.' || $this->generatedDirectory === ''){
-            throw new InvalidArgumentException('Invalid file name');
-        }
-        $path = $this->generatedDirectory.$file;
-        if(!is_file($path)){
-            throw new OutOfBoundsException('Generated file '.$file.' does not exist');
-        }
-        $allowed = $this->policy->isManager()
-            || preg_match('/_u'.$this->policy->userId().'\.[a-z]+$/i', $file) === 1;
-        if(!$allowed){
-            foreach($this->reports->listReports() as $report){
-                $base = strtolower(substr($report['file'], 0, -4));
-                if($report['canEdit'] && $base !== '' && strpos(strtolower($file), $base) === 0){
-                    $allowed = true;
-                    break;
-                }
-            }
-        }
-        if(!$allowed){
-            throw new DomainException('You are not allowed to delete this file');
-        }
-        if(!@unlink($path)){
-            throw new \RuntimeException('Cannot delete '.$file.'. Check permissions for the generated-reports folder');
-        }
-        return array('file' => $file, 'deleted' => true);
-    }
-
-    /**
-     * All visible schedules with the title of their report and their last
-     * generated file (or null).
-     *
-     * @return array<int,array>
-     */
-    public function listSchedules(): array
-    {
-        $this->policy->requireMember();
-        $titles = array();
-        $files = array();
-        foreach($this->reports->listReports() as $report){
-            $titles[$report['id']] = $report['title'];
-            $files[$report['id']] = $report['file'];
-        }
-        $result = array();
-        foreach($this->reports->listSchedules() as $schedule){
-            $schedule['reportTitle'] = $titles[$schedule['reportId']] ?? null;
-            $output = self::scheduleOutput((string)($files[$schedule['reportId']] ?? ''), $schedule['file']);
-            $schedule['generated'] = $this->generatedInfo($output.'.'.$schedule['format']);
-            $result[] = $schedule;
-        }
-        usort($result, static function(array $a, array $b): int { return strcasecmp($a['title'], $b['title']); });
-        return $result;
-    }
-
-    /** The template file name as the start of an output file name. */
-    private static function outputBase(string $file): string
-    {
-        return trim((string)preg_replace('/[\/\\\\:*?"<>|\x00-\x1F]+/u', '_', substr($file, 0, -4)), ' ._');
-    }
-
-    /**
-     * Output file name of a schedule, without extension: it always starts with the name of the report. The record has
-     * any name: none is the report's name, another one gets the report's name in front.
-     *
-     * @param string $templateFile Template file of the report.
-     * @param string $file Value of the file name field of the schedule.
-     */
-    public static function scheduleOutput(string $templateFile, string $file): string
-    {
-        $base = self::outputBase($templateFile);
-        $name = trim((string)preg_replace('/\.[a-z0-9]{1,5}$/i', '', trim($file)));
-        if($name === ''){ return $base; }
-        return stripos($name, $base) === 0 ? $name : $base.' '.$name;
-    }
-
-    /**
-     * Output file name of a report: its template file name, a space and an
-     * optional suffix of letters, digits, "-", "_", "(", ")" and spaces.
-     */
-    public function outputName(array $report, string $suffix): string
-    {
-        $base = self::outputBase($report['file']);
-        $suffix = trim($suffix);
-        if($suffix !== ''){ $base .= ' '.self::asciiName($suffix, 'File name suffix'); }
-        if($base === ''){
-            throw new InvalidArgumentException('Invalid output file name');
-        }
-        return $base;
-    }
-
-    /**
-     * A file name of letters A-Z, digits, "-", "_", "(", ")" and spaces (without extension).
+     * A new template file name: letters A-Z, digits, "-", "_", "(", ")" and spaces (without extension).
      *
      * @param string $name Requested name; ".tpl" is removed.
      * @param string $what Field name for the error message.
@@ -441,101 +288,6 @@ final class ReportService
         return $name;
     }
 
-    /**
-     * Report description for a reference (record id or file name) with the
-     * visibility rules of the current user; used by the report jobs.
-     */
-    public function resolveReport(string $reference): array
-    {
-        return $this->resolve($reference);
-    }
-
-    /** True when the template file exists. */
-    public function templateExists(string $file): bool
-    {
-        return $file !== '' && $this->templates->exists($file);
-    }
-
-    /** Install the report definitions and convert old schedules. Managers only. */
-    public function setup(): array
-    {
-        $this->policy->requireManager();
-        return array('report' => $this->writer->setup());
-    }
-
-    /**
-     * Resolve a reference to a report description. Unregistered files get
-     * `id` null and the same keys as records.
-     */
-    private function resolve(string $reference): array
-    {
-        $reference = trim($reference);
-        if($reference === ''){
-            throw new InvalidArgumentException('Report reference is required');
-        }
-        if(ctype_digit($reference)){
-            $report = $this->reports->getReport(intval($reference));
-            if($report === null){
-                throw new OutOfBoundsException('Report '.$reference.' is not available');
-            }
-            $report['fileExists'] = $report['file'] !== '' && $this->templates->exists($report['file']);
-            return $report;
-        }
-
-        $file = $this->templates->normalize($reference);
-        if(isset($this->reports->registeredFiles()[strtolower($file)])){
-            $report = $this->reports->findByFile($file);
-            if($report === null){
-                throw new DomainException('Template '.$file.' belongs to a report you cannot access');
-            }
-            $report['fileExists'] = $this->templates->exists($report['file']);
-            return $report;
-        }
-        if(!$this->templates->exists($file)){
-            throw new OutOfBoundsException('Template file '.$file.' does not exist');
-        }
-        return $this->unregistered($file);
-    }
-
-    /** Fail unless the current user may change the report or file. */
-    private function requireEdit(array $report): void
-    {
-        if($report['id'] === null ? !$this->policy->isMember() : !$report['canEdit']){
-            throw new DomainException('You are not allowed to change this report');
-        }
-    }
-
-    /** Template files without a Custom Report record. */
-    private function unregisteredFiles(): array
-    {
-        $registered = $this->reports->registeredFiles();
-        $result = array();
-        foreach($this->templates->listFiles() as $entry){
-            if(!isset($registered[strtolower($entry['file'])])){
-                $result[] = $this->unregistered($entry['file'], $entry);
-            }
-        }
-        return $result;
-    }
-
-    /** Report description for an unregistered file. */
-    private function unregistered(string $file, ?array $entry = null): array
-    {
-        return array(
-            'id' => null,
-            'title' => substr($file, 0, -4),
-            'description' => '',
-            'file' => $file,
-            'isCardView' => false,
-            'ownerGroupId' => null,
-            'visibility' => null,
-            'modified' => $entry['modified'] ?? null,
-            'canEdit' => $this->policy->isMember(),
-            'schedules' => array(),
-            'fileExists' => true
-        );
-    }
-
     /** A template file name (letters A-Z, digits, "-", "_", spaces) derived from a title. */
     public static function fileNameFromTitle(string $title): string
     {
@@ -544,18 +296,5 @@ final class ReportService
         $name = trim(preg_replace('/\s+/', ' ', (string)$name), " _");
         if($name === ''){ $name = 'report'; }
         return substr($name, 0, 100).'.tpl';
-    }
-
-    /** Name, size, date and URL of a generated file, or null when it does not exist. */
-    private function generatedInfo(string $file): ?array
-    {
-        $path = $this->generatedDirectory.$file;
-        if($this->generatedDirectory === '' || !is_file($path)){ return null; }
-        return array(
-            'file' => $file,
-            'size' => intval(filesize($path)),
-            'modified' => gmdate('Y-m-d\TH:i:s\Z', intval(filemtime($path))),
-            'url' => $this->generatedUrl === '' ? '' : $this->generatedUrl.rawurlencode($file)
-        );
     }
 }

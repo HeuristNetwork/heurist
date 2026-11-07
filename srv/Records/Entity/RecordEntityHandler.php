@@ -102,6 +102,41 @@ abstract class RecordEntityHandler
     }
 
     /**
+     * Values of the records of a search, by record id (meta.items of /{entity}?q=).
+     *
+     * @param array<int,int> $ids Record ids of the page.
+     * @return array<int,array>
+     */
+    public function describeMany(array $ids): array
+    {
+        return array();
+    }
+
+    /**
+     * After a duplicate: what the copy needs besides its record.
+     *
+     * @param array $body Body of the request.
+     * @return array<int,array> Warnings added to meta.issues.
+     * @throws RecordEditException
+     */
+    public function afterDuplicate(int $sourceId, int $newId, array $body, array $params): array
+    {
+        return array();
+    }
+
+    /** Whether a guest may GET this action; it applies the visibility rules itself. */
+    public function allowsGuest(string $action): bool
+    {
+        return false;
+    }
+
+    /** Whether this action takes a multipart upload instead of a JSON body. */
+    public function acceptsUpload(string $action): bool
+    {
+        return false;
+    }
+
+    /**
      * Problems of a stored record for GET /{entity}/{id}/validate.
      *
      * @return array<int,array>

@@ -3,7 +3,7 @@
 * GroupWriteService.php - Workgroup writes of /sys (plan 20, Phase 4d)
 *
 *   POST /sys/group/0, PUT / PATCH / DELETE /sys/group/{id}, POST /sys/group/{id}/validate
-*   POST /sys/group/{id}/members   {add: [user ids], role: admin|member} | {remove: [user ids]}
+*   POST /sys/group/{id}/assign    {add: [user ids], role: admin|member} | {remove: [user ids]}
 *
 * The rules of legacy DbSysGroups:
 * - any logged-in user adds a group and becomes its admin;
@@ -73,7 +73,7 @@ final class GroupWriteService extends EntityWriteService
     /** {@inheritdoc} */
     protected function route(): string
     {
-        return 'sys/group';
+        return 'group';
     }
 
     /**

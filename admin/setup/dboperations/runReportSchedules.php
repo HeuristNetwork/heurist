@@ -49,24 +49,23 @@ $planner = $factory->reportJobPlanner($renderer, $writer);
 $runner = $factory->jobRunner($factory->reportJobHandlers($renderer, $writer));
 
 $counts = array('done' => 0, 'failed' => 0);
-foreach ($planner->dueSchedules() as $schedule) {
+foreach ($planner->dueOutputs() as $schedule) {
     $start = time();
     $job = $runner->runSystemJob('report-generate', $schedule['title'], array(
         'templateFile' => $schedule['templateFile'],
         'query' => $schedule['query'],
-        'output' => $schedule['output'],
         'language' => $schedule['language'],
         'format' => $schedule['format'],
-        'scheduleId' => $schedule['id']
+        'outputId' => $schedule['id']
     ));
     $seconds = time() - $start;
     if ($job['status'] === 'done') {
         $counts['done']++;
-        echo 'schedule '.$schedule['id'].' "'.$schedule['title'].'": '.$job['result']['file']
+        echo 'output '.$schedule['id'].' "'.$schedule['title'].'": '.$job['result']['format']
             .' ('.$job['result']['records'].' records, '.$seconds." s)\n";
     } else {
         $counts['failed']++;
-        echo 'schedule '.$schedule['id'].' "'.$schedule['title'].'" '.$job['status'].': '.$job['error']."\n";
+        echo 'output '.$schedule['id'].' "'.$schedule['title'].'" '.$job['status'].': '.$job['error']."\n";
     }
 }
 echo 'report schedules: generated '.$counts['done'].', failed '.$counts['failed']."\n";

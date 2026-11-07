@@ -3836,7 +3836,7 @@ public static function importTerms($params){
         }
 
         //find all not empty terms from import table
-        $query = "SELECT imp_ID, $field_id FROM $import_table WHERE $field_id <> '' GROUP BY $field_id";
+        $query = "SELECT MIN(imp_ID), $field_id FROM $import_table WHERE $field_id <> '' GROUP BY $field_id";
 
         $terms = mysql__select_assoc2(self::$mysqli, $query);
 

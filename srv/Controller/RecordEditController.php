@@ -53,6 +53,7 @@ use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
 use Heurist\Records\Entity\RecordEntityHandler;
 use Heurist\Records\Entity\RecordEntityRegistry;
+use Heurist\Runtime\RawResponse;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\ApiResponse;
 use Heurist\Runtime\ErrorReporter;
@@ -139,7 +140,9 @@ final class RecordEditController
         if($action === 'duplicate'){
             $this->allow($method, array('POST'));
             $newId = $this->duplicate->duplicate($recordId);
-            return array(201, $this->savedRecord($newId, array(), $params));
+            $handler = $this->handlerFor('PUT', $recordId, null);
+            $issues = $handler !== null ? $handler->afterDuplicate($recordId, $newId, $json ?? array(), $params) : array();
+            return array(201, $this->savedRecord($newId, $issues, $params));
         }
         if($action === 'validate'){
             $this->allow($method, array('POST'));
@@ -208,14 +211,24 @@ final class RecordEditController
             throw new RecordEditException(405, 'method_not_allowed',
                 'Search with GET /records?q=t:'.$rectype.'; an entity URL needs a record id or an action');
         }
-        if($method !== 'GET'){ $this->assertSameSite($method, $request); }
+        $action = (string)($segments[1] ?? '');
+        $isField = preg_match('/^\d+(-\d+)?$/', $action) === 1;
+        // a guest reads a record or a field; everything else needs a login (plan 28a)
         $handler = $this->entities->handler($entity);
+        $isRead = $method === 'GET' && ctype_digit($first) && ($action === '' || $isField || $handler->allowsGuest($action));
+        if($this->runtime->userId < 1 && !$isRead){
+            throw new RecordEditException(401, 'unauthorized', 'Log in to use this action');
+        }
+        if($handler->acceptsUpload(preg_match('/^-?\d+$/', $first) ? $action : $first)){
+            // an upload is multipart, the Origin is checked all the same
+            $request['contentType'] = 'application/json';
+        }
+        if($method !== 'GET'){ $this->assertSameSite($method, $request); }
         if(!preg_match('/^-?\d+$/', $first)){
             // an action of the whole entity, e.g. /website/setup
             return array(200, $handler->action($first, $method, 0, $params, $json ?? array()));
         }
         $recordId = intval($first);
-        $action = (string)($segments[1] ?? '');
         if($recordId > 0 && !($method === 'POST' && $action === '')){
             $this->assertRectype($recordId, $rectype, $entity);
         }
@@ -225,6 +238,9 @@ final class RecordEditController
         }
         if($action === '' && $method === 'GET'){
             return array(200, $this->entityRecord($handler, $recordId, $params));
+        }
+        if($isField && $method === 'GET'){
+            return array(200, $this->entityField($recordId, $action, $params));
         }
         if($action === 'validate' && $method === 'GET'){
             $issues = $handler->validate($recordId, $params);
@@ -252,6 +268,39 @@ final class RecordEditController
         return array(200, $handler->action($action, $method, $recordId, $params, $json ?? array()));
     }
 
+    /**
+     * Whether POST /{entity}/{id}/execute may start the job of the entity: a login, the record is of this
+     * entity and the request is from this site. Otherwise the error is sent (api.php does not start the job).
+     */
+    public function allowEntityExecute(string $entity, string $method, int $recordId, array $request): bool
+    {
+        try{
+            if($this->runtime->userId < 1){
+                throw new RecordEditException(401, 'unauthorized', 'Log in to use this action');
+            }
+            $this->allow(strtoupper($method), array('POST'));
+            $this->assertSameSite('POST', $request);
+            $this->assertRectype($recordId, $this->entities !== null ? $this->entities->rectype($entity) : 0, $entity);
+            return true;
+        }catch(RecordEditException $error){
+            $this->send(static function() use ($error){ throw $error; });
+            return false;
+        }
+    }
+
+    /** GET /{entity}/{id}/{field}: as GET /records/{id}/{field}. */
+    private function entityField(int $recordId, string $field, array $params): array
+    {
+        try{
+            return $this->query->executeField(array(
+                'db' => $params['db'] ?? $this->runtime->databaseName,
+                'resolveDetails' => $params['resolveDetails'] ?? false
+            ), $recordId, $field);
+        }catch(\OutOfBoundsException $error){
+            throw RecordEditException::notFound($error->getMessage());
+        }
+    }
+
     /** GET /{entity}/{id}: the record with meta.canEdit and the entity's meta. */
     private function entityRecord(RecordEntityHandler $handler, int $recordId, array $params): array
     {
@@ -268,7 +317,10 @@ final class RecordEditController
         $owners = $this->permissions !== null && $this->runtime->userId > 0 ? $this->permissions->owners($recordId) : null;
         $response['meta']['canEdit'] = $owners !== null
             && $this->permissions->canEditOwned($owners['owner'], $owners['editGroups']);
-        foreach($handler->describe($recordId) as $key => $value){ $response['meta'][$key] = $value; }
+        // the summary of the entity (pages, editors ...) is for logged-in users
+        if($this->runtime->userId > 0){
+            foreach($handler->describe($recordId) as $key => $value){ $response['meta'][$key] = $value; }
+        }
         return $response;
     }
 
@@ -352,6 +404,10 @@ final class RecordEditController
         if(defined('HEADER_CORS_POLICY')){ header(HEADER_CORS_POLICY); }
         try{
             list($status, $body) = $build();
+            if(isset($body['rawResponse']) && $body['rawResponse'] instanceof RawResponse){
+                $body['rawResponse']->send($status);
+                return;
+            }
             $this->response->send($body, $status);
         }catch(RecordEditException $error){
             $body = array('status'=>$error->status(), 'error'=>$error->errorCode(), 'message'=>$error->getMessage());

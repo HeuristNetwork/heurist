@@ -726,7 +726,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/users/{{userId}}",
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/user/{{userId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -734,7 +734,7 @@
                 "heurist",
                 "api",
                 "{{db}}",
-                "users",
+                "user",
                 "{{userId}}"
               ]
             }
@@ -755,7 +755,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/groups/{{groupId}}",
+              "raw": "{{baseUrl}}{{apiPrefix}}/{{db}}/group/{{groupId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -763,7 +763,7 @@
                 "heurist",
                 "api",
                 "{{db}}",
-                "groups",
+                "group",
                 "{{groupId}}"
               ]
             }

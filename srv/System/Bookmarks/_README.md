@@ -1,4 +1,4 @@
-# Bookmarks on /sys/bookmark
+# Bookmarks on /bookmark
 
 Plan 20, Phase 4b (§10.9). Bookmarks stay in `usrBookmarks` until the switch (§2.1).
 
@@ -15,7 +15,7 @@ Plan 20, Phase 4b (§10.9). Bookmarks stay in `usrBookmarks` until the switch (�
   too: `hserv/entity/DbUsrBookmarks` (read and save) and `recordSearch` (the key icon).
   **Changing the key makes the stored notes unreadable** (they are left out and listed
   in `meta.privateInfo.unreadable`).
-- `BookmarkRecordOutput` — `GET /sys/bookmark[/{id}]`: the user's own bookmarks only
+- `BookmarkRecordOutput` — `GET /bookmark[/{id}]`: the user's own bookmarks only
   (also for administrators); the note is decrypted for the owner; `meta.privateInfo`
   `{encrypted, unreadable}`.
 - `BookmarkWriteService` — the owner only; one bookmark per record and user (409
@@ -24,9 +24,9 @@ Plan 20, Phase 4b (§10.9). Bookmarks stay in `usrBookmarks` until the switch (�
 
 | Route | Method | |
 |---|---|---|
-| `/sys/bookmark/0` | POST | add (201) |
-| `/sys/bookmark/{id}` | PUT / PATCH / DELETE | change, delete |
-| `/sys/bookmark/{id}/validate` | POST | the checks only |
+| `/bookmark/0` | POST | add (201) |
+| `/bookmark/{id}` | PUT / PATCH / DELETE | change, delete |
+| `/bookmark/{id}/validate` | POST | the checks only |
 
 Query: `{"t":"bookmark","f:record":"81"}` gives the bookmark of a record.
 
