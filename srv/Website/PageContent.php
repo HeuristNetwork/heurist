@@ -30,6 +30,9 @@ final class PageContent
     /** Hard limit of the records of a cards widget (plan 27e §9). */
     public const CARD_LIMIT = 50;
 
+    /** Bytes of a generated report shown with `display: cut` (plan 27e §28). */
+    public const REPORT_CUT = 102400;
+
     private WebsiteRepository $repository;
     private LanguageCodes $languages;
     /** @var array{search:callable,render:callable,generated:string,baseUrl:string,database:string} */
@@ -100,7 +103,7 @@ final class PageContent
         $list = (string)($settings['presentation'] ?? 'list') !== 'slider';
         switch((string)($instance['type'] ?? '')){
             case 'report':
-                $html = $this->report(is_array($settings['files'] ?? null) ? $settings['files'] : array(), $language);
+                $html = $this->report($settings, $language, $context);
                 return $html === null ? null : array('html' => $html, 'class' => 'h-site-report');
             case 'cards':
                 return array('html' => $this->cards($settings, $language), 'class' => $list ? 'h-site-cards h-site-widget-list' : 'h-site-cards h-slider-pending');
@@ -158,15 +161,44 @@ final class PageContent
     }
 
     /**
-     * Content of a generated report: the output record of the language, else `def`; only the body of a
-     * whole document. The author of the website chose the output, as a report of the cards (WebsiteRepository).
+     * Content of a generated report: only the body of a whole document. The author of the website chose the
+     * output, as a report of the cards (WebsiteRepository). `display`: `full` (default), `cut` (the first
+     * REPORT_CUT bytes and a link Show more), `link` (only a link to the file). The link needs an output record
+     * the visitor may see (plan 27e §28).
      */
-    private function report(array $outputs, string $language): ?string
+    private function report(array $settings, string $language, array $context): ?string
     {
-        $file = (new ReportOutputStore((string)$this->services['generated']))->find(intval($outputs[$language] ?? $outputs['def'] ?? 0));
+        $outputs = is_array($settings['files'] ?? null) ? $settings['files'] : array();
+        $outputId = self::reportOutput($outputs, $language, strtolower((string)($context['languages'][0] ?? '')));
+        $file = (new ReportOutputStore((string)$this->services['generated']))->find($outputId);
         if($file === null || $file['format'] !== 'html'){ return null; }
+        $display = (string)($settings['display'] ?? 'full');
+        $url = self::attribute($this->services['baseUrl'].'api/'.rawurlencode($this->services['database']).'/output/'.$outputId.'/asset');
+        if($display === 'link'){
+            return '<a class="h-site-report-link" href="'.$url.'" target="_blank" rel="noopener">Open report</a>';
+        }
         $html = (string)file_get_contents($file['path']);
-        return preg_match('/<body\b[^>]*>(.*)<\/body\s*>/is', $html, $body) === 1 ? $body[1] : $html;
+        $html = preg_match('/<body\b[^>]*>(.*)<\/body\s*>/is', $html, $body) === 1 ? $body[1] : $html;
+        if($display !== 'cut' || strlen($html) <= self::REPORT_CUT){ return $html; }
+        return '<div class="h-site-report-part">'.CmsHtml::cut($html, self::REPORT_CUT).'</div>'
+            .'<a class="h-site-report-more" href="'.$url.'" target="_blank" rel="noopener">Show more</a>';
+    }
+
+    /**
+     * The output of a page language: the language, else `def`, else the default language of the website, else
+     * the first one. As with texts, a language without its own output shows another one.
+     *
+     * @param array $outputs `{language: output id}`.
+     * @param string $language Language of the page (lower case).
+     * @param string $default Default language of the website (lower case), '' when not known.
+     */
+    public static function reportOutput(array $outputs, string $language, string $default = ''): int
+    {
+        $outputs = array_filter(array_map('intval', $outputs), static function(int $id): bool { return $id > 0; });
+        foreach(array($language, 'def', $default) as $key){
+            if($key !== '' && isset($outputs[$key])){ return $outputs[$key]; }
+        }
+        return empty($outputs) ? 0 : (int)reset($outputs);
     }
 
     /** Cards of the records of the query, each one rendered with the card template. */
