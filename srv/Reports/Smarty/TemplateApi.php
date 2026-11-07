@@ -261,8 +261,8 @@ final class TemplateApi
             $record['recRelationID'] = $relationId;
             $record['recRelationType'] = $type['term'];
             $record['recRelationNotes'] = $this->firstValue($raw, 'DT_SHORT_SUMMARY');
-            $record['recRelationStartDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_START_DATE'));
-            $record['recRelationEndDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_END_DATE'));
+            $record['recRelationStartDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_START_DATE'), false, 0, '|', 'both', $this->language());
+            $record['recRelationEndDate'] = Temporal::toHumanReadable($this->firstValue($raw, 'DT_END_DATE'), false, 0, '|', 'both', $this->language());
             $record['relationRecord'] = $relation;
             $result[] = $record;
         }

@@ -75,8 +75,8 @@ final class PageContent
             case 'relationtype':
                 return self::text(implode(', ', $this->termLabels($values, $language)));
             case 'date':
-                return self::text(implode(', ', array_map(static function($value): string {
-                    return (string)Temporal::toHumanReadable((string)$value, true);
+                return self::text(implode(', ', array_map(static function($value) use ($language): string {
+                    return (string)Temporal::toHumanReadable((string)$value, true, 0, '|', 'both', $language);
                 }, $values)));
             case 'blocktext':
                 // stored HTML, already purified on save

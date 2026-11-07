@@ -295,7 +295,7 @@ final class ReportRecordAssembler
                 $prepared = array();
                 $original = array();
                 foreach($values as $value){
-                    $prepared[] = Temporal::toHumanReadable($value, true, 0, '|', 'native');
+                    $prepared[] = Temporal::toHumanReadable($value, true, 0, '|', 'native', $lang);
                     $original[] = $value;
                 }
                 $text = implode(', ', $prepared);

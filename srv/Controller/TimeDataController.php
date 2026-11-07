@@ -51,13 +51,14 @@ final class TimeDataController
     public function execute(array $params): array
     {
         $recordParams = $params;
-        unset($recordParams['timefields'], $recordParams['timeFields']);
+        unset($recordParams['timefields'], $recordParams['timeFields'], $recordParams['lang']);
         // /time always returns records; summary/ids-only detail modes are not
         // part of this endpoint contract.
         unset($recordParams['detail']);
 
         $result = $this->records->execute($recordParams);
-        $this->time->attachWhen($result, $params['timefields'] ?? $params['timeFields'] ?? null);
+        $language = is_string($params['lang'] ?? null) ? $params['lang'] : 'ENG';
+        $this->time->attachWhen($result, $params['timefields'] ?? $params['timeFields'] ?? null, $language);
         return $result;
     }
 

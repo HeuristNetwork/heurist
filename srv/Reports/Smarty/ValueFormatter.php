@@ -43,10 +43,17 @@ final class ValueFormatter
 
     private ReportEnvironment $environment;
 
-    /** @param ReportEnvironment $environment Installation values. */
-    public function __construct(ReportEnvironment $environment)
+    /** Report language (3 letters): the language of date texts. */
+    private string $language;
+
+    /**
+     * @param ReportEnvironment $environment Installation values.
+     * @param string $language Report language (3 letters).
+     */
+    public function __construct(ReportEnvironment $environment, string $language = 'ENG')
     {
         $this->environment = $environment;
+        $this->language = $language;
     }
 
     /**
@@ -109,7 +116,7 @@ final class ValueFormatter
                 if(is_array($value) && array_key_exists(0, $value)){
                     $value = $value[0];
                 }
-                $content = Temporal::toHumanReadable($value, true, $mode ?? 1, '|', $params['calendar'] ?? null);
+                $content = Temporal::toHumanReadable($value, true, $mode ?? 1, '|', $params['calendar'] ?? null, $this->language);
                 return ($label !== '' ? $label.': ' : '').$content.'<br>';
             default:
                 $content = is_string($params['var']) ? json_decode($params['var'], true) : $params['var'];

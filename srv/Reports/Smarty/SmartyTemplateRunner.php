@@ -116,7 +116,7 @@ final class SmartyTemplateRunner
         if(!empty($options['language'])){
             $api->setLanguage((string)$options['language']);
         }
-        $formatter = new ValueFormatter($this->environment);
+        $formatter = new ValueFormatter($this->environment, $api->language());
 
         $displayErrors = ini_get('display_errors');
         try{
