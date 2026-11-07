@@ -4,12 +4,12 @@
   Empty fields and empty groups are left out.
 
   Use: Extended view template of a record list. The report must be marked "Single record (card)".
-  Styles are inline and the layout is a table: without authorisation of the database, reports lose
-  <style> blocks and styles such as display:flex.
+  Styles are inline: without authorisation of the database, reports lose <style> blocks.
+  Flex and grid styles are allowed in inline styles.
 *}
-{$rowStyle = 'width:100%;border-collapse:collapse;table-layout:fixed;margin-bottom:3px;'}
-{$labelStyle = 'width:150px;padding:0 8px 0 0;vertical-align:top;color:#6b7280;'}
-{$valueStyle = 'padding:0;vertical-align:top;'}
+{$rowStyle = 'display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px;margin-bottom:3px;'}
+{$labelStyle = 'color:#6b7280;'}
+{$valueStyle = 'min-width:0;overflow-wrap:anywhere;'}
 {foreach $results as $id}
 {$r = $heurist->getRecord($id)}
 {if $r}
@@ -17,7 +17,7 @@
 {$r = $heurist->prepareRecord($r)}
 <div data-heurist-rec="{$r.recID}">
   <div style="margin-bottom:8px;">
-    <div style="font-size:14px;font-weight:bold;">{$r.recTitle}</div>
+    <div style="font-size:14px;font-weight:bold;overflow-wrap:anywhere;">{$r.recTitle}</div>
     <div style="font-size:11px;color:#6b7280;">{$r.recTypeName}: {$r.recID}</div>
   </div>
 
@@ -40,9 +40,9 @@
     {$valuesKey = "`$key`s"}
     {$fileKey = "`$key`_originalvalue"}
     {if !empty($r[$key])}
-      <table style="{$rowStyle}"><tr>
-        <td style="{$labelStyle}">{$label}</td>
-        <td style="{$valueStyle}">
+      <div style="{$rowStyle}">
+        <div style="{$labelStyle}">{$label}</div>
+        <div style="{$valueStyle}">
           {if $type == 'file'}
             {wrap var=$r[$fileKey] dt="file" width="200" height="auto"}
           {elseif $type == 'geo'}
@@ -59,8 +59,8 @@
               {/if}
             {/foreach}
           {/if}
-        </td>
-      </tr></table>
+        </div>
+      </div>
     {/if}
   {/foreach}
   {if $groupOpen}</div>{/if}
@@ -69,10 +69,10 @@
   {if $related}
     <div style="margin-top:10px;">
       {foreach $related as $target}
-        <table style="{$rowStyle}"><tr>
-          <td style="{$labelStyle}">{$target.recRelationType}</td>
-          <td style="{$valueStyle}"><a href="{$target.recID}" target="_blank" rel="noopener">{$target.recTitle}</a></td>
-        </tr></table>
+        <div style="{$rowStyle}">
+          <div style="{$labelStyle}">{$target.recRelationType}</div>
+          <div style="{$valueStyle}"><a href="{$target.recID}" target="_blank" rel="noopener">{$target.recTitle}</a></div>
+        </div>
       {/foreach}
     </div>
   {/if}
