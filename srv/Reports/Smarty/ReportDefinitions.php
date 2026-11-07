@@ -85,23 +85,29 @@ final class ReportDefinitions
     /**
      * Label of a term with the labels of its parent terms ("Parent.Child"); the
      * vocabulary is not included and repeated parts are removed
-     * (DbsTerms::getTermLabel with hierarchy).
+     * (DbsTerms::getTermLabel with hierarchy). With a language each level is its translation,
+     * or its label when it has none.
      *
      * @param mixed $termId
+     * @param string|null $lang 3-letter language code; null: the labels as stored.
      * @return string
      */
-    public function termFullLabel($termId): string
+    public function termFullLabel($termId, ?string $lang = null): string
     {
         $term = $this->term($termId);
         if($term === null){ return ''; }
-        $labels = explode('.', $term['term']);
+        $text = function(array $item, $id) use ($lang): string {
+            return $lang === null ? (string)$item['term'] : (string)$this->translation('trm', $id, 'trm_Label', $lang);
+        };
+        $labels = explode('.', $text($term, $termId));
         $guard = 0;
         while($term['parent'] > 0 && $guard++ < 50){
-            $term = $this->term($term['parent']);
+            $parentId = $term['parent'];
+            $term = $this->term($parentId);
             if($term === null || !($term['parent'] > 0)){
                 break; // the vocabulary itself is not shown
             }
-            $labels = array_merge(explode('.', $term['term']), $labels);
+            $labels = array_merge(explode('.', $text($term, $parentId)), $labels);
         }
         $i = 1;
         while($i < count($labels)){

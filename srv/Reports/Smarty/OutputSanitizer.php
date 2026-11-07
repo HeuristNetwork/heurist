@@ -179,6 +179,8 @@ final class OutputSanitizer
                 $config->set('Cache.DefinitionImpl', null);
             }
             $config->set('CSS.Trusted', true);
+            // border-radius: round thumbnails of cards
+            $config->set('CSS.Proprietary', true);
             $config->set('Attr.AllowedFrameTargets', '_blank');
             $config->set('HTML.SafeEmbed', true);
             $config->set('HTML.SafeIframe', true);
