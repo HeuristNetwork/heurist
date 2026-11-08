@@ -295,7 +295,7 @@ final class ReportRecordAssembler
                 $prepared = array();
                 $original = array();
                 foreach($values as $value){
-                    $prepared[] = Temporal::toHumanReadable($value, true, 0, '|', 'native');
+                    $prepared[] = Temporal::toHumanReadable($value, true, 0, '|', 'native', $lang);
                     $original[] = $value;
                 }
                 $text = implode(', ', $prepared);
@@ -376,7 +376,7 @@ final class ReportRecordAssembler
                 'internalid' => $value,
                 'code' => $term['code'],
                 'label' => $this->definitions->translation('trm', $value, 'trm_Label', $lang),
-                'term' => $this->definitions->termFullLabel($value),
+                'term' => $this->definitions->termFullLabel($value, $lang),
                 'conceptid' => $term['conceptid'],
                 'desc' => $this->definitions->translation('trm', $value, 'trm_Description', $lang)
             );

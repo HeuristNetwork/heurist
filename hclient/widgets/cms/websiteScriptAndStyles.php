@@ -85,8 +85,8 @@ use hserv\utilities\USystem;
     var website_title = <?php echo $website_title; ?>;
     var is_custom_header = <?php echo ($page_header!==null && $page_header!=='')?'true':'false';?>;
 
-    var record_view_smarty_template = '<?php echo $record_view_smarty_template!=null?$record_view_smarty_template:'';?>';
-    var record_view_target = '<?php echo $record_view_target!=null?$record_view_target:'';?>';
+    var record_view_smarty_template = <?php echo json_encode((string)$record_view_smarty_template, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);?>;
+    var record_view_target = <?php echo json_encode((string)$record_view_target, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_AMP);?>;
 </script>
 
 

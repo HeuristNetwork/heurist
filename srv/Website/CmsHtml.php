@@ -119,6 +119,28 @@ final class CmsHtml
         return strtr(self::inner($root), $replacements);
     }
 
+    /**
+     * The first part of an HTML fragment: cut after the last closing tag before the limit (never inside a tag or
+     * a UTF-8 character), all open elements closed.
+     *
+     * @param int $limit Bytes.
+     */
+    public static function cut(string $html, int $limit): string
+    {
+        if(strlen($html) <= $limit){ return $html; }
+        $part = mb_strcut($html, 0, $limit, 'UTF-8');
+        $close = strrpos($part, '</');
+        $end = $close === false ? false : strpos($part, '>', $close);
+        if($end !== false){
+            $part = substr($part, 0, $end + 1);
+        }else{
+            $open = strrpos($part, '<');
+            if($open !== false){ $part = substr($part, 0, $open); }
+        }
+        $root = self::parse($part);
+        return $root === null ? '' : self::inner($root);
+    }
+
     /** Inner HTML of the parsed fragment root. */
     private static function inner(\DOMElement $root): string
     {

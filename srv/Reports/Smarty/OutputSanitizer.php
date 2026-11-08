@@ -165,6 +165,35 @@ final class OutputSanitizer
         return $output;
     }
 
+    /**
+     * Flex and grid in inline styles: HTMLPurifier knows only older CSS. They only arrange content; display:none
+     * stays out. Set on the definition of this run, so nothing of it goes into the definition cache.
+     */
+    private static function allowLayoutStyles(\HTMLPurifier_Config $config): void
+    {
+        $info = &$config->getCSSDefinition()->info;
+        $keywords = array(
+            'display' => array('block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid'),
+            'flex-direction' => array('row', 'row-reverse', 'column', 'column-reverse'),
+            'flex-wrap' => array('nowrap', 'wrap', 'wrap-reverse'),
+            'justify-content' => array('flex-start', 'flex-end', 'start', 'end', 'center', 'space-between', 'space-around', 'space-evenly'),
+            'justify-items' => array('start', 'end', 'center', 'stretch'),
+            'justify-self' => array('start', 'end', 'center', 'stretch'),
+            'align-items' => array('flex-start', 'flex-end', 'start', 'end', 'center', 'baseline', 'stretch'),
+            'align-self' => array('auto', 'flex-start', 'flex-end', 'start', 'end', 'center', 'baseline', 'stretch'),
+            'align-content' => array('flex-start', 'flex-end', 'start', 'end', 'center', 'space-between', 'space-around', 'stretch'),
+            'object-fit' => array('fill', 'contain', 'cover', 'none', 'scale-down'),
+            'overflow-wrap' => array('normal', 'break-word', 'anywhere')
+        );
+        foreach($keywords as $property => $values){
+            $info[$property] = new \HTMLPurifier_AttrDef_Enum($values);
+        }
+        foreach(array('flex', 'flex-grow', 'flex-shrink', 'flex-basis', 'order', 'gap', 'row-gap', 'column-gap',
+            'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row', 'object-position', 'aspect-ratio') as $property){
+            $info[$property] = new ReportCssValue();
+        }
+    }
+
     /** Output without JavaScript (HTMLPurifier, ReportExecute::sanitizeHtml). */
     private function purify(string $output, string $styles): string
     {
@@ -179,6 +208,8 @@ final class OutputSanitizer
                 $config->set('Cache.DefinitionImpl', null);
             }
             $config->set('CSS.Trusted', true);
+            // border-radius: round thumbnails of cards
+            $config->set('CSS.Proprietary', true);
             $config->set('Attr.AllowedFrameTargets', '_blank');
             $config->set('HTML.SafeEmbed', true);
             $config->set('HTML.SafeIframe', true);
@@ -192,6 +223,7 @@ final class OutputSanitizer
                 $definition->addElement('source', 'Block', 'Flow', 'Common', array('src' => 'URI', 'type' => 'Text'));
                 $definition->addAttribute('div', 'data-heurist-rec', 'Number');
             }
+            self::allowLayoutStyles($config);
             $output = (new \HTMLPurifier($config))->purify($output);
         }
         if($styles !== ''){

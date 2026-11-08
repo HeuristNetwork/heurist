@@ -1055,9 +1055,11 @@ class Temporal {
                 }
                 if(@$date['month']){
 
-                    $month = mktime(0, 0, 0, $date['month'], 1);
-                    $month = getMonthLabel(date('n', $month), self::$language);
-                    $month = ctype_digit((string)$month) ? date('M', $month) : $month;
+                    $monthTimestamp = mktime(0, 0, 0, $date['month'], 1);
+                    $month = getMonthLabel(date('n', $monthTimestamp), self::$language);
+                    if (!is_string($month) || $month === '' || ctype_digit($month)) {
+                        $month = date('M', $monthTimestamp);
+                    }
 
                     $res2 = "{$res2} {$month}";
                 }

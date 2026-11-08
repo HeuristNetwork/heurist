@@ -32,9 +32,18 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu', 'report', 'cards', 'gallery')
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges')
     );
     public const CONFIG_VERSION = 1;
+
+    /** Website layout (`layout`, plan 27f §2-3): allowed values of each setting; the first is the default (CMS_LAYOUT). */
+    public const LAYOUT = array(
+        'navigation' => array('reload', 'swap', 'scroll'),
+        'header' => array('position' => array('default', 'fixed', 'slide', 'none'), 'orientation' => array('horizontal', 'vertical')),
+        'footer' => array('position' => array('default', 'fixed', 'none'))
+    );
+    /** Pages kept by the navigation mode swap (`layout.cache`). */
+    public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
 
     /**
      * Parse the configuration JSON (2-1187). An empty value is an empty configuration.
@@ -55,6 +64,10 @@ final class CmsValidator
                 'The website configuration is not "'.self::SCHEMA.'"')));
         }
         $issues = array();
+        if(isset($config['layout']) && !is_array($config['layout'])){
+            $issues[] = self::issue('error', 'cms_json', 'The "layout" of the website configuration is not an object');
+            unset($config['layout']);
+        }
         foreach(array('instances', 'styles', 'media') as $part){
             if(isset($config[$part]) && !is_array($config[$part])){
                 $issues[] = self::issue('error', 'cms_json', 'The "'.$part.'" of the website configuration is not an object');
@@ -143,6 +156,9 @@ final class CmsValidator
                 $issues[] = self::issue('warning', 'media_settings', 'Media "'.$mediaId.'": '.$problem, null);
             }
         }
+        foreach(self::layoutProblems(is_array($config['layout'] ?? null) ? $config['layout'] : array()) as $problem){
+            $issues[] = self::issue('warning', 'layout', 'Layout: '.$problem);
+        }
         $compiler = new StyleCompiler($baseUrl);
         $styles = $config['styles'];
         $compiler->compile(is_array($styles['base'] ?? null) ? $styles['base'] : array(),
@@ -185,6 +201,47 @@ final class CmsValidator
             return array('mount', 'mount must be "direct" or "iframe"');
         }
         return null;
+    }
+
+    /**
+     * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false.
+     *
+     * @return array<int,string>
+     */
+    public static function layoutProblems(array $layout): array
+    {
+        $problems = array();
+        foreach($layout as $key => $value){
+            $key = (string)$key;
+            if($key === 'navigation'){
+                if(!in_array($value, self::LAYOUT['navigation'], true)){
+                    $problems[] = 'navigation must be '.implode(', ', self::LAYOUT['navigation']);
+                }
+            }elseif($key === 'cache'){
+                if(!is_int($value) || $value < self::LAYOUT_CACHE['min'] || $value > self::LAYOUT_CACHE['max']){
+                    $problems[] = 'cache must be a number from '.self::LAYOUT_CACHE['min'].' to '.self::LAYOUT_CACHE['max'];
+                }
+            }elseif($key === 'hideHeader' || $key === 'hideFooter'){
+                if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
+            }elseif($key === 'header' || $key === 'footer'){
+                if(!is_array($value) || (!empty($value) && array_keys($value) === range(0, count($value) - 1))){
+                    $problems[] = $key.' must be an object';
+                    continue;
+                }
+                foreach($value as $name => $item){
+                    $allowed = self::LAYOUT[$key][(string)$name] ?? null;
+                    if($allowed === null){
+                        $problems[] = 'unknown setting '.$key.'.'.$name;
+                    }elseif(!in_array($item, $allowed, true)){
+                        $problems[] = $key.'.'.$name.' must be '.implode(', ', $allowed);
+                    }
+                }
+            }else{
+                $problems[] = 'unknown setting '.$key;
+            }
+        }
+        return $problems;
     }
 
     /**

@@ -59,6 +59,22 @@ final class CmsRecordCheck
                 $result->warning($key, null, $issue['code'], $issue['message']);
             }
         }
+        // plan 27f §9.3: custom CSS, script and files only on the website (or a standalone page); not shown on a page
+        if($rectypeId === ($this->codes['page'] ?? 0) && !$this->isStandalone($details)){
+            foreach(array('css', 'script', 'extFiles') as $name){
+                if(trim(implode('', $this->all($details, $name))) !== ''){
+                    $result->warning((string)$this->codes[$name], null, 'page_custom_code',
+                        'Custom CSS, JavaScript and external files of a page of a website are not used: define them on the website');
+                }
+            }
+        }
+    }
+
+    /** Whether a page record is a standalone page (page type, not a page of a website). */
+    private function isStandalone(array $details): bool
+    {
+        $term = (string)($this->codes['standalonePage'] ?? '');
+        return $term !== '' && $term !== '0' && in_array($term, $this->all($details, 'pageType'), true);
     }
 
     /** First value of a field as text. */

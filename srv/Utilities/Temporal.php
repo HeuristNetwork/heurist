@@ -159,9 +159,10 @@ class Temporal {
      * Returns an array: [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination].
      *
      * @param bool $plain_array Optional. This parameter is currently not used in the method logic. Defaults to false.
+     * @param string|null $language Optional. Language of the label (3 letters, TemporalLocale). Defaults to English.
      * @return array|null An array representing the timespan, or null if the date is invalid or out of representable range.
      */
-    public function getTimespan($plain_array=false){
+    public function getTimespan($plain_array=false, $language='ENG'){
         $res = null;
         if($this->isValid()){
             //[start, latest-start, earliest-end, end, label, profile-start, profile-end, determination]
@@ -172,7 +173,7 @@ class Temporal {
                 return null;
             }
 
-            $res = array($minmax[0],'','',$minmax[1],$this->toReadableExt('',true), 0, 0, 0);
+            $res = array($minmax[0],'','',$minmax[1],$this->toReadableExt('',true,null,$language), 0, 0, 0);
 
             $date = $this->tDate;
 
@@ -1108,9 +1109,10 @@ class Temporal {
      * @param string|array $value The date value to convert. Can be a string or a pre-parsed date array.
      * @param string|null $calendar Optional. The name of the calendar to consider for formatting (e.g., "Gregorian", "Julian").
      *                              Defaults to null, implying Gregorian/Julian conventions for month names.
+     * @param string $language Optional. Language of the text (3 letters, TemporalLocale). Defaults to English.
      * @return string A human-readable representation of the date, or "unknown temporal format" if conversion fails.
      */
-    public static function dateToString($value, $calendar=null){
+    public static function dateToString($value, $calendar=null, $language='ENG'){
 
         $res = 'unknown temporal format';
 
@@ -1125,6 +1127,7 @@ class Temporal {
 
             $res = '';
             $isbce = false;
+            $words = TemporalLocale::words($language);
 
             if(is_numeric(@$date['year'])){
 
@@ -1142,17 +1145,17 @@ class Temporal {
 
             if($is_greg_or_julian){
 
-                $res2 = '';
-                if(@$date['has_days']!=true){
-
-                }elseif(@$date['day']){
-                    $res2 = $date['day'];
-                }
                 if(@$date['month']){
-                    $res2 = $res2.' '.date('M', mktime(0, 0, 0, $date['month'], 1));//strtotime($date['month'].'01'));
+                    $day = @$date['has_days']==true ? @$date['day'] : null;
+                    $dayText = intval($day)===1 && $words['firstDay']!==null ? $words['firstDay'] : $day;
+                    $res = TemporalLocale::fill($day ? $words['dayMonthYear'] : $words['shortMonthYear'], array(
+                        'd' => $dayText,
+                        'm' => $words['months'][intval($date['month'])-1],
+                        'y' => $res
+                    ));
+                }elseif(@$date['has_days']==true && @$date['day']){
+                    $res = trim($date['day']."  ".$res);
                 }
-
-                $res = trim($res2."  ".$res);// day month year
 
             }else{
                 if(@$date['month'] || $has_time){
@@ -1185,14 +1188,14 @@ class Temporal {
             if($isbce){
                 if(@$date['has_days']!=true && $date['year']<-999999){
                     if($date['year']<-999999999){
-                        $res = (intval($res)/1e9).' bya';
+                        $res = (intval($res)/1e9).' '.$words['bya'];
                     }elseif($date['year']<-999999){
-                        $res = (intval($res)/1e6).' Mya';
+                        $res = (intval($res)/1e6).' '.$words['mya'];
                     }else{
                         //$res = (intval($res)/1000).' kya';
                     }
                 }else{
-                    $res = $res.' BCE';
+                    $res = $res.' '.$words['bce'];
                 }
 
             }
@@ -1440,17 +1443,19 @@ class Temporal {
      *                  Defaults to 0.
      * @param string $sep Optional. Separator for extended mode (mode 2). Defaults to '|'.
      * @param string $calendar Optional. Calendar preference for output: "both", "native", "gregorian". Defaults to "both".
+     * @param string|null $language Optional. Language of the text (3 letters, TemporalLocale). Defaults to English.
+     *                              Labels of the extended mode 2 stay in English.
      * @return string The human-readable date string, or an error message if invalid.
      */
-    public static function toHumanReadable($dt, $print_invalid_str=false, $mode=0, $sep='|', $calendar="both"){
+    public static function toHumanReadable($dt, $print_invalid_str=false, $mode=0, $sep='|', $calendar="both", $language='ENG'){
 
         if($dt){
             $dt2 = new Temporal($dt);
             if($dt2 && $dt2->isValid()) {
                 if($mode>0){
-                    return $dt2->toReadableExt($sep, ($mode==1), $calendar);
+                    return $dt2->toReadableExt($sep, ($mode==1), $calendar, $language);
                 }else{
-                    return $dt2->toReadable($calendar);
+                    return $dt2->toReadable($calendar, $language);
                 }
             }elseif($print_invalid_str && $mode <= 1){
                 return $dt;
@@ -1509,17 +1514,17 @@ class Temporal {
     //
     //
     //
-    private static function _deviationSuffix($timestamp){
+    private static function _deviationSuffix($timestamp, $language='ENG'){
 
         $res = '';
         if(@$timestamp['deviation']){
-            $res = Temporal::_deviationToText($timestamp['deviation'], ' ±');
+            $res = Temporal::_deviationToText($timestamp['deviation'], ' ±', $language);
         }else{
             if(@$timestamp['deviation_negative']){
-                $res = Temporal::_deviationToText($timestamp['deviation_negative'], ' -');
+                $res = Temporal::_deviationToText($timestamp['deviation_negative'], ' -', $language);
             }
             if(@$timestamp['deviation_positive']){
-                $res = trim($res.' '.Temporal::_deviationToText($timestamp['deviation_positive'], ' +'));
+                $res = trim($res.' '.Temporal::_deviationToText($timestamp['deviation_positive'], ' +', $language));
             }
         }
         return $res;
@@ -1528,7 +1533,7 @@ class Temporal {
     //
     //get textual version of deviation
     //
-    private static function _deviationToText($value, $prefix){
+    private static function _deviationToText($value, $prefix, $language='ENG'){
 
         if(!$value){
             return '';
@@ -1539,9 +1544,10 @@ class Temporal {
         try{
             $i = new \DateInterval($value);
             if($i){
-                $ret = ($i->y ? ("$prefix{$i->y} years") :
-                    ($i->m ? ("$prefix{$i->m} months") :
-                        ($i->d ? ("$prefix{$i->d} days") :'' )));
+                $words = TemporalLocale::words($language);
+                $ret = ($i->y ? ($prefix.$i->y.' '.($i->y==1 ? $words['year'] : $words['years'])) :
+                    ($i->m ? ($prefix.$i->m.' '.($i->m==1 ? $words['month'] : $words['monthPlural'])) :
+                        ($i->d ? ($prefix.$i->d.' '.($i->d==1 ? $words['day'] : $words['days'])) :'' )));
             }
         } catch (\Exception  $e){
             $ret = '';
@@ -1558,12 +1564,14 @@ class Temporal {
      *                             "both": Show native then Gregorian in parentheses if different (default).
      *                             "native": Show native calendar representation only.
      *                             "gregorian": Show Gregorian representation only.
+     * @param string|null $language Optional. Language of the text (3 letters, TemporalLocale). Defaults to English.
      * @return string Human-readable date string, or "undefined temporal" if the date is not valid.
      */
-    public function toReadable($out_calendar='both'){
+    public function toReadable($out_calendar='both', $language='ENG'){
         if($this->tDate){
 
             $date = $this->tDate;
+            $words = TemporalLocale::words($language);
 
             $calendar = @$date['calendar'];
 
@@ -1576,18 +1584,18 @@ class Temporal {
             if(@$date['timestamp']){
 
                 //one date value with possible deviation
-                $res = Temporal::dateToString(@$date['timestamp']['in'], $calendar);
+                $res = Temporal::dateToString(@$date['timestamp']['in'], $calendar, $language);
                 if($res){
-                    $res = $res.Temporal::_deviationSuffix( $date['timestamp'] );
+                    $res = $res.Temporal::_deviationSuffix( $date['timestamp'], $language );
                 }
 
                 $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $prefix = 'circa ';
+                    $prefix = $words['circa'].' ';
                 }elseif(@$date['timestamp']['before']){
-                    $prefix = 'before ';
+                    $prefix = $words['before'].' ';
                 }elseif(@$date['timestamp']['after']){
-                    $prefix = 'after ';
+                    $prefix = $words['after'].' ';
                 }
 
                 if($prefix){
@@ -1603,27 +1611,27 @@ class Temporal {
                 $to = '';
 
                 if(@$date['start'] && @$date['start']['in']){
-                    $from = Temporal::dateToString($date['start']['in'], $calendar);
+                    $from = Temporal::dateToString($date['start']['in'], $calendar, $language);
                     if($from && strpos($from,'unknown')===false){
-                        $from = $from.Temporal::_deviationSuffix( $date['start'] );
+                        $from = $from.Temporal::_deviationSuffix( $date['start'], $language );
                     }
                 }elseif(@$date['start']['earliest']){
-                    $from = Temporal::dateToString($date['start']['earliest'], $calendar);
+                    $from = Temporal::dateToString($date['start']['earliest'], $calendar, $language);
                 }
 
                 if(@$date['end'] && @$date['end']['in']){
-                    $to = Temporal::dateToString($date['end']['in'], $calendar);
+                    $to = Temporal::dateToString($date['end']['in'], $calendar, $language);
                     if($to && strpos($to,'unknown')===false){
-                        $to = $to.Temporal::_deviationSuffix( $date['end'] );
+                        $to = $to.Temporal::_deviationSuffix( $date['end'], $language );
                     }
                 }elseif(@$date['end']['latest']){
-                    $to = Temporal::dateToString($date['end']['latest'], $calendar);
+                    $to = Temporal::dateToString($date['end']['latest'], $calendar, $language);
                 }
 
-                $res = "{$from} to {$to}";
+                $res = TemporalLocale::fill($words['range'], array('from' => $from, 'to' => $to));
 
                 $possibleDateSpan = [];
-                Temporal::checkForLongDateSpan($possibleDateSpan, $date);
+                Temporal::checkForLongDateSpan($possibleDateSpan, $date, $language);
                 if(!empty($possibleDateSpan)){
                     $res = $possibleDateSpan['Date'];
                 }
@@ -1635,7 +1643,7 @@ class Temporal {
                     $res = $native; //native only
                 }elseif($out_calendar!='gregorian'){
                     //both gregorian and native
-                    $res = $native.'  '.$calendar.' (Gregorian '.$res.')';
+                    $res = $native.'  '.$calendar.' ('.$words['gregorian'].' '.$res.')';
                 }
             }
 
@@ -1656,9 +1664,10 @@ class Temporal {
      *                         If false (default), lists all fields separated by $separator.
      * @param string|null $out_calendar Optional. Calendar preference for output: "both", "native", "gregorian".
      *                                  Defaults to null (behaves like "both").
+     * @param string|null $language Optional. Language of the text (3 letters, TemporalLocale). Defaults to English.
      * @return string Extended human-readable date string, or "undefined temporal" if the date is not valid.
      */
-    public function toReadableExt($separator, $is_compact=false, $out_calendar=null){
+    public function toReadableExt($separator, $is_compact=false, $out_calendar=null, $language='ENG'){
 
         $tSimpleRange = 'Simple Range';
         $tEarliestEstimate = 'Earliest estimate';
@@ -1667,6 +1676,7 @@ class Temporal {
         if($this->tDate){
 
             $date = $this->tDate;
+            $words = TemporalLocale::words($language);
 
             $calendar = @$date['calendar'];
             $res = array();
@@ -1686,20 +1696,20 @@ class Temporal {
                 :($date['timestamp']['type'] == 'f'?'Fuzzy date'
                     :'Simple');
                 //one date value with possible deviation
-                $timestamp = Temporal::dateToString(@$date['timestamp']['in'], $calendar);
+                $timestamp = Temporal::dateToString(@$date['timestamp']['in'], $calendar, $language);
                 if($timestamp){
-                    $timestamp = $timestamp.Temporal::_deviationSuffix( $date['timestamp'] );
+                    $timestamp = $timestamp.Temporal::_deviationSuffix( $date['timestamp'], $language );
                 }
 
                 $res['Date']  = $timestamp;
 
                 $prefix = null;
                 if(@$date['timestamp']['circa']){
-                    $prefix = 'circa ';
+                    $prefix = $words['circa'].' ';
                 }elseif(@$date['timestamp']['before']){
-                    $prefix = 'before ';
+                    $prefix = $words['before'].' ';
                 }elseif(@$date['timestamp']['after']){
-                    $prefix = 'after ';
+                    $prefix = $words['after'].' ';
                 }
 
                 if($prefix){
@@ -1713,8 +1723,8 @@ class Temporal {
 
                 $res['Type'] = $tSimpleRange;
 
-                $res[$tEarliestEstimate] = Temporal::dateToString($date['start']['earliest'], $calendar);
-                $res[$tLatestEstimate] = Temporal::dateToString($date['end']['latest'], $calendar);
+                $res[$tEarliestEstimate] = Temporal::dateToString($date['start']['earliest'], $calendar, $language);
+                $res[$tLatestEstimate] = Temporal::dateToString($date['end']['latest'], $calendar, $language);
 
                 if(@$date['profile']){
                     $res['Probability curve'] = $this->dictProfile[intval($date['profile'])];
@@ -1727,20 +1737,21 @@ class Temporal {
                 $to = '';
                 $is_simple = true;
 
-                if(@$date['start'] && @$date['start']['in']){ //not used
-                    $from = Temporal::dateToString($date['start']['in'], $calendar);
+                if(@$date['start'] && @$date['start']['in']){ //range of two date fields (mergeTemporals)
+                    $from = Temporal::dateToString($date['start']['in'], $calendar, $language);
                     if($from && strpos($from,'unknown')===false){
-                        $from = $from.Temporal::_deviationSuffix( $date['start'] );
+                        $from = $from.Temporal::_deviationSuffix( $date['start'], $language );
                     }
+                    $res[$tEarliestEstimate] = $from;
                     if(@$date['start']['profile']){
                         $res['Start probability curve'] = $this->dictProfile[intval($date['start']['profile'])];
                     }
                 }elseif(@$date['start']['earliest']){
-                    $from = Temporal::dateToString($date['start']['earliest'], $calendar);
+                    $from = Temporal::dateToString($date['start']['earliest'], $calendar, $language);
 
                     $dt = null;
                     if(@$date['start']['latest']){
-                        $dt = Temporal::dateToString($date['start']['latest'], $calendar);
+                        $dt = Temporal::dateToString($date['start']['latest'], $calendar, $language);
                         if($dt && strpos($dt,'unknown')===false){
                             $is_simple = false;
                         }
@@ -1753,11 +1764,12 @@ class Temporal {
                     }
                 }
 
-                if(@$date['end'] && @$date['end']['in']){  //not used
-                    $to = Temporal::dateToString($date['end']['in'], $calendar);
+                if(@$date['end'] && @$date['end']['in']){  //range of two date fields (mergeTemporals)
+                    $to = Temporal::dateToString($date['end']['in'], $calendar, $language);
                     if($to && strpos($to,'unknown')===false){
-                        $to = $to.Temporal::_deviationSuffix( $date['end'] );
+                        $to = $to.Temporal::_deviationSuffix( $date['end'], $language );
                     }
+                    $res[$is_simple?$tLatestEstimate:'Terminus Ante Quem'] = $to;
 
                     if(@$date['end']['profile']){
                         $res['End probability curve'] = $this->dictProfile[intval($date['end']['profile'])];
@@ -1765,14 +1777,14 @@ class Temporal {
                 }elseif(@$date['end']['latest']){
 
                     if(@$date['end']['earliest']){
-                        $dt = Temporal::dateToString($date['end']['earliest'], $calendar);
+                        $dt = Temporal::dateToString($date['end']['earliest'], $calendar, $language);
                         if($dt && strpos($dt,'unknown')===false){
                             $res['Probable End'] = $dt;
                             $is_simple = false;
                         }
                     }
 
-                    $to = Temporal::dateToString($date['end']['latest'], $calendar);
+                    $to = Temporal::dateToString($date['end']['latest'], $calendar, $language);
                     $res[$is_simple?$tLatestEstimate:'Terminus Ante Quem'] = $to;
 
                     if(@$date['start']['profile']){
@@ -1781,7 +1793,7 @@ class Temporal {
                 }
 
                 if($is_simple){
-                    Temporal::checkForLongDateSpan($res, $date);
+                    Temporal::checkForLongDateSpan($res, $date, $language);
                 }
 
                 $res['Type'] = $is_simple ? $tSimpleRange : 'Fuzzy Range';
@@ -1801,27 +1813,29 @@ class Temporal {
             if($is_compact){
 
                 if($res['Type']!='Simple' && $res['Type']!=$tSimpleRange){
-                    $res2 = $res['Type'].' ';
+                    $type = $words['types'][$res['Type']] ?? $res['Type'];
+                    $res2 = $type.' ';
                     if($native && $out_calendar=='native'){
-                        $native = $res['Type'].' '.$native;
+                        $native = $type.' '.$native;
                     }
                 }
 
-                if($res['Date']){
+                if(!empty($res['Date'])){
                     $res2 = $res2 . $res['Date'];
                 }elseif($is_simple){
 
-                    $res2 = $res2 . $res[$tEarliestEstimate] . ' .. ' . $res[$tLatestEstimate];
+                    $res2 = $res2 . ($res[$tEarliestEstimate] ?? '') . ' .. ' . ($res[$tLatestEstimate] ?? '');
                 }else {
-
-                    $res2 = $res2 . '>' .$res['Terminus Post Quem'] . ':' .$res['Probable Begin']
+                    // one side of a range can be simple: it then has only its estimate
+                    $res2 = $res2 . '>' .($res['Terminus Post Quem'] ?? $res[$tEarliestEstimate] ?? '')
+                    . ':' .($res['Probable Begin'] ?? '')
                     .' .. '.
-                    $res['Probable End'].':<'.$res['Terminus Ante Quem'];
+                    ($res['Probable End'] ?? '').':<'.($res['Terminus Ante Quem'] ?? $res[$tLatestEstimate] ?? '');
                 }
 
                 $supinfo = array();
-                if(!empty($res['Determination'])) {$supinfo[] = $res['Determination'];}
-                if(!empty($date['calibrated'])) {$supinfo[] = 'Calibarated';}
+                if(!empty($res['Determination'])) {$supinfo[] = $words['determinations'][intval($date['determination'])];}
+                if(!empty($date['calibrated'])) {$supinfo[] = $words['calibrated'];}
 
                 //add native decription as prefix
                 if($native){
@@ -1999,10 +2013,23 @@ class Temporal {
         return $dtl_Value;
     }
 
-    private static function checkForLongDateSpan(&$resDate, $date){
+    /**
+     * A decimal date (YYYY.MMDD) as text with all four decimals: as a number 1850.0430 is 1850.043.
+     *
+     * @param string|float|int|null $decimal Decimal date.
+     * @return string
+     */
+    private static function _decimalText($decimal){
 
-        $start = strval(@$date['estMinDate']);
-        $end = strval(@$date['estMaxDate']);
+        $text = strval($decimal);
+        return preg_match('/^-?\d+\.\d{1,3}$/', $text)
+            ? str_pad($text, strpos($text, '.') + 5, '0') : $text;
+    }
+
+    private static function checkForLongDateSpan(&$resDate, $date, $language='ENG'){
+
+        $start = self::_decimalText(@$date['estMinDate']);
+        $end = self::_decimalText(@$date['estMaxDate']);
         $earliest = @$date['start']['earliest'] ?? '';
         $latest = @$date['end']['latest'] ?? '';
 
@@ -2019,7 +2046,11 @@ class Temporal {
             $start = self::decimalToYMD($start);
             $start = new \DateTime($start);
 
-            $resDate['Date'] = $start->format('F Y');
+            $words = TemporalLocale::words($language);
+            $resDate['Date'] = TemporalLocale::fill($words['monthYear'], array(
+                'm' => $words['monthsLong'][intval($start->format('n'))-1],
+                'y' => $start->format('Y')
+            ));
         }elseif((preg_match('/0101$/', $start) || preg_match("/{$year}-01$/", $earliest)) && (preg_match('/1231$/', $end) || preg_match("/{$year}-12$/", $latest))){
             $resDate['Date'] = $year;
         }

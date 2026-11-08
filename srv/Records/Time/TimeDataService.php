@@ -37,6 +37,9 @@ final class TimeDataService
     private int $startDateFieldId;
     private int $endDateFieldId;
 
+    /** Language of the date labels (3 letters). */
+    private string $language = 'ENG';
+
     public function __construct(
         DatabaseInterface $database,
         RuntimeContext $runtime,
@@ -54,9 +57,16 @@ final class TimeDataService
         $this->endDateFieldId = $codes->id('DT_END_DATE');
     }
 
-    /** Add `when` to each record in an ordinary /records response envelope. */
-    public function attachWhen(array &$response, $timeFields = null): void
+    /**
+     * Add `when` to each record in an ordinary /records response envelope.
+     *
+     * @param array $response Response of /records.
+     * @param mixed $timeFields Selection of the date fields.
+     * @param string $language Language of the date labels (3 letters).
+     */
+    public function attachWhen(array &$response, $timeFields = null, string $language = 'ENG'): void
     {
+        $this->language = $language;
         if(!isset($response['records']) || !is_array($response['records'])){ return; }
 
         $topIds = array();
@@ -198,7 +208,7 @@ final class TimeDataService
                 $temporal = new Temporal($start);
             }
             if($temporal instanceof Temporal && $temporal->isValid()){
-                $span = $temporal->getTimespan(true);
+                $span = $temporal->getTimespan(true, $this->language);
                 if($span !== null){
                     $span[] = $sourceFieldId;
                     $spans[] = $span;
@@ -217,7 +227,7 @@ final class TimeDataService
         if(is_array($value) && array_key_exists('value', $value)){ $value = $value['value']; }
         $temporal = new Temporal($value);
         if(!$temporal->isValid()){ return null; }
-        $span = $temporal->getTimespan(true);
+        $span = $temporal->getTimespan(true, $this->language);
         if($span === null){ return null; }
         $span[] = $fieldId;
         return $span;

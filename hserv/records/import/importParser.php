@@ -1438,55 +1438,34 @@ public static function simpleCsvParser($params){
 
     $content = $params['content'];
     //parse
-    $csv_delimiter = @$params['csv_delimiter'];
-    $csv_enclosure = @$params['csv_enclosure'];
-    $csv_linebreak = @$params['csv_linebreak'];
+    $csv_delimiter = $params['csv_delimiter'] ?? ',';
+    $csv_enclosure = $params['csv_enclosure'] ?? 2;
+    $csv_linebreak = $params['csv_linebreak'] ?? 'auto';
 
     if(!$csv_delimiter) {$csv_delimiter = ',';}
     elseif($csv_delimiter=='tab') {$csv_delimiter="\t";}
     elseif($csv_delimiter=='space') {$csv_delimiter=" ";}
 
-    if(!$csv_linebreak) {$csv_linebreak = "auto";}
-
     $csv_enclosure = ($csv_enclosure==1)?"'":'"';
+    $group_by = intval($csv_linebreak);
 
-
-
-    if(intval($csv_linebreak)>0){  //no breaks - group by
-            $group_by = $csv_linebreak;
-            $response = str_getcsv($content, $csv_delimiter, $csv_enclosure);
-
-            $temp = array();
-            $i = 0;
-            while($i<count($response)) {
-                $temp[] = array_slice($response, $i, $csv_linebreak);
-                $i = $i + $csv_linebreak;
-            }
-            return $temp;
+    if($group_by > 0){
+        $fields = str_getcsv($content, $csv_delimiter, $csv_enclosure, "\\");
+        return array_chunk($fields, $group_by);
     }
 
+    // Split lines separately: CSV delimiters and enclosures must be single bytes.
+    $line_pattern = match ($csv_linebreak) {
+        'win' => '/\r\n/',
+        'nix' => '/\n/',
+        'mac' => '/\r/',
+        default => '/\r\n|\n|\r/',
+    };
+
     $response = array();
-
-        if($csv_linebreak=="auto"){
-            //ini_set('auto_detect_line_endings', true);
-            $lb = "\n";
-        }elseif($csv_linebreak="win"){
-            $lb = "\r\n";
-        }elseif($csv_linebreak="nix"){
-            $lb = "\n";
-        }elseif($csv_linebreak="mac"){
-            $lb = "\r";
-        }
-
-        //remove spaces
-        $content = trim(preg_replace('/([\s])\1+/', ' ', $content));
-
-        $lines = str_getcsv($content, $lb, '¢');
-
-        foreach($lines as &$Row) {
-             $row = str_getcsv($Row, $csv_delimiter , $csv_enclosure);//parse the items in rows
-             array_push($response, $row);
-        }
+    foreach(preg_split($line_pattern, trim($content, "\r\n")) as $line){
+        $response[] = str_getcsv($line, $csv_delimiter, $csv_enclosure, "\\");
+    }
 
     return $response;
 

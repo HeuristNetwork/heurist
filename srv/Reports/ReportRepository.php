@@ -268,7 +268,7 @@ final class ReportRepository
         $reportField = $this->codes->id('DT_REPORT');
         if($scheduleType < 1 || $reportField < 1){ return array(); }
 
-        $schedules = $this->repository()->find($scheduleType, array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID'),
+        $schedules = $this->repository()->find($scheduleType, array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID', 'rec_NonOwnerVisibility'),
             $ignoreAccess ? null : RecordAccess::fromRuntime($this->runtime), $scheduleId === null ? null : array($scheduleId));
         $reports = $this->repository()->values(array_map(static function(array $row): int {
             return intval($row['rec_ID']);
@@ -314,6 +314,8 @@ final class ReportRepository
                 'languageTerm' => $languageTerm,
                 'language' => (string)($terms[$languageTerm]['code'] ?? ''),
                 'ownerGroupId' => $ownerGroupId,
+                // guests may open the file of a public or pending output (website links, plan 27e §28)
+                'visibility' => (string)($row['rec_NonOwnerVisibility'] ?? ''),
                 'canEdit' => $this->canEdit($ownerGroupId)
             );
         }

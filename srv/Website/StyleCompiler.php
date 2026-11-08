@@ -13,6 +13,9 @@
 * style wins: `styles.kinds` (defaults of a kind: group, tabs, accordion, text,
 * instance) and `styles.presets` (`{name: {label, ...properties, medium, narrow}}`,
 * used by an element with `data-h-style="name"`). Website first, then the page.
+* A scope (plan 27f §2.2): the page styles of a website page are written below
+* `[data-h-page="{id}"]` (its section), so pages loaded into one document (navigation
+* modes swap / scroll) do not change each other; base settings become variables of the section.
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -37,7 +40,7 @@ final class StyleCompiler
     public const BASE = array(
         'font-family', 'color-text', 'color-bg', 'color-surface', 'color-primary', 'color-link',
         'color-border', 'radius', 'site-font-size', 'site-heading-font', 'site-heading-color', 'site-width',
-        'color-selected', 'color-selected-border', 'color-primary-text', 'color-text-muted'
+        'color-selected', 'color-selected-border', 'color-primary-text', 'color-text-muted', 'site-logo-height'
     );
 
     /** Screen sizes: key in a node style => max width. */
@@ -68,6 +71,8 @@ final class StyleCompiler
     /** @var array<int,array{level:string,code:string,message:string,node:?string}> */
     private array $issues = array();
     private string $baseUrl;
+    /** Prefix of every selector of the current compile() (scope and a space), or ''. */
+    private string $scope = '';
 
     /** @param string $baseUrl Heurist base URL: background images may only come from it (or be relative). */
     public function __construct(string $baseUrl = '')
@@ -88,13 +93,16 @@ final class StyleCompiler
      * @param array<int,array> $nodeSets Node styles, in order (website first, then the page).
      * @param array<int,array> $kindSets Kind defaults (`styles.kinds`), website first, then the page.
      * @param array<int,array> $presetSets Presets (`styles.presets`), website first, then the page.
+     * @param string $scope Selector every rule is written below (plan 27f), e.g. `[data-h-page="5"]`; '' = none.
      */
-    public function compile(array $base, array $nodeSets, array $kindSets = array(), array $presetSets = array()): string
+    public function compile(array $base, array $nodeSets, array $kindSets = array(), array $presetSets = array(),
+        string $scope = ''): string
     {
         $this->issues = array();
+        $this->scope = $scope !== '' ? $scope.' ' : '';
         $css = '';
         $variables = $this->variables($base);
-        if($variables !== ''){ $css .= 'html.h-site{'.$variables."}\n"; }
+        if($variables !== ''){ $css .= ($scope !== '' ? $scope : 'html.h-site').'{'.$variables."}\n"; }
         $screens = array_fill_keys(array_keys(self::SCREENS), '');
         foreach($kindSets as $kinds){
             if(!is_array($kinds)){ continue; }
@@ -154,6 +162,7 @@ final class StyleCompiler
     /** The rule of one selector, and its screen rules into $screens. */
     private function rule(string $selector, array $style, ?string $id, string &$css, array &$screens): void
     {
+        $selector = $this->scope.$selector;
         $rules = $this->declarations($style, $id);
         if($rules !== ''){ $css .= $selector.'{'.$rules."}\n"; }
         foreach(array_keys(self::SCREENS) as $screen){

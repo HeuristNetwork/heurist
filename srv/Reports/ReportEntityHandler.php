@@ -132,7 +132,7 @@ final class ReportEntityHandler extends RecordEntityHandler
         $title = trim((string)($body['title'] ?? ''));
         $copy = $this->reports->getReport($newId);
         if($title === ''){ $title = (string)($copy['title'] ?? ''); }
-        $file = $this->templates->uniqueName(ReportService::fileNameFromTitle($title));
+        $file = $this->templates->uniqueName(ReportTemplateStore::nameFromTitle($title));
         $source = (string)($copy['file'] ?? '');
         $this->templates->write($file, $source !== '' && $this->templates->exists($source) ? $this->templates->read($source) : '');
         $save = $this->recordSave !== null ? ($this->recordSave)() : null;
@@ -295,7 +295,7 @@ final class ReportEntityHandler extends RecordEntityHandler
         if($file === null){ throw new OutOfBoundsException('Output '.$id.' is not generated yet'); }
         $headers = array('Cache-Control' => 'no-cache');
         if(filter_var($params['download'] ?? false, FILTER_VALIDATE_BOOLEAN)){
-            $name = substr(ReportService::fileNameFromTitle((string)$output['title']), 0, -4);
+            $name = substr(ReportTemplateStore::nameFromTitle((string)$output['title']), 0, -4);
             $headers['Content-Disposition'] = 'attachment; filename="'.$name.'.'.$file['format'].'"';
         }
         $type = ReportRepository::FORMATS[$file['format']];
@@ -320,7 +320,7 @@ final class ReportEntityHandler extends RecordEntityHandler
     private function fileName(string $given, string $current, string $title, int $field): string
     {
         if($given === ''){
-            return $current !== '' ? $current : $this->templates->uniqueName(ReportService::fileNameFromTitle($title));
+            return $current !== '' ? $current : $this->templates->uniqueName(ReportTemplateStore::nameFromTitle($title));
         }
         // an unchanged name is not checked: a legacy name with other characters stays
         $withExtension = strtolower(substr($given, -4)) === '.tpl' ? $given : $given.'.tpl';
@@ -328,18 +328,16 @@ final class ReportEntityHandler extends RecordEntityHandler
             if(strcasecmp($withExtension, $current) === 0){ return $current; }
             throw self::refused($field, 'The template file name does not change: save a copy with another title');
         }
-        // the name of a template without a record (registration) stays as it is
+        // one rule for a new name and for a file without a record (registration)
         try{
-            if($this->templates->exists($withExtension)){
-                if(isset($this->reports->registeredFiles()[strtolower($withExtension)])){
-                    throw self::refused($field, 'A template file '.$withExtension.' already exists');
-                }
-                return $withExtension;
-            }
-            return ReportService::asciiName($given, 'Template file name').'.tpl';
+            $file = $this->templates->normalize($given);
         }catch(InvalidArgumentException $error){
-            throw self::refused($field, 'A template file name may contain only the letters A-Z, digits, "-", "_", "(", ")" and spaces');
+            throw self::refused($field, ReportTemplateStore::NAME_RULE_TEXT);
         }
+        if($this->templates->exists($file) && isset($this->reports->registeredFiles()[strtolower($file)])){
+            throw self::refused($field, 'A template file '.$file.' already exists');
+        }
+        return $file;
     }
 
     /** Refuse a query with parameters. */

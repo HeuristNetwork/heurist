@@ -4770,6 +4770,9 @@ function bugreportUpdate($system, $recID){
 
     $updateEmail = <<<EMAIL
     The status of the following ticket has been updated to: <strong>$status</strong>.<br>
+    
+    Changes normally appear in the alpha version (/hx-alpha/, x = current version) within 24 hours on any server with automated daily update (including HeuristAU.net & Heurist.Huma-Num.fr). Clear cache and reload before testing. 
+    <hr>
        
     $resolution <br>
      
@@ -4779,11 +4782,7 @@ function bugreportUpdate($system, $recID){
     $database <br>
     Ticket: <a href="$url">$url</a><br> <br>
     <hr>
-    When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>
-    (/hx-alpha/, where x is the current version) within a couple of days on HeuristRef.net and any server which has <br>
-    automated daily update of the alpha version, and a week or more on the Huma-Num server <br>
-    (due to new approval protocols from September 2025).
-    EMAIL;
+     EMAIL;
 
     $to = [$reportersEmail];
     $bcc = ['support@HeuristNetwork.org'];
