@@ -1585,6 +1585,9 @@ class HSystemMgr {
         if(typeof EditorCodeMirror === 'undefined'){
             scripts.push(`${editingBase}editorCodeMirror.js`);
         }
+        if(typeof EditorSpreadsheet === 'undefined'){
+            scripts.push(`${editingBase}editorSpreadsheet.js`);
+        }
         if(typeof $.heurist.selectMultiValues === 'undefined'){
             scripts.push(`${editingBase}selectMultiValues.js`);
         }
@@ -1673,7 +1676,7 @@ class HSystemMgr {
                 .catch((e) => {
                     this._verifyRecordEditorScriptsStart = false;
                     console.error(e);                    
-                    window.hWin.HEURIST4.msg.showMsg_ScriptFail()   
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail();
                 });
         }
 
