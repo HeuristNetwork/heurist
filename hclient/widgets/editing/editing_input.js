@@ -1119,7 +1119,7 @@ $.widget( "heurist.editing_input", {
         
         this._removeTooltip(input_id);        
 
-        if(this.inputs.length>1 && this.enum_buttons == null){
+        if(this.inputs.length > 1 && this.enum_buttons == null){
 
             //find in array
             $.each(this.inputs, function(idx, item){
@@ -1424,6 +1424,10 @@ $.widget( "heurist.editing_input", {
                     codeEditor = new EditorCodeMirror($input, editorMode);
                 }
 
+                let spreadsheetEditor = null;
+                if(typeof EditorSpreadsheet !== 'undefined'){
+                    spreadsheetEditor = new EditorSpreadsheet($input);
+                }
                 
                 let $btn_edit_switcher;
 
@@ -1453,12 +1457,14 @@ $.widget( "heurist.editing_input", {
                             .appendTo($btn_edit_switcher);
                     }
 
-                    $('<span>table</span>')
-                        .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
-                        .addClass('smallbutton')
-                        .css({cursor: 'pointer', 'margin-left': '10px'})
-                        .hide() // currently un-available
-                        .appendTo($btn_edit_switcher);
+                    if(spreadsheetEditor && window.hWin.HEURIST4.util.isPositiveInt(this.options.dtID)){
+                        $('<span>table</span>')
+                            .attr('title', 'treats the text as a table/spreadsheet and opens a lightweight spreadsheet editor')
+                            .addClass('smallbutton')
+                            .css({cursor: 'pointer', 'margin-left': '10px'})
+                            //.hide() // currently un-available
+                            .appendTo($btn_edit_switcher);
+                    }
                 }else{
                     $btn_edit_switcher = $( '<span>wysiwyg</span>', {title: 'Show/hide Rich text editor'})
                         //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
@@ -1921,6 +1927,7 @@ $.widget( "heurist.editing_input", {
 
                             let sel_action = $(event.target).text();
                             sel_action = sel_action == 'codeeditor' && !codeEditor ? 'text' : sel_action;
+                            sel_action = sel_action == 'table' && !spreadsheetEditor ? 'text' : sel_action;
                             if(cur_action == sel_action) return;
                             
                             $btn_edit_switcher.find('span').css('text-decoration', '');
@@ -1934,10 +1941,17 @@ $.widget( "heurist.editing_input", {
                                 $(eid).parent().hide();
                             }else if(cur_action=='codeeditor'){
                                 codeEditor.hideEditor();
+                            }else if(cur_action == 'table'){
+                                spreadsheetEditor.hide();
+                                this.input_cell.sortable('option', 'disabled', false);
                             }
+
                             //show now
                             if(sel_action == 'codeeditor'){
                                 codeEditor.showEditor();
+                            }else if(sel_action == 'table'){
+                                spreadsheetEditor.show();
+                                this.input_cell.sortable('option', 'disabled', true);
                             }else if(sel_action == 'wysiwyg'){
                                 __showEditor(true); //show tinymce editor
                             }else if(sel_action == 'text'){

@@ -214,6 +214,8 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorCodeMirror.js"></script>
         <link rel="stylesheet" href="<?php echo PDIR;?>external/codemirror-5.61.0/lib/codemirror.css">
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editorSpreadsheet.js"></script>
+
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
 
         <script type="text/javascript">

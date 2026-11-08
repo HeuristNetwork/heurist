@@ -15,6 +15,7 @@ This directory houses widgets that provide various editing functionalities withi
 - `mapSymbolEditor.js`, `mapThemesEditor.js`, `mapSymbolPreview.js`: map symbology editors and previews.
 - `editing_input.js`: Defines the `heurist.editing_input` jQuery UI widget for form input controls.
 - `editorCodeMirror.js`: Provides a wrapper class `EditorCodeMirror` to integrate the CodeMirror editor.
+- `editorSpreadsheet.js`: Provides a wrapper class `EditorSpreadsheet` to integrate the JSpreadsheet editor.
 - `imgFilter.html`: Content for imgFilter dialog
 - `imgFilter.js`: Provides a UI dialog for defining CSS image filter configurations.
 - `selectFile.js`: Widget to select image files or tiled images from various sources.
