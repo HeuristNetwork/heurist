@@ -507,7 +507,7 @@ $.widget( "heurist.manageEntity", {
                 });     
                 
                 if(customRenderer){
-                   this.options.resultList.renderer =  typeof customRenderer === 'functiion'?customRenderer:null;
+                   this.options.resultList.renderer = typeof customRenderer === 'function' ? customRenderer : null;
                 }
                 if(customSearchfull){
                    this.options.resultList.searchfull =  customSearchfull; 
