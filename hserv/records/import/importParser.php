@@ -1455,11 +1455,20 @@ public static function simpleCsvParser($params){
     }
 
     // Split lines separately: CSV delimiters and enclosures must be single bytes.
-    $line_pattern = match ($csv_linebreak) {
-        'win' => '/\r\n/',
-        'nix' => '/\n/',
-        'mac' => '/\r/',
-        default => '/\r\n|\n|\r/',
+    $line_pattern = '';
+    switch ($csv_linebreak) {
+        case 'win':
+            $line_pattern = '/\r\n/';
+            break;
+        case 'nix':
+            $line_pattern = '/\n/';
+            break;
+        case 'mac':
+            $line_pattern = '/\r/';
+            break;
+        default:
+            $line_pattern = '/\r\n|\n|\r/';
+            break;
     };
 
     $response = array();
