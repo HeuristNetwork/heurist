@@ -4782,7 +4782,7 @@ function bugreportUpdate($system, $recID){
     $database <br>
     Ticket: <a href="$url">$url</a><br> <br>
     <hr>
-     EMAIL;
+    EMAIL;
 
     $to = [$reportersEmail];
     $bcc = ['support@HeuristNetwork.org'];
