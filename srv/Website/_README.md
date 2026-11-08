@@ -18,6 +18,7 @@ language, split into rows by `RecordValidator` and joined by `RecordDataService`
   runtime (`heurist-explorer` apps/website); the iframe page of an instance.
 - `CmsHtml.php` — nodes and hosts of a page HTML; translated text blocks put in place.
 - `CmsValidator.php` — checks of §7 (also used on save through `CmsRecordCheck.php`).
+- `CmsRecordReferences.php` — record ids picked on a page (record fields, media, reports, manual cards, galleries) for the check of a website (`WebsiteService::check`, review 2026-11-08).
 - `StyleCompiler.php` — base settings, kind defaults (`styles.kinds`), presets (`styles.presets`, `data-h-style`)
   and node styles as CSS (values: `Utilities/StoredCss`; plan 27c §6a).
 - `SiteUrls.php` — `/{db}/site/{id}[/{page}]` or `?db=&site=&pageid=`.

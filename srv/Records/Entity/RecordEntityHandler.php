@@ -139,7 +139,7 @@ abstract class RecordEntityHandler
     /**
      * Problems of a stored record for GET /{entity}/{id}/validate.
      *
-     * @return array<int,array>
+     * @return array<int,array>|array{issues:array} A list of issues, or {issues, ...more parts of the answer}.
      */
     public function validate(int $id, array $params): array
     {

@@ -10,7 +10,8 @@
 *                                          language codes in DT_LANGUAGE become terms
 *   DELETE /website/{id}[?pages=1]         with pages=1 also the menu pages no other record uses
 *   GET    /website/{id}, /page/{id}       meta.website: kind, version, URL, languages, menu tree
-*   GET    /website/{id}/validate[?page=&lang=], /page/{id}/validate   problems of the format
+*   GET    /website/{id}/validate[?page=&lang=], /page/{id}/validate   problems of the format of all
+*                                          pages (?page=: one page) and records a visitor can not see
 *   GET|POST /website/setup, /page/setup   are the definitions installed (with their local ids) /
 *                                          install them (database managers)
 *   POST   /website/{id}/assign {page, parent?, index?}   put a page into the menu, or move it
@@ -19,7 +20,8 @@
 *                                          standalone page (module Publish)
 * POST /{website|page}/{id}/execute (the build job) is routed by api.php to the jobs.
 * New pages are public; their owner is the user (a page added to a website menu gets the
-* website's owner and visibility).
+* website's owner and visibility). Only database administrators create websites and change the
+* owner of a website or a page (review 2026-11-08).
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -59,8 +61,9 @@ final class WebsiteEntityHandler extends RecordEntityHandler
 
     public function beforeSave(string $method, int $id, array $body, array $params, bool $dryRun = false): array
     {
-        return $this->run(function() use ($method, $body, $dryRun): array {
+        return $this->run(function() use ($method, $id, $body, $dryRun): array {
             $record = isset($body['records'][0]) && is_array($body['records'][0]) ? $body['records'][0] : $body;
+            $this->edit->assertOwnerRule($this->kind, $method, $id, $record);
             if($this->kind === 'website' && $method === 'POST'){
                 $record = $this->edit->starterBody($record);
                 if(!$dryRun){
@@ -124,8 +127,11 @@ final class WebsiteEntityHandler extends RecordEntityHandler
     public function validate(int $id, array $params): array
     {
         return $this->run(function() use ($id, $params): array {
-            $context = $this->service->context($id, intval($params['page'] ?? 0), (string)($params['lang'] ?? ''));
-            return $context['issues'];
+            $language = (string)($params['lang'] ?? '');
+            $page = intval($params['page'] ?? 0);
+            // one page of the website (?page=), else the whole website with the records a visitor can not see
+            if($page > 0){ return $this->service->context($id, $page, $language)['issues']; }
+            return $this->service->check($id, $language);
         });
     }
 
