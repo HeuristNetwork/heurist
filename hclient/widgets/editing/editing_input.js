@@ -4422,7 +4422,9 @@ $.widget( "heurist.editing_input", {
             }});
         }
 
-        let entryMaskAllowed = window.hWin.HEURIST4.util.isPositiveInt(this.options?.recordset?.recID) && this.options.dtID > 0 && this.detailType == 'freetext';
+        let entryMaskAllowed = window.hWin.HEURIST4.util.isPositiveInt(this.options.recID)
+            && window.hWin.HEURIST4.util.isPositiveInt(this.options.dtID)
+            && this.detailType == 'freetext';
         if(window.hWin.HAPI4.is_admin() && entryMaskAllowed){
 
             let $btn_entrymask = $('<span>', {title: 'Edit value entry mask', class: 'smallicon ui-icon ui-icon-input btn_entry_mask show-onhover', style: 'cursor: pointer;'});
