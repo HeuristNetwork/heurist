@@ -114,7 +114,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
     if(isset($mailRelayPwd) && $mailRelayPwd!=''
     && count($email_to)==1 && endsWith($email_to[0], '@gmail.com')){
 
-        $data = array('pwd' => $mailRelayPwd ,
+        $data = array('pwd' => $mailRelayPwd,
             'from_name' => $replyToName,
             'from' => $replyTo,
             'to' => implode(',',$email_to),  //cs list of recipients

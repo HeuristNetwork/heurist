@@ -217,7 +217,7 @@ class ImportHeurist {
             return null;
         }
 
-        $GEO_TYPES = array('bounds'=>'r', 'circle'=>'c' , 'polygon'=>'pl', 'path'=>'l' , 'point'=>'p', 'multi'=>'m');
+        $GEO_TYPES = array('bounds'=>'r', 'circle'=>'c', 'polygon'=>'pl', 'path'=>'l', 'point'=>'p', 'multi'=>'m');
 
         $db_attr = $xml_doc->database[0]->attributes();
 
