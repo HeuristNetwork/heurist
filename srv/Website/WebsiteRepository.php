@@ -56,6 +56,9 @@ final class WebsiteRepository
         'standalonePage' => 'TRM_PAGETYPE_WEBPAGE',
         'menuPage' => 'TRM_PAGETYPE_MENUITEM',
         'logo' => 'DT_FILE_RESOURCE',
+        // the header default set (plan 27f §13): subtitle and banner image of the website
+        'subtitle' => 'DT_ALTERNATE_NAME',
+        'banner' => 'DT_CMS_BANNER',
         // menu entry of a page (plan 27f §4): icon (thumbnail) and what is shown: name, icon or both
         'thumbnail' => 'DT_THUMBNAIL',
         'menuFormat' => 'DT_CMS_MENU_FORMAT',
@@ -141,6 +144,37 @@ final class WebsiteRepository
                 'visibility' => (string)($row['rec_NonOwnerVisibility'] ?? ''),
                 'title' => isset($visible[$id]) ? (string)($row['rec_Title'] ?? '') : ''
             );
+        }
+        return $result;
+    }
+
+    /**
+     * Record fields whose values a visitor (guest) can not all see: a hidden or logged-in-only field of the record
+     * structure, or values hidden from the public (dtl_HideFromPublic). Fields without values are left out.
+     *
+     * @param array<int,array<int,mixed>> $fields Record id => field id => anything.
+     * @return array<int,array<int,string>> Record id => field id => `hidden` (no value visible) or `partly`.
+     */
+    public function hiddenFieldValues(array $fields): array
+    {
+        if(empty($fields)){ return array(); }
+        $fieldIds = array();
+        foreach($fields as $list){ $fieldIds = array_merge($fieldIds, array_keys($list)); }
+        $repository = RecordRepository::shared($this->database);
+        $guest = RecordAccess::guest();
+        $counts = array();
+        foreach($repository->details(array_keys($fields), array_values(array_unique($fieldIds)), array('owner' => true)) as $row){
+            if(!isset($fields[$row['record']][$row['field']])){ continue; }
+            $count = $counts[$row['record']][$row['field']] ?? array(0, 0);
+            $count[0]++;
+            if(!$repository->valueVisible($row, $guest)){ $count[1]++; }
+            $counts[$row['record']][$row['field']] = $count;
+        }
+        $result = array();
+        foreach($counts as $recordId => $list){
+            foreach($list as $fieldId => $count){
+                if($count[1] > 0){ $result[$recordId][$fieldId] = $count[1] === $count[0] ? 'hidden' : 'partly'; }
+            }
         }
         return $result;
     }

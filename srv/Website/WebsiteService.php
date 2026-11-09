@@ -141,10 +141,13 @@ final class WebsiteService
     /**
      * Check of a whole website (review 2026-11-08): the format of the home content and of every menu page, and
      * the records a visitor can not see: the website, its pages and the records picked on them (record fields,
-     * media, generated reports, manual record cards, media galleries; not queries). A standalone page: only itself.
+     * media, generated reports, manual record cards, media galleries; not queries). A record field of a public record
+     * (also `website.` / `page.`) is listed when the field or some of its values are hidden from visitors (`fields`:
+     * state `hidden` = all values, `partly` = some; review 2026-11-08). A standalone page: only itself.
      *
      * @return array{issues:array,records:array<int,array{id:int,title:string,visibility:string,role:string,
-     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string}>}>}
+     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string}>,
+     *         fields?:array<int,array{id:int,name:string,state:string}>}>}
      * @throws WebsiteException
      */
     public function check(int $id, string $language = ''): array
@@ -175,12 +178,14 @@ final class WebsiteService
             $add($this->context($id, intval($pageId), $language)['issues'], $page);
         }
 
-        // roles: the website and its pages themselves, then the picked records
-        $roles = array();
-        $usedIn = array();
-        if($site !== null){ $roles[intval($site['rec_ID'])] = 'website'; }
+        // the website and its pages, then the records picked on the pages and the record fields
+        $pageRoles = array();
+        if($site !== null){ $pageRoles[intval($site['rec_ID'])] = 'website'; }
+        $uses = array();
+        $fieldUses = array();
+        $definitions = $this->repository->definitions();
         foreach($pages as $pageId => $page){
-            $roles[intval($pageId)] = $roles[intval($pageId)] ?? 'page';
+            $pageRoles[intval($pageId)] = $pageRoles[intval($pageId)] ?? 'page';
             $isSite = $site !== null && intval($pageId) === intval($site['rec_ID']);
             $config = $isSite ? $context['siteConfig'] : CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config'];
             $parts = array(WebsiteRepository::value($page, $codes['content']));
@@ -188,28 +193,56 @@ final class WebsiteService
                 $parts[] = WebsiteRepository::value($page, $codes['header']);
                 $parts[] = WebsiteRepository::value($page, $codes['footer']);
             }
-            foreach(CmsRecordReferences::collect(is_array($config) ? $config : array(), $parts) as $reference){
-                $roles[$reference['id']] = $roles[$reference['id']] ?? 'reference';
-                $usedIn[$reference['id']][] = array(
-                    'page' => intval($pageId), 'pageTitle' => $title($page), 'node' => $reference['node'], 'kind' => $reference['kind']
-                );
+            $references = CmsRecordReferences::collect(is_array($config) ? $config : array(), $parts,
+                $site !== null ? intval($site['rec_ID']) : 0, intval($pageId));
+            foreach($references as $reference){
+                $use = array('page' => intval($pageId), 'pageTitle' => $title($page), 'node' => $reference['node'], 'kind' => $reference['kind']);
+                if($reference['kind'] === 'field'){
+                    $fieldId = $definitions->localId('dty', (string)$reference['field']);
+                    if($fieldId > 0){ $fieldUses[$reference['id']][$fieldId][] = $use; }
+                    // website. / page.: the record itself is checked as a page
+                    if(!empty($reference['own'])){ continue; }
+                }
+                $uses[$reference['id']][] = $use;
             }
         }
 
-        $found = $this->repository->visibility(array_keys($roles));
-        $records = array();
-        foreach($roles as $recordId => $role){
-            $row = $found[$recordId] ?? null;
-            $visibility = $row === null ? 'missing' : $row['visibility'];
+        $found = $this->repository->visibility(array_merge(array_keys($pageRoles), array_keys($uses), array_keys($fieldUses)));
+        $public = static function(?array $row): bool {
             // pending: guests see it
-            if($visibility === 'public' || $visibility === 'pending'){ continue; }
-            $records[] = array(
-                'id' => $recordId,
-                'title' => $row !== null ? $row['title'] : '',
-                'visibility' => $visibility,
-                'role' => $role,
-                'usedIn' => $usedIn[$recordId] ?? array()
-            );
+            return $row !== null && in_array($row['visibility'], array('public', 'pending'), true);
+        };
+        $records = array();
+        foreach($pageRoles as $recordId => $role){
+            $row = $found[$recordId] ?? null;
+            if($public($row)){ continue; }
+            $records[] = array('id' => $recordId, 'title' => $row !== null ? $row['title'] : '',
+                'visibility' => $row === null ? 'missing' : $row['visibility'], 'role' => $role, 'usedIn' => array());
+        }
+        // record fields of public records: the field or its values may still be hidden from visitors
+        $fieldChecks = array();
+        foreach($fieldUses as $recordId => $fields){
+            if($public($found[$recordId] ?? null)){ $fieldChecks[$recordId] = $fields; }
+        }
+        $hiddenFields = $this->repository->hiddenFieldValues($fieldChecks);
+        foreach(array_unique(array_merge(array_keys($uses), array_keys($fieldUses))) as $recordId){
+            $row = $found[$recordId] ?? null;
+            if(!$public($row)){
+                if(!isset($uses[$recordId])){ continue; } // only website. / page. fields of a page listed above
+                $usedIn = $uses[$recordId];
+                $records[] = array('id' => $recordId, 'title' => $row !== null ? $row['title'] : '',
+                    'visibility' => $row === null ? 'missing' : $row['visibility'], 'role' => 'reference', 'usedIn' => $usedIn);
+                continue;
+            }
+            if(empty($hiddenFields[$recordId])){ continue; }
+            $fields = array();
+            $usedIn = array();
+            foreach($hiddenFields[$recordId] as $fieldId => $state){
+                $fields[] = array('id' => $fieldId, 'name' => (string)($definitions->field($fieldId)['name'] ?? $fieldId), 'state' => $state);
+                $usedIn = array_merge($usedIn, $fieldUses[$recordId][$fieldId] ?? array());
+            }
+            $records[] = array('id' => $recordId, 'title' => $row['title'], 'visibility' => $row['visibility'], 'role' => 'reference',
+                'usedIn' => $usedIn, 'fields' => $fields);
         }
         return array('issues' => $issues, 'records' => $records);
     }

@@ -39,9 +39,14 @@ final class CmsValidator
     /** Website layout (`layout`, plan 27f §2-3): allowed values of each setting; the first is the default (CMS_LAYOUT). */
     public const LAYOUT = array(
         'navigation' => array('reload', 'swap', 'scroll'),
-        'header' => array('position' => array('default', 'fixed', 'slide', 'none'), 'orientation' => array('horizontal', 'vertical')),
-        'footer' => array('position' => array('default', 'fixed', 'none'))
+        // fixed is the default since 2026-11-09 (was `default` = scroll); slide = an expand / collapse button (§13)
+        'header' => array('position' => array('fixed', 'scroll', 'slide', 'none'), 'orientation' => array('horizontal', 'vertical'),
+            // the header default set: one row on normal screens, or two (plan 27f §13)
+            'rows' => array('auto', 'two'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own')),
+        'footer' => array('position' => array('default', 'fixed', 'none'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own'))
     );
+    /** A colour of the own theme of the header or footer (`colors`: bg, text), as CMS_LAYOUT_COLOR. */
+    public const LAYOUT_COLOR = '/^(?:#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([0-9\s.,%deg\/]+\))$/i';
     /** Pages kept by the navigation mode swap (`layout.cache`). */
     public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
 
@@ -203,6 +208,18 @@ final class CmsValidator
         return null;
     }
 
+    /** Own colours of the header or footer: {bg, text}, each a colour (LAYOUT_COLOR). */
+    public static function isLayoutColors($colors): bool
+    {
+        if(!is_array($colors) || (!empty($colors) && array_keys($colors) === range(0, count($colors) - 1))){ return false; }
+        foreach($colors as $part => $colour){
+            if(!in_array((string)$part, array('bg', 'text'), true) || !is_string($colour) || !preg_match(self::LAYOUT_COLOR, trim($colour))){
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
      * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false.
@@ -230,6 +247,10 @@ final class CmsValidator
                     continue;
                 }
                 foreach($value as $name => $item){
+                    if((string)$name === 'colors'){
+                        if(!self::isLayoutColors($item)){ $problems[] = $key.'.colors must be {bg, text} colours'; }
+                        continue;
+                    }
                     $allowed = self::LAYOUT[$key][(string)$name] ?? null;
                     if($allowed === null){
                         $problems[] = 'unknown setting '.$key.'.'.$name;

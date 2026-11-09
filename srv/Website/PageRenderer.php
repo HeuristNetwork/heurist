@@ -93,6 +93,8 @@ final class PageRenderer
         if(($layout['header']['position'] ?? '') === 'none'){ $header = ''; }
         if(($layout['footer']['position'] ?? '') === 'none'){ $footer = ''; }
         $bodyClass = self::bodyClasses($layout);
+        // the banner image of the website and own colours of header / footer (plan 27f §13)
+        $styles .= self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -456,12 +458,50 @@ final class PageRenderer
     {
         $classes = array('h-site-body');
         $header = is_array($layout['header'] ?? null) ? $layout['header'] : array();
-        if(in_array($header['position'] ?? '', array('fixed', 'slide'), true)){ $classes[] = 'h-site-header-'.$header['position']; }
+        $footer = is_array($layout['footer'] ?? null) ? $layout['footer'] : array();
+        // no position = fixed (the default since 2026-11-09); slide = an expand / collapse button (§13)
+        $position = (string)($header['position'] ?? CmsValidator::LAYOUT['header']['position'][0]);
+        if(in_array($position, array('fixed', 'slide'), true)){ $classes[] = 'h-site-header-'.$position; }
         if(($header['orientation'] ?? '') === 'vertical'){ $classes[] = 'h-site-header-vertical'; }
-        if((($layout['footer']['position'] ?? '') === 'fixed')){ $classes[] = 'h-site-footer-fixed'; }
+        if(($header['rows'] ?? '') === 'two'){ $classes[] = 'h-site-header-rows2'; }
+        if((($footer['position'] ?? '') === 'fixed')){ $classes[] = 'h-site-footer-fixed'; }
+        foreach(array('header' => $header, 'footer' => $footer) as $part => $settings){
+            $theme = (string)($settings['theme'] ?? 'default');
+            if($theme !== 'default' && in_array($theme, CmsValidator::LAYOUT[$part]['theme'], true)){ $classes[] = 'h-site-'.$part.'-theme-'.$theme; }
+        }
         if(!empty($layout['hideHeader'])){ $classes[] = 'h-site-hide-header'; }
         if(!empty($layout['hideFooter'])){ $classes[] = 'h-site-hide-footer'; }
         return implode(' ', $classes);
+    }
+
+    /**
+     * CSS of the layout (plan 27f §13): the banner image as the variable --h-site-banner (the background of the header
+     * default set) and the own colours of the header and footer (theme `own`).
+     */
+    public static function layoutCss(array $layout, string $bannerUrl): string
+    {
+        $css = '';
+        if($bannerUrl !== ''){ $css .= 'html.h-site{--h-site-banner:url("'.addcslashes($bannerUrl, '"\\').'");}'."\n"; }
+        foreach(array('header', 'footer') as $part){
+            $settings = is_array($layout[$part] ?? null) ? $layout[$part] : array();
+            if(($settings['theme'] ?? '') !== 'own' || !CmsValidator::isLayoutColors($settings['colors'] ?? null)){ continue; }
+            $rules = '';
+            if(!empty($settings['colors']['bg'])){ $rules .= '--h-color-bg:'.trim($settings['colors']['bg']).';'; }
+            if(!empty($settings['colors']['text'])){
+                // links, headings and the menu of the part take the text colour too
+                $text = trim($settings['colors']['text']);
+                $rules .= '--h-color-text:'.$text.';--h-color-link:'.$text.';--h-site-heading-color:'.$text.';';
+            }
+            if($rules !== ''){ $css .= '.h-site-'.$part.'{'.$rules."}\n"; }
+        }
+        return $css;
+    }
+
+    /** URL of the file in a file field of a record, or ''. */
+    private function fileUrlOf(array $record, int $fieldId): string
+    {
+        $fileId = $fieldId > 0 ? intval(WebsiteRepository::value($record, $fieldId)) : 0;
+        return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId) : '';
     }
 
     /** Scope of the page styles: its section (plan 27f §2.2). */
