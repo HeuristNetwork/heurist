@@ -144,13 +144,6 @@ class System {
             return false;
         }
 
-        // Enforce MPCE database migration to heurist.huma-num.fr before any DB connection attempt.
-        $mpce_check = USystem::enforceMPCEHumaNumDomain($db);
-        if (!empty($mpce_check['fatal_message'])) {
-            $this->addError(HEURIST_ACTION_BLOCKED, $mpce_check['fatal_message'], null, 'Problem opening database');
-            return false;
-        }        
-
         $res = mysql__init($this->dbnameFull);
         $this->timingMark('db');
 
