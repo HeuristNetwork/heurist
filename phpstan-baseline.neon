@@ -1,0 +1,541 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \$set of function ensureUniqueConceptNameForInsert\(\) has invalid type SourceDataset\.$#'
+			identifier: class.notFound
+			count: 1
+			path: admin/harvest/HarvestHelpers.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: admin/harvest/HarvestLogger.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 9
+			path: admin/harvest/SemanticGlobalHarvester.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 4
+			path: admin/harvest/SemanticReferenceRepair.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: admin/harvest/SemanticSchema.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: admin/harvest/SemanticStructureImporter.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: admin/harvest/SemanticTermLinksImporter.php
+
+		-
+			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
+			identifier: arguments.count
+			count: 4
+			path: admin/harvest/harvest_semantics_global.php
+
+		-
+			message: '#^Function main invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: admin/harvest/harvest_semantics_global.php
+
+		-
+			message: '#^Class BulkEmailSystem referenced with incorrect case\: bulkEmailSystem\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: admin/utilities/bulkEmailCron.php
+
+		-
+			message: '#^Access to an undefined property BulkEmailSystem\:\:\$rec_lastmod\.$#'
+			identifier: property.notFound
+			count: 1
+			path: admin/utilities/bulkEmailSystem.php
+
+		-
+			message: '#^Undefined variable\: \$serverName$#'
+			identifier: variable.undefined
+			count: 1
+			path: admin/utilities/checkMembershipLib.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''single\-transaction'' \(''single\-transaction'', ''single\-transaction''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: admin/utilities/purgeInactiveDBs.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''g'' in pattern\: /\[\(\)\]/g$#'
+			identifier: regexp.pattern
+			count: 1
+			path: admin/utilities/purgeInactiveDBs.php
+
+		-
+			message: '#^Function main invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: admin/utilities/refreshMembershipList.php
+
+		-
+			message: '#^Result of function main \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
+			path: admin/utilities/refreshMembershipList.php
+
+		-
+			message: '#^File ends with a trailing whitespace\. This may cause problems when running the code in the web browser\. Remove the closing \?\> mark or remove the whitespace\.$#'
+			identifier: whitespace.fileEnd
+			count: 1
+			path: admin/verification/rebuildRecordTitles.php
+
+		-
+			message: '#^Function json_format not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: admin/verification/repairUploadedFiles.php
+
+		-
+			message: '#^Undefined variable\: \$mysqli$#'
+			identifier: variable.undefined
+			count: 2
+			path: admin/verification/verifyFieldTypes.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''\#\.\<'' \(''\#\.\<'', ''\#\.\<''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: admin/verification/verifyScripts.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''\#\.\>'' \(''\#\.\>'', ''\#\.\>''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: admin/verification/verifyScripts.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''%%;;e'' \(''%%;;e'', ''%%;;e''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: admin/verification/verifyScripts.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''%%\<u'' \(''%%\<u'', ''%%\<u''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: admin/verification/verifyScripts.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''fc'' \(''fc'', ''fc''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: export/xml/flathml.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''slb'' \(''slb'', ''slb''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: export/xml/flathml.php
+
+		-
+			message: '#^Function expandCollections not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: export/xml/flathml.php
+
+		-
+			message: '#^Function openTag\(\) should return type but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: export/xml/flathml.php
+
+		-
+			message: '#^Function exist_similar not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: hclient/framecontent/recordEdit.php
+
+		-
+			message: '#^File ends with a trailing whitespace\. This may cause problems when running the code in the web browser\. Remove the closing \?\> mark or remove the whitespace\.$#'
+			identifier: whitespace.fileEnd
+			count: 1
+			path: hclient/widgets/cms/websiteRecord.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$dbParam \(string\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: hserv/controller/RecordResolver.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$serverRoot \(string\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: hserv/controller/RecordResolver.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''\\'' in pattern\: /\[\\\\/\\"\\r\\n\]\+/$#'
+			identifier: regexp.pattern
+			count: 1
+			path: hserv/controller/importController.php
+
+		-
+			message: '#^Method hserv\\entity\\DbEntitySearch\:\:getLimit\(\) should return string\|false but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/entity/DbEntitySearch.php
+
+		-
+			message: '#^Method hserv\\entity\\DbEntitySearch\:\:getOffset\(\) should return string\|false but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/entity/DbEntitySearch.php
+
+		-
+			message: '#^Access to an undefined property hserv\\filestore\\FilestoreHarvest\:\:\$rep_counter\.$#'
+			identifier: property.notFound
+			count: 1
+			path: hserv/filestore/FilestoreHarvest.php
+
+		-
+			message: '#^Access to an undefined property hserv\\records\\batch\\RecordsBatchAction\:\:\$not_purify\.$#'
+			identifier: property.notFound
+			count: 1
+			path: hserv/records/batch/RecordsBatchAction.php
+
+		-
+			message: '#^Access to an undefined property hserv\\records\\batch\\field\\RecordsBatchDetailAdd\:\:\$not_purify\.$#'
+			identifier: property.notFound
+			count: 1
+			path: hserv/records/batch/field/RecordsBatchDetailAdd.php
+
+		-
+			message: '#^Access to an undefined property hserv\\records\\batch\\field\\RecordsBatchDetailReplace\:\:\$not_purify\.$#'
+			identifier: property.notFound
+			count: 1
+			path: hserv/records/batch/field/RecordsBatchDetailReplace.php
+
+		-
+			message: '#^Result of function findAndUpdateAffectedCalcFields \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
+			path: hserv/records/edit/recordModify.php
+
+		-
+			message: '#^Access to an undefined property RecordsBatch\:\:\$not_purify\.$#'
+			identifier: property.notFound
+			count: 3
+			path: hserv/records/edit/recordsBatchOld.php
+
+		-
+			message: '#^Instantiated class GeoJSON not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/records/export/ExportRecordsGEOJSON.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value 10023 \(CURLOPT_HTTPHEADER, CURLOPT_HTTPHEADER\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: hserv/records/export/ExportRecordsHTML.php
+
+		-
+			message: '#^Undefined variable\: \$term_id$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/records/export/ExportRecordsRDF.php
+
+		-
+			message: '#^Result of method hserv\\records\\export\\ExportRecords\:\:setSession\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
+			count: 1
+			path: hserv/records/export/ExportRecordsROCRATE.php
+
+		-
+			message: '#^Access to an undefined static property ImportAction\:\:\$tot_count\.$#'
+			identifier: staticProperty.notFound
+			count: 1
+			path: hserv/records/import/importAction.php
+
+		-
+			message: '#^Function geoSimplifyAndConvertToJSON not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: hserv/records/import/importAction.php
+
+		-
+			message: '#^Instantiated class GeoJSON not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/records/import/importAction.php
+
+		-
+			message: '#^Instantiated class wkt not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/records/import/importAction.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''\:'' in pattern\: /\[\\\\/\:\*\?\\\[\\\]\]\+/$#'
+			identifier: regexp.pattern
+			count: 1
+			path: hserv/records/import/importAction.php
+
+		-
+			message: '#^Method ImportHeurist\:\:validateEnumeration\(\) should return int\|false but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/records/import/importHeurist.php
+
+		-
+			message: '#^Instantiated class KML not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/records/import/importParser.php
+
+		-
+			message: '#^Instantiated class WKT not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/records/import/importParser.php
+
+		-
+			message: '#^Deprecated in PHP 8\.0\: Required parameter \$output follows optional parameter \$limit\.$#'
+			identifier: parameter.requiredAfterOptional
+			count: 1
+			path: hserv/records/import/importSession.php
+
+		-
+			message: '#^Static call to instance method ElasticSearch\:\:buildIndexForRectype\(\)\.$#'
+			identifier: method.staticCall
+			count: 1
+			path: hserv/records/indexing/elasticSearch.php
+
+		-
+			message: '#^Static method ElasticSearch\:\:checkElasticSync\(\) invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 4
+			path: hserv/records/indexing/elasticSearch.php
+
+		-
+			message: '#^Function tagWhereExp not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: hserv/records/search/composeSqlOld.php
+
+		-
+			message: '#^Method SortPhrase\:\:makeSQL\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/records/search/composeSqlOld.php
+
+		-
+			message: '#^Undefined variable\: \$all_fields$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/records/search/recordFile.php
+
+		-
+			message: '#^Undefined variable\: \$db$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/records/search/recordFile.php
+
+		-
+			message: '#^Function recordSearchMenuItems\(\) should return array\|false but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/records/search/recordSearch.php
+
+		-
+			message: '#^Undefined variable\: \$this$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/records/search/recordSearch.php
+
+		-
+			message: '#^Access to an undefined property hserv\\report\\ReportExecute\:\:\$testForWidgetTemplate\.$#'
+			identifier: property.notFound
+			count: 2
+			path: hserv/report/ReportExecute.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''g'' in pattern\: @\(\?\:\^\<body\[\^\>\]\*\>\)\|\(\?\:\</body\>\$\)@g$#'
+			identifier: regexp.pattern
+			count: 1
+			path: hserv/report/ReportExecute.php
+
+		-
+			message: '#^Regex pattern is invalid\: Unknown modifier ''g'' in pattern\: @\(\?\:\^\<p\[\^\>\]\*\>\)\|\(\?\:\</p\>\$\)@g$#'
+			identifier: regexp.pattern
+			count: 1
+			path: hserv/report/ReportExecute.php
+
+		-
+			message: '#^Instantiated class GeoJSON not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/report/ReportRecord.php
+
+		-
+			message: '#^Method hserv\\report\\ReportRecord\:\:composeRecLink\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/report/ReportRecord.php
+
+		-
+			message: '#^Instantiated class DbDefCalcFunctions not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/structure/import/dbsImport.php
+
+		-
+			message: '#^Instantiated class ReportActions not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/structure/import/dbsImport.php
+
+		-
+			message: '#^Undefined variable\: \$pre_query$#'
+			identifier: variable.undefined
+			count: 3
+			path: hserv/utilities/DbExecuteScript.php
+
+		-
+			message: '#^Undefined variable\: \$script_name$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/utilities/DbExecuteScript.php
+
+		-
+			message: '#^Instantiated class Mysqldump not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/utilities/DbUtils.php
+
+		-
+			message: '#^Call to an undefined static method geoPHP\:\:getAdapter\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 2
+			path: hserv/utilities/DbVerify.php
+
+		-
+			message: '#^Instantiated class GeoJSON not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/utilities/DbVerify.php
+
+		-
+			message: '#^Instantiated class WKT not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/utilities/DbVerify.php
+
+		-
+			message: '#^Regex pattern is invalid\: Compilation failed\: missing terminating \] for character class at offset 23 in pattern\: /https\?\:\\/\\/\[\^\\s"''\>\(\)\\\]\*/$#'
+			identifier: regexp.pattern
+			count: 1
+			path: hserv/utilities/DbVerifyURLs.php
+
+		-
+			message: '#^Undefined variable\: \$data$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/utilities/DbVerifyURLs.php
+
+		-
+			message: '#^Function folderSize\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/utilities/UFile.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#5 \$errcontext \(array\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: hserv/utilities/UImage.php
+
+		-
+			message: '#^Undefined variable\: \$system$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/utilities/UImage.php
+
+		-
+			message: '#^Instantiated class SimpleSAML\\Auth\\Simple not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: hserv/utilities/USaml.php
+
+		-
+			message: '#^Method hserv\\web\\WebSite\:\:execute\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 4
+			path: hserv/web/WebSite.php
+
+		-
+			message: '#^Method hserv\\web\\WebSite\:\:handleJsAllowed\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: hserv/web/WebSite.php
+
+		-
+			message: '#^Undefined variable\: \$parentKey$#'
+			identifier: variable.undefined
+			count: 1
+			path: hserv/web/WebSite.php
+
+		-
+			message: '#^Instantiated class phpZotero not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: import/biblio/syncZotero.php
+
+		-
+			message: '#^Result of function handleUnresolvedPointers \(void\) is used\.$#'
+			identifier: function.void
+			count: 1
+			path: import/biblio/syncZotero.php
+
+		-
+			message: '#^Path in include_once\(\) "external/php/tileserver\.php" is not a file or it does not exist\.$#'
+			identifier: includeOnce.fileNotFound
+			count: 1
+			path: mbtiles.php
+
+		-
+			message: '#^Instantiated class GeoJSON not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: srv/Records/Map/GeoJsonGeometryConverter.php
+
+		-
+			message: '#^Instantiated class Heurist\\Website\\Build\\WebsiteBuildJob not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: srv/Runtime/ServiceFactory.php
+
+		-
+			message: '#^Instantiated class Heurist\\Website\\Build\\WebsiteBuilder not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: srv/Runtime/ServiceFactory.php
+
+		-
+			message: '#^Instantiated class DbRecUploadedFiles not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: viewers/record/renderRecordData.php
