@@ -413,14 +413,19 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * @param {string} [url_fld=''] - The field key from the selected record that contains an external URL, if applicable.
      *                                If provided and the field exists, its value will be added to the `ext_url` property
      *                                of the response object.
+     * @param {?HRecordSet} [recordset=null] - Prepared recordset, otherwise the selected record will be retrieved
+     * @param {?array} [record=null]
      * @returns {void}
      */
-    doAction: function(url_fld = ''){
+    doAction: function(url_fld = '', recordset = null, record = null){
 
         this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
-        let [recset, record] = this._getSelection(true);
-        if(recset?.length() < 0 || !record){
+        if(recordset === null){
+            [recordset, record] = this._getSelection(true);
+        }
+
+        if(recordset?.length() < 0 || !record){
             return;
         }
 

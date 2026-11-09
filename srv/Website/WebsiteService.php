@@ -138,6 +138,82 @@ final class WebsiteService
         );
     }
 
+    /**
+     * Check of a whole website (review 2026-11-08): the format of the home content and of every menu page, and
+     * the records a visitor can not see: the website, its pages and the records picked on them (record fields,
+     * media, generated reports, manual record cards, media galleries; not queries). A standalone page: only itself.
+     *
+     * @return array{issues:array,records:array<int,array{id:int,title:string,visibility:string,role:string,
+     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string}>}>}
+     * @throws WebsiteException
+     */
+    public function check(int $id, string $language = ''): array
+    {
+        $codes = $this->repository->codes();
+        $context = $this->context($id, 0, $language);
+        $site = $context['site'];
+        $title = function(array $record) use ($codes): string {
+            $name = WebsiteRepository::value($record, $codes['name']);
+            return $name !== '' ? $name : (string)($record['rec_Title'] ?? '');
+        };
+        $first = $site ?? $context['page'];
+        $pages = array(intval($first['rec_ID']) => $first) + $context['pages'];
+
+        $issues = array();
+        $seen = array();
+        $add = function(array $list, array $page) use (&$issues, &$seen, $title): void {
+            foreach($list as $issue){
+                // header, footer and website configuration are checked with every page: listed once
+                $key = ($issue['code'] ?? '').'|'.($issue['message'] ?? '').'|'.($issue['node'] ?? '');
+                if(isset($seen[$key])){ continue; }
+                $seen[$key] = true;
+                $issues[] = $issue + array('page' => intval($page['rec_ID']), 'pageTitle' => $title($page));
+            }
+        };
+        $add($context['issues'], $first);
+        foreach($context['pages'] as $pageId => $page){
+            $add($this->context($id, intval($pageId), $language)['issues'], $page);
+        }
+
+        // roles: the website and its pages themselves, then the picked records
+        $roles = array();
+        $usedIn = array();
+        if($site !== null){ $roles[intval($site['rec_ID'])] = 'website'; }
+        foreach($pages as $pageId => $page){
+            $roles[intval($pageId)] = $roles[intval($pageId)] ?? 'page';
+            $isSite = $site !== null && intval($pageId) === intval($site['rec_ID']);
+            $config = $isSite ? $context['siteConfig'] : CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config'];
+            $parts = array(WebsiteRepository::value($page, $codes['content']));
+            if($isSite){
+                $parts[] = WebsiteRepository::value($page, $codes['header']);
+                $parts[] = WebsiteRepository::value($page, $codes['footer']);
+            }
+            foreach(CmsRecordReferences::collect(is_array($config) ? $config : array(), $parts) as $reference){
+                $roles[$reference['id']] = $roles[$reference['id']] ?? 'reference';
+                $usedIn[$reference['id']][] = array(
+                    'page' => intval($pageId), 'pageTitle' => $title($page), 'node' => $reference['node'], 'kind' => $reference['kind']
+                );
+            }
+        }
+
+        $found = $this->repository->visibility(array_keys($roles));
+        $records = array();
+        foreach($roles as $recordId => $role){
+            $row = $found[$recordId] ?? null;
+            $visibility = $row === null ? 'missing' : $row['visibility'];
+            // pending: guests see it
+            if($visibility === 'public' || $visibility === 'pending'){ continue; }
+            $records[] = array(
+                'id' => $recordId,
+                'title' => $row !== null ? $row['title'] : '',
+                'visibility' => $visibility,
+                'role' => $role,
+                'usedIn' => $usedIn[$recordId] ?? array()
+            );
+        }
+        return array('issues' => $issues, 'records' => $records);
+    }
+
     /** Languages of a website (DT_LANGUAGE terms) as 3-letter codes, the first is the default. */
     private function siteLanguages(array $site, int $field): array
     {

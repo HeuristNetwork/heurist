@@ -124,6 +124,27 @@ final class WebsiteRepository
         return $ordered;
     }
 
+    /**
+     * Visibility of records for the check of a website: rec_NonOwnerVisibility of each record that exists, the
+     * title only when the user may see the record (records that do not exist are left out).
+     *
+     * @return array<int,array{visibility:string,title:string}>
+     */
+    public function visibility(array $ids): array
+    {
+        $repository = RecordRepository::shared($this->database);
+        $rows = $repository->headers($ids, array('rec_ID', 'rec_Title', 'rec_NonOwnerVisibility'));
+        $visible = array_flip($repository->visibleIds(array_keys($rows), RecordAccess::fromRuntime($this->runtime)));
+        $result = array();
+        foreach($rows as $id => $row){
+            $result[$id] = array(
+                'visibility' => (string)($row['rec_NonOwnerVisibility'] ?? ''),
+                'title' => isset($visible[$id]) ? (string)($row['rec_Title'] ?? '') : ''
+            );
+        }
+        return $result;
+    }
+
     /** Whether a record exists, visible or not (a 404 and a "log in" page differ). */
     public function exists(int $id): bool
     {

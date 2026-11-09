@@ -71,7 +71,7 @@ final class WebsiteEditService
      * 99-51 / 99-52, the logo of a website optional), and the local ids of the record types,
      * fields and terms the entities use (WebsiteRepository::CONCEPTS names).
      *
-     * @return array{installed:bool,missing:array<int,string>,canSetup:bool,codes:array<string,int>}
+     * @return array{installed:bool,missing:array<int,string>,canSetup:bool,canCreate:bool,codes:array<string,int>}
      */
     public function status(): array
     {
@@ -90,7 +90,7 @@ final class WebsiteEditService
             }
         }
         return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin,
-            'codes' => $codes);
+            'canCreate' => $this->runtime->isAdmin, 'codes' => $codes);
     }
 
     /**
@@ -410,6 +410,29 @@ final class WebsiteEditService
             'details' => array($codes['pageType'] => $codes['standalonePage'] > 0 ? array($codes['standalonePage']) : array())
         ));
         return $this->summary($siteId);
+    }
+
+    /**
+     * Who may create websites and change owners (review 2026-11-08): only database administrators create a
+     * website and change the owner of a website or a page; the owner of a website edits it. The owner a page
+     * gets from its website (shareAccess, assign) is written here, not through this rule.
+     *
+     * @param string $kind "website" or "page".
+     * @param array $record Record of the request body.
+     * @throws WebsiteException 403.
+     */
+    public function assertOwnerRule(string $kind, string $method, int $id, array $record): void
+    {
+        if($this->runtime->isAdmin){ return; }
+        if($kind === 'website' && $method === 'POST'){
+            throw new WebsiteException(403, 'Only database administrators can create websites');
+        }
+        if($method === 'POST' || $id < 1 || !array_key_exists('rec_OwnerUGrpID', $record)){ return; }
+        $current = $this->permissions->owners($id);
+        if($current !== null && intval($current['owner']) !== intval($record['rec_OwnerUGrpID'])){
+            throw new WebsiteException(403, 'Only database administrators can change the owner of a '
+                .($kind === 'website' ? 'website' : 'web page'));
+        }
     }
 
     /**

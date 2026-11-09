@@ -341,7 +341,8 @@ function showNodeInformation(d){
         infoBox.style('display', 'none');
 
         const rec_ID = d.id;
-        let viewer = settings.nodeSettings?.[d.rty_ID]?.viewer ?? thematicSettings.nodes?.[d.rty_ID]?.settings?.viewer;
+        const rty_ID = d.rty_ID;
+        let viewer = settings.nodeSettings?.[rty_ID]?.viewer ?? thematicSettings.nodes?.[rty_ID]?.settings?.viewer;
         viewer = !viewer || viewer === 'rec-viewer' ? null : viewer;
 
         if(infoFrame.attr('data-hid') == rec_ID && infoFrame.attr('data-format') === viewer){ // block retrival of last record in quick succession
@@ -358,6 +359,7 @@ function showNodeInformation(d){
 
         infoFrame.attr('src', srcURL)
                  .attr('data-hid', rec_ID)
+                 .attr('data-hrectype', rty_ID)
                  .attr('data-format', viewer)
                  .on('load', () => {
 
@@ -455,7 +457,8 @@ function handleNodeAction(action = 'close'){
     }
 
     const rec_ID = window.d3.select('#infoIframe').attr('data-hid');
-    const viewer = settings.nodeSettings?.[d.rty_ID]?.viewer ?? thematicSettings.nodes?.[d.rty_ID]?.settings?.viewer;
+    const rty_ID = window.d3.select('#infoIframe').attr('data-hrectype');
+    const viewer = settings.nodeSettings?.[rty_ID]?.viewer ?? thematicSettings.nodes?.[rty_ID]?.settings?.viewer;
 
     const isTemplate = !window.hWin.HEURIST4.util.isempty(viewer) && typeof viewer === 'string' && viewer.slice(-4) === '.tpl';
     const templateURL = isTemplate ? `${window.hWin.HAPI4.baseURL}?snippet=1&q=ids:${rec_ID}&db=${window.hWin.HAPI4.database}&template=${encodeURIComponent(viewer)}` : '';

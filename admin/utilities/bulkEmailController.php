@@ -148,6 +148,7 @@ class BulkEmailController{
             return;
         }
 
+        $data = [];
         if($dbRequest == 'all'){ // No additional filtering needed
 
             $data = ['list' => $dbList, 'details' => []];
@@ -582,7 +583,7 @@ class BulkEmailController{
             case 'DAY':  $lastmod_unit = 'DAY'; break;
             case 'MONTH':  $lastmod_unit = 'MONTH'; break;
             case 'YEAR':  $lastmod_unit = 'YEAR'; break;
-            default;
+            default: break;
         }
 
         $lastmod_where = $lastmod_unit !='ALL' ? "AND rec_Modified {$lastmod_logic} date_format(curdate(), '%Y-%m-%d') - INTERVAL {$lastmod_period} {$lastmod_unit}" : "";

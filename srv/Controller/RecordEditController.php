@@ -243,11 +243,14 @@ final class RecordEditController
             return array(200, $this->entityField($recordId, $action, $params));
         }
         if($action === 'validate' && $method === 'GET'){
-            $issues = $handler->validate($recordId, $params);
+            // a list of issues, or {issues, ...other parts of the answer} (website: records a visitor can not see)
+            $result = $handler->validate($recordId, $params);
+            $issues = isset($result['issues']) && is_array($result['issues']) ? $result['issues'] : $result;
+            $extra = isset($result['issues']) && is_array($result['issues']) ? array_diff_key($result, array('issues'=>1)) : array();
             $errors = array_filter($issues, static function(array $issue): bool {
                 return ($issue['level'] ?? $issue['severity'] ?? '') === 'error';
             });
-            return array(200, array('valid'=>empty($errors), 'issues'=>array_values($issues)));
+            return array(200, array('valid'=>empty($errors), 'issues'=>array_values($issues)) + $extra);
         }
         if($action === '' || $action === 'validate' || $action === 'duplicate'){
             if($method === 'POST' && $action !== 'duplicate'){
