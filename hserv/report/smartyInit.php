@@ -298,6 +298,9 @@ function heuristModifierTranslate($input, $lang, $field=null)
  */
 function heuristModifierArraySortByFields($arr, $sortby=null)
 {
+    if (!is_array($arr) || empty($arr)) {
+        return []; // avoid trying to sort empty array which throwns error
+    }
 
     if(!isset($sortby)){
         if(is_array($arr[0])){
