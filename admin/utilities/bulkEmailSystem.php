@@ -786,8 +786,6 @@ class BulkEmailSystem {
             $email_rtn = 0;//'OK';
         } elseif ($this->use_native_mail_function) {
             $email_rtn = $this->sendNativeMail($email, $title, $body);
-        } elseif (isset($mailRelayPwd) && $mailRelayPwd != '' && endsWith($email, '@gmail.com')) {
-            $email_rtn = $this->sendViaRelay($email, $title, $body, $mailRelayPwd);
         } else {
             //$this->printMessage('sendUsingPHPMailer');    
             $email_rtn = $this->sendUsingPHPMailer($email, $title, $body, $mailer);
@@ -853,41 +851,6 @@ class BulkEmailSystem {
         return 0;
     }
 
-    /**
-     * Send email to email relay (for Gmail to avoid blockage)
-     *
-     * @param string $email Email recipient
-     * @param string $title Email title/subject
-     * @param string $body Email body text
-     * @param mixed $mailRelayPwd relay password
-     * @return int response code, -3 = email error, 0 = success
-     */
-    private function sendViaRelay($email, $title, $body, $mailRelayPwd) {
-        $data = [
-            'pwd' => $mailRelayPwd,
-            'from_name' => $this->cur_user['ugr_FullName'],
-            'from' => $this->cur_user['ugr_eMail'],
-            'to' => $email,
-            'title' => $title,
-            'text' => $body,
-            'html' => 1
-        ];
-
-        $data_str = http_build_query($data);
-        $ch = curl_init("https://heuristref.net/HEURIST/mailRelay.php");
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        if ($response != 1) {
-            $this->setError('Unknown error: Sending via heuristref relay');
-            return -3;
-        }
-
-        return 0;
-    }
 
     /**
      * Send email using PHPMailer
