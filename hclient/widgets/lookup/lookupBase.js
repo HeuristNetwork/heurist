@@ -425,7 +425,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             [recordset, record] = this._getSelection(true);
         }
 
-        if(recset?.length() < 0 || !record){
+        if(recordset?.length() < 0 || !record){
             return;
         }
 
