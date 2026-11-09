@@ -293,6 +293,42 @@ $.widget( "heurist.controlPanel", {
 
         this._refresh();
 
+        const phpVersion = window.hWin.HAPI4.sysinfo.php_version;
+        const versionParts = typeof phpVersion === 'string'
+            ? phpVersion.match(/^(\d+)\.(\d+)\.(\d+)(?:[-.]?(dev|alpha|beta|RC))?/i)
+            : null;
+        if(!versionParts){
+            return;
+        }
+
+        const [major, minor, patch] = versionParts.slice(1, 4).map(Number);
+        const prerelease = versionParts[4];
+        const branch = `${major}.${minor}`;
+        // First stable releases with fixes for CVE-2026-109618 and CVE-2026-109619.
+        const fixedPatch = {'8.2': 35, '8.3': 36, '8.4': 27, '8.5': 12}[branch];
+        const unsupported = major < 8 || (major === 8 && minor < 2);
+        const belowFixedVersion = fixedPatch !== undefined && (patch < fixedPatch || (patch === fixedPatch && prerelease));
+        if(unsupported || belowFixedVersion){
+            const displayedVersion = window.hWin.HEURIST4.util.htmlEscape(phpVersion);
+            let message = `<p>This Heurist server is running PHP ${displayedVersion}.`;
+            if(unsupported){
+                message += ` The PHP project no longer provides regular security updates for PHP ${branch}.`;
+            }else{
+                message += ` PHP ${branch}.${fixedPatch} is the first stable release in this branch that fixes two critical vulnerabilities (CVE-2026-109618 and CVE-2026-109619) that can let attackers run code on the server without signing in.`;
+            }
+            const securitySupportEnd = {'8.2': '31 December 2026', '8.3': '31 December 2027'}[branch];
+            if(securitySupportEnd){
+                message += ` Upstream security support for PHP ${branch} ends on ${securitySupportEnd}.`;
+            }
+            if(major < 8){
+                message += ' Some Heurist features may be unavailable on this version.';
+            }
+            message += '</p><p>Please ask your server administrator to update PHP promptly to the latest patched release of a supported branch. '
+                + 'If PHP came from an operating system vendor, the administrator can check whether the vendor has already included the security fixes.</p>';
+            window.hWin.HEURIST4.msg.showMsgDlg(message, null, {title: 'PHP security update required'},
+                {dialogId: 'php-security-warning', width: 560});
+        }
+
     }, //end _initControls
 
 // TODO: The following large block of commented-out code (formerly function ___set_menu_item_visibility)
