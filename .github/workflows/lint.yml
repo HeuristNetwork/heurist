@@ -9,15 +9,21 @@ jobs:
   ecs:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - uses: php-actions/composer@v6
+      with:
+        php_version: "8.5"
+        php_extensions: pdo_mysql
     - name: Easy Coding Standard
       run: vendor/bin/ecs
 
   phpstan:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
     - uses: php-actions/composer@v6
-    - name: Easy Coding Standard
+      with:
+        php_version: "8.5"
+        php_extensions: pdo_mysql
+    - name: PHPStan
       run: vendor/bin/phpstan analyse
