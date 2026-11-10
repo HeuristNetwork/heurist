@@ -93,8 +93,9 @@ final class PageRenderer
         if(($layout['header']['position'] ?? '') === 'none'){ $header = ''; }
         if(($layout['footer']['position'] ?? '') === 'none'){ $footer = ''; }
         $bodyClass = self::bodyClasses($layout);
-        // the banner image of the website and own colours of header / footer (plan 27f §13)
-        $styles .= self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
+        // the banner image of the website and own colours of header / footer (plan 27f §13): a block of its own, the
+        // preview of the designer replaces h-site-styles with the draft styles and keeps this one
+        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -110,6 +111,7 @@ final class PageRenderer
             .'<link rel="stylesheet" href="'.self::attr($baseUrl.self::BUNDLE.'heurist-website-main.css').'">'
             .'<style id="h-site-styles">'."\n".$styles.'</style>'
             .($pageStyles !== '' ? '<style id="h-page-styles" data-h-page="'.$pageId.'">'."\n".$pageStyles.'</style>' : '')
+            .($layoutCss !== '' ? '<style id="h-site-layout">'."\n".$layoutCss.'</style>' : '')
             .$this->customCss($site ?? $page)
             .$this->externalFiles($site ?? $page)
             .'</head><body class="'.self::attr($bodyClass).'">'

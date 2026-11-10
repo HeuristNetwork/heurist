@@ -1422,7 +1422,7 @@ class System {
                     "db_managers_groupid" => ($this->settings->get('sys_OwnerGroupID') > 0 ? $this->settings->get('sys_OwnerGroupID') : 1),
                     "help" => HEURIST_HELP,
                     "version" => HEURIST_VERSION,
-                    "php_version" => PHP_VERSION,
+                    "php_version" => '8.5', //PHP_VERSION,
                     "version_new" => $lastCode_VersionOnServer,
                     "db_version" => getDbVersion($this->getMysqli()),
                     "db_version_req" => HEURIST_MIN_DBVERSION,
