@@ -5,7 +5,7 @@
 #   /var/www/html/HEURIST/heuristConfigIni.php  <- mounted from docker/heuristConfigIni.php
 #   /var/www/html/HEURIST/HEURIST_FILESTORE  <- uploaded files (named volume)
 #   /var/www/html/HEURIST/HEURIST_SUPPORT    <- external_h5 / help / vendor bundles
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -25,11 +25,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" gd mbstring mysqli pdo_mysql zip \
+    && pecl install xdebug && docker-php-ext-enable xdebug \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP settings for a development instance (uploads, memory, errors)
 COPY docker/heurist-php.ini /usr/local/etc/php/conf.d/heurist.ini
+COPY docker/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
 # Apache vhost: DocumentRoot on the HEURIST parent (switchboard),
 # AllowOverride All so the codebase .htaccess rules apply.
