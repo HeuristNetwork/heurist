@@ -4,7 +4,8 @@
 *
 *   POST   /records/{id}            insert; id 0 = next id, negative = that id (import)
 *   PUT    /records/{id}            update, the body replaces the whole record
-*   PATCH  /records/{id}            update, only the fields in the body
+*   PATCH  /records/{id}            update, only the fields in the body (plan 32: detailsAdd,
+*                                   detailsMatch, addIfNone; meta.changed); ?fields= shortens the answer
 *   DELETE /records/{id}[?force=1]  delete; 409 with the references unless force
 *   POST   /records/{id}/duplicate  copy of the record
 *   POST   /records/{id}/validate   check a record body without saving (id <= 0: insert)
@@ -173,7 +174,12 @@ final class RecordEditController
         if($handler !== null){
             $issues = array_merge($issues, $handler->afterSave($method, $result['recordId'], $body ?? array(), $params));
         }
-        return array($result['created'] ? 201 : 200, $this->savedRecord($result['recordId'], $issues, $params));
+        $saved = $this->savedRecord($result['recordId'], $issues, $params);
+        if(isset($result['changed'])){
+            // PATCH (plan 32): field => removed + inserted value rows
+            $saved['meta']['changed'] = (object)$result['changed'];
+        }
+        return array($result['created'] ? 201 : 200, $saved);
     }
 
     /**
@@ -356,9 +362,11 @@ final class RecordEditController
     /** The saved record as GET /records/{id} returns it, with meta.issues. */
     private function savedRecord(int $recordId, array $issues, array $params): array
     {
+        // ?fields= gives a shorter answer (e.g. rec_ID,rec_Modified,rec_Title after a PATCH, plan 32)
+        $fields = trim((string)($params['fields'] ?? ''));
         $response = $this->query->executeItem(array(
             'db' => $params['db'] ?? $this->runtime->databaseName,
-            'fields' => '_all'
+            'fields' => $fields !== '' ? $fields : '_all'
         ), $recordId);
         unset($response['meta']['self']);
         $response['meta']['issues'] = array_values($issues);

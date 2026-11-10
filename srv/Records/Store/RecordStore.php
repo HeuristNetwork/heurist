@@ -166,6 +166,25 @@ final class RecordStore
         $this->insertDetails($recordId, $rows);
     }
 
+    /** Delete all values of some fields of a record (PATCH, plan 32). */
+    public function deleteFields(int $recordId, array $fieldIds): void
+    {
+        $fieldIds = array_values(array_unique(array_filter(array_map('intval', $fieldIds))));
+        if(empty($fieldIds)){ return; }
+        $this->database->execute('DELETE FROM '.$this->details.' WHERE dtl_RecID=? AND dtl_DetailTypeID IN ('
+            .implode(',', array_fill(0, count($fieldIds), '?')).')', array_merge(array($recordId), $fieldIds));
+    }
+
+    /** Delete some value rows (dtl_ID) of a record (PATCH with a value condition, plan 32). */
+    public function deleteDetailIds(int $recordId, array $detailIds): void
+    {
+        $detailIds = array_values(array_unique(array_filter(array_map('intval', $detailIds))));
+        foreach(array_chunk($detailIds, 500) as $chunk){
+            $this->database->execute('DELETE FROM '.$this->details.' WHERE dtl_RecID=? AND dtl_ID IN ('
+                .implode(',', array_fill(0, count($chunk), '?')).')', array_merge(array($recordId), $chunk));
+        }
+    }
+
     /** @param array<int,array{dty:int,value:?string,fileId:?int,geo:?string,hidden:?int}> $rows */
     public function insertDetails(int $recordId, array $rows): void
     {

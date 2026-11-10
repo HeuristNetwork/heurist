@@ -143,6 +143,49 @@ final class TitleMask
         return $this->cleanUp($title);
     }
 
+    /**
+     * Fields a title mask depends on (plan 32, FieldDependencies): the first part of every
+     * [token] resolved in the record type, and the parts after "Parent entity" (fields of
+     * the parent record, '' = the parent itself). Special header tokens are left out.
+     *
+     * @return array{fields:array<int,int>,parent:array<int,string>}|null Null when a field
+     *         of the mask is unknown (the title is then filled on every save).
+     */
+    public function maskReferences(int $rectypeId, ?string $mask = null): ?array
+    {
+        $mask = $mask ?? (string)($this->definitions->rectype($rectypeId)['titleMask'] ?? '');
+        $result = array('fields' => array(), 'parent' => array());
+        if(trim($mask) === '' || !preg_match_all('/\s*\[\[|\s*\]\]|(\s*(\[\s*([^]]+)\s*\]))/s', $mask, $matches)){
+            return $result;
+        }
+        foreach($matches[3] as $fieldName){
+            if(trim($fieldName) === '' || self::specialField($fieldName) !== null){ continue; }
+            $separator = mb_strpos($fieldName, '..') > 0 ? '..' : '.';
+            $parts = explode($separator, $fieldName);
+            for($i = 1; $i < count($parts); $i++){
+                while(mb_strpos($parts[$i], '.') === 0){
+                    $parts[$i - 1] .= '.';
+                    $parts[$i] = mb_substr($parts[$i], 1);
+                }
+            }
+            $fieldId = $this->fieldId($rectypeId, $parts[0]);
+            if($fieldId < 1){ return null; }
+            $result['fields'][] = $fieldId;
+            if($this->isParentEntity($parts[0])){
+                $result['parent'][] = count($parts) > 1 ? trim($parts[1]) : '';
+            }
+        }
+        $result['fields'] = array_values(array_unique($result['fields']));
+        $result['parent'] = array_values(array_unique($result['parent']));
+        return $result;
+    }
+
+    /** Local id of a field name of a mask in a record type (plan 32); 0 when unknown. */
+    public function resolveField(int $rectypeId, string $name): int
+    {
+        return $this->fieldId($rectypeId, $name);
+    }
+
     /** {\Label: [field] \else} and {[field] \if set\if not} sections (legacy, both formats). */
     private function conditionalSections(string $mask, array $replacements): string
     {

@@ -7,6 +7,10 @@
 * Values stay as given (compact or resolved object form); RecordValidator
 * reads them by field type. Legacy recordSave input (headers without "rec_",
 * details keyed "t:NNN") is refused with a message.
+* PATCH options (plan 32): "detailsAdd" (values appended to multi-value fields),
+* "detailsMatch" (field => value condition of the query format: only the matching
+* values of a field in "details" are replaced or deleted) and "addIfNone" (field
+* ids of "details" whose new values are added when nothing matches).
 *
 * @project     Heurist academic knowledge management system
 * @package     Records\Edit
@@ -31,6 +35,9 @@ final class RecordInput
         'rec_NonOwnerVisibilityGroups', 'rec_EditGroups', 'rec_URL', 'rec_ScratchPad', 'rec_Modified'
     );
 
+    /** Body keys of the details and the PATCH options (plan 32). */
+    private const DETAIL_KEYS = array('details', 'detailsAdd', 'detailsMatch', 'addIfNone');
+
     /** Headers of the GET output that are ignored on input. */
     public const READ_ONLY_HEADERS = array(
         'rec_Title', 'rec_Added', 'rec_AddedByUGrpID', 'rec_Hash', 'rec_FlagTemporary',
@@ -42,17 +49,30 @@ final class RecordInput
     /** @var array<int,array<int,mixed>> dty => values as given */
     private array $details;
     private bool $hasDetails;
+    /** @var array<int,array<int,mixed>> dty => values appended (PATCH) */
+    private array $detailsAdd;
+    /** @var array<int,string> dty => value condition (PATCH) */
+    private array $detailsMatch;
+    /** @var array<int,int> fields of details whose values are added when nothing matches (PATCH) */
+    private array $addIfNone;
 
     /**
      * @param array<string,mixed> $headers Writable headers present in the body.
      * @param array<int,array<int,mixed>> $details dty => values.
      * @param bool $hasDetails False when the body has no "details" key.
+     * @param array<int,array<int,mixed>> $detailsAdd dty => values appended (PATCH).
+     * @param array<int,string> $detailsMatch dty => value condition (PATCH).
+     * @param array<int,int> $addIfNone Field ids (PATCH).
      */
-    public function __construct(array $headers, array $details, bool $hasDetails = true)
+    public function __construct(array $headers, array $details, bool $hasDetails = true,
+        array $detailsAdd = array(), array $detailsMatch = array(), array $addIfNone = array())
     {
         $this->headers = $headers;
         $this->details = $details;
         $this->hasDetails = $hasDetails;
+        $this->detailsAdd = $detailsAdd;
+        $this->detailsMatch = $detailsMatch;
+        $this->addIfNone = $addIfNone;
     }
 
     /**
@@ -79,7 +99,7 @@ final class RecordInput
         $headers = array();
         foreach($body as $key => $value){
             $key = (string)$key;
-            if($key === 'details'){ continue; }
+            if(in_array($key, self::DETAIL_KEYS, true)){ continue; }
             if(in_array($key, self::WRITABLE_HEADERS, true)){
                 $headers[$key] = $value;
             }elseif(in_array($key, self::READ_ONLY_HEADERS, true)){
@@ -92,28 +112,63 @@ final class RecordInput
         }
 
         $hasDetails = array_key_exists('details', $body);
-        $details = array();
-        if($hasDetails){
-            if(!is_array($body['details'])){
-                throw RecordEditException::invalid('"details" must be an object keyed by field id');
+        $details = $hasDetails ? self::parseDetails($body['details'], 'details') : array();
+        $detailsAdd = array_key_exists('detailsAdd', $body) ? self::parseDetails($body['detailsAdd'], 'detailsAdd') : array();
+        $detailsMatch = array();
+        if(array_key_exists('detailsMatch', $body) && $body['detailsMatch'] !== null){
+            if(!is_array($body['detailsMatch'])){
+                throw RecordEditException::invalid('"detailsMatch" must be an object keyed by field id');
             }
-            foreach($body['details'] as $key => $values){
-                $key = (string)$key;
-                if(preg_match('/^t:\d+$/', $key)){
-                    throw RecordEditException::invalid('Detail key "'.$key.'" is the legacy format; use the field id "'.substr($key, 2).'"');
+            foreach($body['detailsMatch'] as $key => $condition){
+                if(!is_scalar($condition)){
+                    throw RecordEditException::invalid('The value condition of field '.$key.' must be a string');
                 }
-                if(!preg_match('/^\d+$/', $key) || intval($key) < 1){
-                    throw RecordEditException::invalid('Detail key "'.$key.'" is not a field id');
-                }
-                if($values === null){
-                    $values = array();
-                }elseif(!is_array($values) || array_keys($values) !== range(0, count($values) - 1)){
-                    $values = array($values); // one value given without array
-                }
-                $details[intval($key)] = $values;
+                $detailsMatch[self::fieldKey((string)$key)] = (string)$condition;
             }
         }
-        return new self($headers, $details, $hasDetails);
+        $addIfNone = array();
+        if(array_key_exists('addIfNone', $body) && $body['addIfNone'] !== null){
+            $list = is_array($body['addIfNone']) ? $body['addIfNone'] : explode(',', (string)$body['addIfNone']);
+            foreach($list as $key){
+                $addIfNone[] = self::fieldKey(trim((string)$key));
+            }
+        }
+        return new self($headers, $details, $hasDetails, $detailsAdd, $detailsMatch, array_values(array_unique($addIfNone)));
+    }
+
+    /**
+     * dty => values of a "details" or "detailsAdd" object.
+     *
+     * @return array<int,array<int,mixed>>
+     * @throws RecordEditException 400
+     */
+    private static function parseDetails($object, string $name): array
+    {
+        if(!is_array($object)){
+            throw RecordEditException::invalid('"'.$name.'" must be an object keyed by field id');
+        }
+        $details = array();
+        foreach($object as $key => $values){
+            if($values === null){
+                $values = array();
+            }elseif(!is_array($values) || array_keys($values) !== range(0, count($values) - 1)){
+                $values = array($values); // one value given without array
+            }
+            $details[self::fieldKey((string)$key)] = $values;
+        }
+        return $details;
+    }
+
+    /** @throws RecordEditException 400 for a key that is not a field id */
+    private static function fieldKey(string $key): int
+    {
+        if(preg_match('/^t:\d+$/', $key)){
+            throw RecordEditException::invalid('Detail key "'.$key.'" is the legacy format; use the field id "'.substr($key, 2).'"');
+        }
+        if(!preg_match('/^\d+$/', $key) || intval($key) < 1){
+            throw RecordEditException::invalid('Detail key "'.$key.'" is not a field id');
+        }
+        return intval($key);
     }
 
     /** True when the body has this header. */
@@ -164,9 +219,33 @@ final class RecordInput
         return $this->details;
     }
 
+    /** @return array<int,array<int,mixed>> dty => values appended (PATCH, plan 32) */
+    public function detailsAdd(): array
+    {
+        return $this->detailsAdd;
+    }
+
+    /** @return array<int,string> dty => value condition of the query format (PATCH, plan 32) */
+    public function detailsMatch(): array
+    {
+        return $this->detailsMatch;
+    }
+
+    /** @return array<int,int> Fields of details whose values are added when nothing matches (PATCH, plan 32). */
+    public function addIfNone(): array
+    {
+        return $this->addIfNone;
+    }
+
+    /** True when the body uses a PATCH option (detailsAdd, detailsMatch, addIfNone). */
+    public function hasPatchOptions(): bool
+    {
+        return !empty($this->detailsAdd) || !empty($this->detailsMatch) || !empty($this->addIfNone);
+    }
+
     /** Copy with other details (PATCH merge, stored values of forbidden fields). */
     public function withDetails(array $details): self
     {
-        return new self($this->headers, $details, true);
+        return new self($this->headers, $details, true, $this->detailsAdd, $this->detailsMatch, $this->addIfNone);
     }
 }
