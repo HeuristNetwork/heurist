@@ -2,8 +2,9 @@
 /**
 * RecordActionInterface.php - One record action applied to one record (plan 33)
 *
-* Outcome of run(): {status, reason?, message?, found?, added?, removed?}
+* Outcome of run(): {status, reason?, message?, found?, added?, removed?, relationships?, bookmarks?}
 *   status  changed | unchanged | skipped | error ("changed" = deleted for the delete action)
+*   relationships, bookmarks  delete: relationship records and bookmarks deleted with the record
 *   reason  of a skipped record: structure, rights, required, single_value, max,
 *           language_exists, blank, missing
 *

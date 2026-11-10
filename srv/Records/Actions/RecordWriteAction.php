@@ -79,8 +79,10 @@ final class RecordWriteAction implements RecordActionInterface
                     }
                     return $outcome;
                 default:
-                    $this->delete->delete($recordId, true);
-                    return array('status' => 'changed');
+                    $result = $this->delete->delete($recordId, true);
+                    return array('status' => 'changed',
+                        'relationships' => intval($result['relationshipsDeleted'] ?? 0),
+                        'bookmarks' => intval($result['bookmarks'] ?? 0));
             }
         }catch(RecordEditException $exception){
             return FieldValueAction::refusal($exception);

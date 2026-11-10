@@ -8,7 +8,9 @@
 *
 *   {action, field, fieldName, complete, stage (scope|records), done, total, lastRecordId,
 *    records: {scope, changed, unchanged, skipped, errors},
-*    skipped: {reason: count}, values: {found, added, removed},
+*    skipped: {reason: count}, values: {found, added, removed} (field value actions, else null),
+*    deleted: {relationships, bookmarks} (delete: relationship records and bookmarks deleted
+*    with the records, else null),
 *    ids: {changed, skipped, errors} (at most MAX_IDS each), idsTruncated,
 *    errors: [{id, message}] (at most MAX_ERRORS), seconds}
 *
@@ -58,6 +60,7 @@ final class RecordActionReport
             'records' => array('scope' => 0, 'changed' => 0, 'unchanged' => 0, 'skipped' => 0, 'errors' => 0),
             'skipped' => array(),
             'values' => array('found' => 0, 'added' => 0, 'removed' => 0),
+            'deleted' => array('relationships' => 0, 'bookmarks' => 0),
             'ids' => array('changed' => array(), 'skipped' => array(), 'errors' => array()),
             'idsTruncated' => false,
             'errors' => array(),
@@ -86,6 +89,9 @@ final class RecordActionReport
         $this->data['lastRecordId'] = $recordId;
         foreach(array('found', 'added', 'removed') as $key){
             $this->data['values'][$key] += intval($outcome[$key] ?? 0);
+        }
+        foreach(array('relationships', 'bookmarks') as $key){
+            $this->data['deleted'][$key] += intval($outcome[$key] ?? 0);
         }
         if($status === 'changed'){
             $this->data['records']['changed']++;
@@ -117,6 +123,7 @@ final class RecordActionReport
         $data['complete'] = $complete;
         $data['skipped'] = (object)$data['skipped'];
         if($data['field'] < 1){ $data['values'] = null; } // value counts: field value actions only
+        if($data['action'] !== 'delete'){ $data['deleted'] = null; }
         $data['seconds'] = round(microtime(true) - $this->startedAt, 1);
         return $data;
     }

@@ -732,7 +732,8 @@ final class RecordSaveService
         $given = count(array_filter($values, static function($value) use ($multilang){
             return $value !== null && $value !== '' && $value !== array() && (!$multilang || self::languageOf($value) === '');
         }));
-        if($row !== null && $row['max'] === 1 && $given > 0){
+        // a single-value field: a value is added only when the field has none (plan 33 review 2026-11-10)
+        if($row !== null && $row['max'] === 1 && $given > 0 && $stored + $given > 1){
             throw new RecordEditException(422, 'validation', 'Field "'.$name.'" has one value', array(
                 array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'single_value', 'severity'=>'error',
                     'message'=>'Field "'.$name.'" has one value: replace it with "details"')
