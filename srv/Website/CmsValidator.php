@@ -47,6 +47,11 @@ final class CmsValidator
     );
     /** A colour of the own theme of the header or footer (`colors`: bg, text), as CMS_LAYOUT_COLOR. */
     public const LAYOUT_COLOR = '/^(?:#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([0-9\s.,%deg\/]+\))$/i';
+    /** Header height / width and footer height (`layout.header.height|width`, `layout.footer.height`; review 2026-11-10),
+     *  as CMS_LAYOUT_SIZE: a number with px, em, rem, vh, vw or %. */
+    public const LAYOUT_SIZE = '/^\d{1,4}(?:\.\d{1,2})?(?:px|em|rem|vh|vw|%)$/';
+    /** The layout settings that are sizes (LAYOUT_SIZE). */
+    public const LAYOUT_SIZES = array('header' => array('height', 'width'), 'footer' => array('height'));
     /** Pages kept by the navigation mode swap (`layout.cache`). */
     public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
 
@@ -208,6 +213,12 @@ final class CmsValidator
         return null;
     }
 
+    /** A size of the header or footer (LAYOUT_SIZE). */
+    public static function isLayoutSize($value): bool
+    {
+        return is_string($value) && preg_match(self::LAYOUT_SIZE, trim($value)) === 1;
+    }
+
     /** Own colours of the header or footer: {bg, text}, each a colour (LAYOUT_COLOR). */
     public static function isLayoutColors($colors): bool
     {
@@ -249,6 +260,10 @@ final class CmsValidator
                 foreach($value as $name => $item){
                     if((string)$name === 'colors'){
                         if(!self::isLayoutColors($item)){ $problems[] = $key.'.colors must be {bg, text} colours'; }
+                        continue;
+                    }
+                    if(in_array((string)$name, self::LAYOUT_SIZES[$key], true)){
+                        if(!self::isLayoutSize($item)){ $problems[] = $key.'.'.$name.' must be a size such as 120px, 10em or 20%'; }
                         continue;
                     }
                     $allowed = self::LAYOUT[$key][(string)$name] ?? null;
