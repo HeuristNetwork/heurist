@@ -292,8 +292,7 @@ class Temporal {
                                 || strtolower($matches[0][0])=='avant');
 
                             if(@$timespan['start']){
-                                $timespan = array('timestamp' => array('in'=>$is_before?$timespan['start']['earliest']:$timespan['end']['latest']
-                                    ,'type'=>'s'));
+                                $timespan = array('timestamp' => array('in'=>$is_before?$timespan['start']['earliest']:$timespan['end']['latest'],'type'=>'s'));
                             }
 
                             if(@$timespan['timestamp']){
