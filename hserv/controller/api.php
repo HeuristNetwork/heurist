@@ -828,11 +828,12 @@ if($is_def_query){
 
     $factory = ServiceFactory::fromLegacySystem($system);
     // srv Smarty engine; the legacy renderer only converts templates on import/export.
-    // Job types: report-preview, report-generate (plan 12), export (plan 13) and website-build (plan 27b).
+    // Job types: report-preview, report-generate (plan 12), export (plan 13), website-build (plan 27b)
+    // and record-action (plan 33).
     $controller = $factory->jobController(array_merge($factory->reportJobHandlers(
         $factory->reportRenderer(new hserv\report\SmartyReportRenderer($system)),
         new hserv\report\ReportRecordWriter($system)
-    ), $factory->exportJobHandlers(), $factory->websiteJobHandlers()));
+    ), $factory->exportJobHandlers(), $factory->websiteJobHandlers(), $factory->recordActionJobHandlers()));
     $controller->handleRequest(
         $http_method,
         array_slice($requestUri, 4),

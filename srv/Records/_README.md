@@ -14,6 +14,8 @@ record editing of system record types (`Edit/`, plan 14).
 - `Presentation/PresentationRecordRepository.php` — direct definition records.
 - `Map/MapFeatureService.php` — GeoJSON feature production.
 - `Edit/RecordSaveService.php` — insert and update of records (see `Edit/_README.md`).
+- `Actions/` — record actions over a set of records, job `record-action` (plan 33, see `Actions/_README.md`).
+- `Query/RecordScope.php` — ids of a tool scope (query or selection, record types): export and actions.
 - `Entity/` — record-based entities `/{entity}/{id}/{action}`: registry, hooks and actions of a
   record type (plan 27d, see `Entity/_README.md`).
 - `Store/` — the record access layer (plan 15, heurist-explorer

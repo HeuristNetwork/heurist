@@ -400,8 +400,10 @@ final class RecordSaveService
      * values are validated, and the title, calculated fields and child titles are updated only
      * when they depend on a changed field (FieldDependencies).
      *
-     * @return array{recordId:int,created:bool,issues:array<int,array>,changed:array<int,int>}
-     *         changed = field => number of removed + inserted value rows
+     * @return array{recordId:int,created:bool,issues:array<int,array>,changed:array<int,int>,values:array<int,array>}
+     *         changed = field => number of removed + inserted value rows;
+     *         values = field => {found, added, removed}: found = the matched values (with a
+     *         condition) or the stored ones (record actions report them, plan 33)
      * @throws RecordEditException
      */
     private function patchFields(int $recordId, RecordInput $input, bool $force, bool $dryRun): array
@@ -445,25 +447,28 @@ final class RecordSaveService
         $deleteIds = array();
         $insert = array();
         $changed = array();
-        foreach($replace as $fieldId => $values){
+        $values = array();
+        foreach($replace as $fieldId => $sent){
             $fieldRows = $newRows[$fieldId] ?? array();
             $stored = $counts[$fieldId] ?? 0;
             if(!isset($match[$fieldId])){
                 $deleteFields[] = $fieldId;
                 $remaining = count($fieldRows);
-                $changed[$fieldId] = $stored + count($fieldRows);
+                $values[$fieldId] = array('found'=>$stored, 'added'=>count($fieldRows), 'removed'=>$stored);
             }elseif(!empty($matched[$fieldId])){
                 $deleteIds = array_merge($deleteIds, $matched[$fieldId]);
                 $remaining = $stored - count($matched[$fieldId]) + count($fieldRows);
-                $changed[$fieldId] = count($matched[$fieldId]) + count($fieldRows);
+                $found = count($matched[$fieldId]);
+                $values[$fieldId] = array('found'=>$found, 'added'=>count($fieldRows), 'removed'=>$found);
             }elseif(in_array($fieldId, $addIfNone, true)){
                 $remaining = $stored + count($fieldRows);
-                $changed[$fieldId] = count($fieldRows);
+                $values[$fieldId] = array('found'=>0, 'added'=>count($fieldRows), 'removed'=>0);
             }else{
                 $fieldRows = array(); // nothing matches: no change
                 $remaining = $stored;
-                $changed[$fieldId] = 0;
+                $values[$fieldId] = array('found'=>0, 'added'=>0, 'removed'=>0);
             }
+            $changed[$fieldId] = $values[$fieldId]['added'] + $values[$fieldId]['removed'];
             if($remaining === 0 && ($structure[$fieldId]['requirement'] ?? '') === 'required'){
                 $name = $structure[$fieldId]['name'];
                 throw new RecordEditException(422, 'validation', 'Field "'.$name.'" is required', array(
@@ -473,17 +478,25 @@ final class RecordSaveService
             }
             $insert = array_merge($insert, $fieldRows);
         }
-        foreach($add as $fieldId => $values){
+        foreach($add as $fieldId => $sent){
             $fieldRows = $newRows[$fieldId] ?? array();
-            $this->checkAdd($recordId, $rectype, $fieldId, $values, $counts[$fieldId] ?? 0, $issues);
+            $this->checkAdd($recordId, $rectype, $fieldId, $sent, $counts[$fieldId] ?? 0, $issues);
             $insert = array_merge($insert, $fieldRows);
             $changed[$fieldId] = count($fieldRows);
+            $values[$fieldId] = array('found'=>$counts[$fieldId] ?? 0, 'added'=>count($fieldRows), 'removed'=>0);
         }
+        $answer = array('recordId'=>$recordId, 'created'=>false, 'issues'=>$issues, 'changed'=>$changed, 'values'=>$values);
         if($dryRun){
-            return array('recordId'=>$recordId, 'created'=>false, 'issues'=>$issues, 'changed'=>$changed);
+            return $answer;
         }
 
         $changedFields = array_keys(array_filter($changed));
+        $headerChanged = $this->headerChanged($plan, $input);
+        $answer['header'] = $headerChanged;
+        if(empty($changedFields) && !$headerChanged){
+            // nothing matched and the header is as stored: no write, rec_Modified stays (plan 33)
+            return $answer;
+        }
         $affected = $this->dependencies !== null ? $this->dependencies->affected($rectype, $changedFields) : null;
         $childBefore = array();
         foreach($affected['childFields'] ?? array() as $fieldId){
@@ -515,7 +528,150 @@ final class RecordSaveService
             $database->rollback();
             throw $exception;
         }
-        return array('recordId'=>$recordId, 'created'=>false, 'issues'=>$issues, 'changed'=>$changed);
+        return array('issues'=>$issues) + $answer;
+    }
+
+    /** True when the input sets a header field (owner, visibility, groups, URL, scratchpad). */
+    private function writesHeader(RecordInput $input): bool
+    {
+        foreach(array('rec_OwnerUGrpID', 'rec_NonOwnerVisibility', 'rec_NonOwnerVisibilityGroups',
+            'rec_EditGroups', 'rec_URL', 'rec_ScratchPad') as $header){
+            if($input->has($header)){ return true; }
+        }
+        return false;
+    }
+
+    /**
+     * True when the sent header fields differ from the stored ones: owner, visibility, view and
+     * edit groups, URL, scratchpad (the Actions tool reports unchanged records, plan 33).
+     */
+    private function headerChanged(array $plan, RecordInput $input): bool
+    {
+        if(!$this->writesHeader($input)){ return false; }
+        $stored = $plan['stored'];
+        $ids = static function(array $list): array {
+            $list = array_values(array_unique(array_map('intval', $list)));
+            sort($list);
+            return $list;
+        };
+        if($plan['owner'] !== intval($plan['currentOwners']['owner'])
+            || $plan['visibility'] !== (string)$stored['rec_NonOwnerVisibility']
+            || ($input->has('rec_URL') && (string)$plan['url'] !== (string)($stored['rec_URL'] ?? ''))
+            || ($input->has('rec_ScratchPad') && (string)$plan['scratchPad'] !== (string)($stored['rec_ScratchPad'] ?? ''))){
+            return true;
+        }
+        $storedEdit = $this->withoutOwner($plan['currentOwners']['editGroups'] ?? array(), $plan['owner']);
+        if($ids($plan['editGroups']) !== $ids($storedEdit)){ return true; }
+        $storedView = $this->store->records()->owners(array($plan['recordId']))[$plan['recordId']]['viewGroups'] ?? array();
+        return $ids($plan['viewGroups']) !== $ids($storedView);
+    }
+
+    // -------------------------------------------------------------- record actions (plan 33)
+
+    /**
+     * Fill the title of a record again from the title mask of its record type (Actions tool
+     * "Rebuild record titles"). A changed title is written, with the titles of the children that
+     * use it; a mask that gives no text is not written (status "blank").
+     *
+     * @return array{status:string,title:string} status changed | unchanged | blank
+     * @throws RecordEditException 403, 404
+     */
+    public function rebuildTitle(int $recordId): array
+    {
+        $stored = $this->editableHeader($recordId);
+        $rectype = intval($stored['rec_RecTypeID']);
+        $old = (string)$stored['rec_Title'];
+        $mask = trim((string)($this->definitions->rectype($rectype)['titleMask'] ?? ''));
+        $title = $this->titleMask !== null && $mask !== '' ? $this->titleMask->fill($recordId) : null;
+        if($title === null){
+            if($mask !== '' && $this->titleMask !== null){
+                return array('status' => 'blank', 'title' => $old);
+            }
+            $title = $this->titleFromValues($recordId);
+        }
+        if($title === $old){
+            return array('status' => 'unchanged', 'title' => $old);
+        }
+        $database = $this->store->database();
+        $database->beginTransaction();
+        try{
+            $this->store->setUser($this->runtime->userId);
+            $this->store->setTitle($recordId, $title);
+            if($this->titleMask !== null){
+                $children = $this->childIds($recordId, $rectype);
+                if(!empty($children)){ $this->refreshTitles($children, $recordId); }
+            }
+            $database->commit();
+        }catch(Throwable $exception){
+            $database->rollback();
+            throw $exception;
+        }
+        return array('status' => 'changed', 'title' => $title);
+    }
+
+    /**
+     * Run the calculated fields of a record again (Actions tool "Rebuild calculation fields");
+     * only changed values are written (CalculatedFields), then the title and child titles when
+     * they depend on a changed field (FieldDependencies).
+     *
+     * @return array{status:string,fields:array<int,int>,errors:array<int,string>} status changed |
+     *         unchanged | error (a formula failed and nothing changed); errors = field => message
+     * @throws RecordEditException 403, 404
+     */
+    public function rebuildCalculated(int $recordId): array
+    {
+        $stored = $this->editableHeader($recordId);
+        $rectype = intval($stored['rec_RecTypeID']);
+        if($this->calculated === null || empty($this->definitions->calculatedFields($rectype))){
+            return array('status' => 'unchanged', 'fields' => array(), 'errors' => array());
+        }
+        $changed = array();
+        $issues = array();
+        $database = $this->store->database();
+        $database->beginTransaction();
+        try{
+            $this->store->setUser($this->runtime->userId);
+            $errors = $this->calculated->update($recordId, $rectype, null, $changed);
+            if(!empty($changed)){
+                $affected = $this->dependencies !== null ? $this->dependencies->affected($rectype, $changed) : null;
+                if($affected !== null){ $affected['calc'] = array(); } // all were run just now
+                $this->recalculate($recordId, $rectype, $stored, $affected, array(), $issues);
+            }
+            $database->commit();
+        }catch(Throwable $exception){
+            $database->rollback();
+            throw $exception;
+        }
+        $status = !empty($changed) ? 'changed' : (!empty($errors) ? 'error' : 'unchanged');
+        return array('status' => $status, 'fields' => $changed, 'errors' => $errors);
+    }
+
+    /**
+     * Header of a record the user may edit.
+     *
+     * @throws RecordEditException 403, 404
+     */
+    private function editableHeader(int $recordId): array
+    {
+        $this->permissions->assertAccount('edit');
+        $stored = $this->store->records()->header($recordId);
+        if($stored === null){
+            throw RecordEditException::notFound('Record '.$recordId.' does not exist');
+        }
+        $owners = $this->permissions->owners($recordId);
+        if(!$this->permissions->canEditOwned($owners['owner'], $owners['editGroups'])){
+            throw RecordEditException::denied('You cannot change record '.$recordId
+                .'; you must be the database administrator or a member of a group that owns it');
+        }
+        return $stored;
+    }
+
+    /** Title from the values when there is no title mask (DT_NAME, else "Record NNN"). */
+    private function titleFromValues(int $recordId): string
+    {
+        $rows = array_map(static fn($row) => array('dty' => $row['field'], 'value' => $row['value']),
+            $this->store->records()->details(array($recordId)));
+        return $this->title->fromRows($rows, $recordId);
     }
 
     /**
@@ -626,7 +782,7 @@ final class RecordSaveService
         }
         $state = new SqlBuildContext();
         try{
-            $sql = $this->matcher->valueCondition($fieldId, $condition, $state);
+            $sql = $this->matcher->valueCondition($fieldId, $condition, $state, 'd', null, true);
         }catch(QueryValidationException $exception){
             throw new RecordEditException(422, 'validation', $exception->getMessage(), array(
                 array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'match', 'severity'=>'error',

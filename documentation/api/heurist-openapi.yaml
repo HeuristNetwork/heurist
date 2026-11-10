@@ -4077,7 +4077,9 @@ paths:
         Validates the parameters, creates the job and answers 202 with the queued job; the connection is closed and
         the same server process runs the job. Poll GET /jobs/{jobId} for progress. Job types: export (record export
         into a file, parameters ExportJobParams), report-preview (report: record id, or body; ids, replevel, language: language
-        of the test run) and report-generate (output: record id; result outputId, format, size, records) (Smarty reports). One active
+        of the test run), report-generate (output: record id; result outputId, format, size, records) (Smarty reports) and
+        record-action (Explorer Actions tool, plan 33: add, replace or delete values of a field in the records of a scope,
+        parameters RecordActionJobParams; the result is the report, also of a stopped or failed job). One active
         job of the same type per user (a second start is refused with 403; a report-preview replaces the older one)
         and at most maxJobs active jobs per database. Record export has no streaming endpoint by design: a job has
         limits, Stop, progress and a result file that only its owner can download.
@@ -4101,9 +4103,11 @@ paths:
                   - export
                   - report-preview
                   - report-generate
+                  - record-action
                 params:
                   oneOf:
                   - $ref: '#/components/schemas/ExportJobParams'
+                  - $ref: '#/components/schemas/RecordActionJobParams'
                   - type: object
                     description: Parameters of the report job types.
             example:
@@ -4463,6 +4467,36 @@ components:
         error:
           type: string
           nullable: true
+    RecordActionJobParams:
+      type: object
+      description: >-
+        Parameters of the job record-action (plan 33). Every record is saved by the field-level PATCH (plan 32) in its
+        own transaction; records that break its rules (last value of a required field, too many values, field not in
+        the record type, no rights) are skipped and counted in the report.
+      required: [action, scope]
+      properties:
+        action: {type: string, enum: [field-add, field-replace, field-delete, ownership, titles, calculations, delete]}
+        title: {type: string}
+        scope:
+          type: object
+          description: Query of the data source, or ids (the selection) instead; optionally only some record types.
+          properties:
+            query: {description: Query (array or text)}
+            ids: {type: array, items: {type: integer}}
+            rectypes: {type: array, items: {type: integer}}
+        field: {type: integer, description: 'Field id: freetext, blocktext, date, float or enum'}
+        values: {type: array, items: {type: string}, description: New values (add, replace)}
+        match: {type: string, description: 'Value condition of the query format (=x, x, x%, -x, a<>b ...); empty = all values'}
+        addIfNone: {type: boolean, description: 'Replace with a condition: add the values when none matches'}
+        owner: {type: integer, description: 'ownership: owner (0 = any logged-in user)'}
+        visibility: {type: string, enum: [hidden, viewable, public, pending], description: ownership}
+        viewGroups: {type: array, items: {type: integer}, description: 'ownership: groups that can view a viewable record'}
+        password:
+          type: string
+          format: password
+          description: >-
+            delete: the server password ($passwordForServerFunctions) for more than 10 records; checked when the job
+            starts and never stored. Half of the database or more: only the database owner.
     ExportJobParams:
       type: object
       description: >-

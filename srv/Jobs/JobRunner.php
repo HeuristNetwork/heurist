@@ -174,6 +174,8 @@ final class JobRunner
             if($reason !== null){
                 $final['status'] = $reason;
                 $final['error'] = (new JobInterruptedException($reason))->getMessage();
+                // a job with a result so far finished all its work: its result stays
+                if($context->hasPartialResult()){ $final['result'] = $result; }
             }else{
                 $final['status'] = 'done';
                 $final['result'] = $result;
@@ -182,11 +184,14 @@ final class JobRunner
             $final = $context->job();
             $final['status'] = $error->reason();
             $final['error'] = $error->getMessage();
+            if($context->hasPartialResult()){ $final['result'] = $context->partialResult(); }
         }catch(Throwable $error){
             $final = $context->job();
             $reason = $context->interruption();
             $final['status'] = $reason ?? 'failed';
             $final['error'] = $reason !== null ? (new JobInterruptedException($reason))->getMessage() : $error->getMessage();
+            // work that stays done (e.g. records saved one by one) is reported also after a failure
+            if($context->hasPartialResult()){ $final['result'] = $context->partialResult(); }
         }
         $final['finishedAt'] = time();
         $final['heartbeat'] = time();

@@ -35,8 +35,12 @@ has a time limit; Stop also runs `KILL QUERY` on the connections a job registere
 Job types are supplied by the caller (`hserv/controller/api.php`):
 `report-preview` and `report-generate` (`Reports/Jobs/ReportPreviewJob.php`,
 `ReportGenerateJob.php`, built by `Runtime\ServiceFactory::reportJobHandlers()`),
-`export` (`Records/Export/ExportJob.php`, `ServiceFactory::exportJobHandlers()`, plan 13) and
-`website-build` (`Website/Build/WebsiteBuildJob.php`, `ServiceFactory::websiteJobHandlers()`, plan 27b).
+`export` (`Records/Export/ExportJob.php`, `ServiceFactory::exportJobHandlers()`, plan 13),
+`website-build` (`Website/Build/WebsiteBuildJob.php`, `ServiceFactory::websiteJobHandlers()`, plan 27b) and
+`record-action` (`Records/Actions/RecordActionJob.php`, `ServiceFactory::recordActionJobHandlers()`, plan 33).
+
+A job whose finished work stays (records saved one by one) gives `JobContext::setPartialResult(callable)`:
+when it is stopped, times out or fails, `JobRunner` stores the result so far as the job `result`.
 The endpoints are in `documentation/api/heurist-openapi.yaml` (tag Jobs).
 
 ## Key files

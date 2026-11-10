@@ -31,6 +31,8 @@ final class JobContext
     private array $job;
     private float $startedAt;
     private float $lastWrite = 0.0;
+    /** @var callable|null fn(): array result so far, stored when the job stops early (setPartialResult) */
+    private $partialResult = null;
 
     /**
      * @param JobStore $store Job storage.
@@ -106,6 +108,30 @@ final class JobContext
             $this->job['connectionIds'][] = $connectionId;
             $this->write();
         }
+    }
+
+    /**
+     * Result so far of a job whose finished work stays (records saved one by one): when the
+     * job is stopped, times out or fails, JobRunner stores it as the job result, so the user
+     * sees what was done. Called only when the job ends.
+     *
+     * @param callable|null $result fn(): array, the result so far (null = none).
+     */
+    public function setPartialResult(?callable $result): void
+    {
+        $this->partialResult = $result;
+    }
+
+    /** True when the job gave a result so far (setPartialResult). */
+    public function hasPartialResult(): bool
+    {
+        return $this->partialResult !== null;
+    }
+
+    /** Result so far (setPartialResult); null when the job set none. */
+    public function partialResult(): ?array
+    {
+        return $this->partialResult !== null ? (array)call_user_func($this->partialResult) : null;
     }
 
     /** Store result content (e.g. preview HTML), read back by GET /jobs/{id}/result. */
