@@ -144,13 +144,6 @@ class System {
             return false;
         }
 
-        // Enforce MPCE database migration to heurist.huma-num.fr before any DB connection attempt.
-        $mpce_check = USystem::enforceMPCEHumaNumDomain($db);
-        if (!empty($mpce_check['fatal_message'])) {
-            $this->addError(HEURIST_ACTION_BLOCKED, $mpce_check['fatal_message'], null, 'Problem opening database');
-            return false;
-        }        
-
         $res = mysql__init($this->dbnameFull);
         $this->timingMark('db');
 
@@ -1379,6 +1372,7 @@ class System {
                     "sysinfo" => [
                         "help" => HEURIST_HELP,
                         "version" => HEURIST_VERSION,
+                        "php_version" => PHP_VERSION,
                         "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
                         "baseURL" => HEURIST_BASE_URL,
                         'baseURL_pro' => HEURIST_BASE_URL_PRO,
@@ -1428,6 +1422,7 @@ class System {
                     "db_managers_groupid" => ($this->settings->get('sys_OwnerGroupID') > 0 ? $this->settings->get('sys_OwnerGroupID') : 1),
                     "help" => HEURIST_HELP,
                     "version" => HEURIST_VERSION,
+                    "php_version" => PHP_VERSION,
                     "version_new" => $lastCode_VersionOnServer,
                     "db_version" => getDbVersion($this->getMysqli()),
                     "db_version_req" => HEURIST_MIN_DBVERSION,

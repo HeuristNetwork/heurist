@@ -35,7 +35,7 @@ $language = array_key_exists('lang', $requestParameters) ? $requestParameters['l
 $language = getLangCode3($language);
 
 $system = new hserv\System();
-if(!$system->init($database, true, false)){
+if(!$system->init($database)){
     echo 'Unable to initialise Heurist System.';
     exit;
 }
@@ -47,7 +47,7 @@ $files = [];
 $hasPDFFile = false;
 $__getFileDetails = function($ulfWhereClause) use ($mysqli, $isLoggedIn, $language, $database, &$hasPDFFile, &$files){
 
-    $ulfWhereClause .= $isLoggedIn ? ' AND ulf_WhoCanView="viewable"' : '';
+    $ulfWhereClause .= !$isLoggedIn ? ' AND ulf_WhoCanView="viewable"' : '';
 
     $ulfRecords = mysql__select_assoc($mysqli, "SELECT * FROM recUploadedFiles WHERE {$ulfWhereClause}", 0);
 
@@ -125,13 +125,15 @@ if($imageURL !== ''){
     $__getFileDetails($ulfQuery);
 }else{
 
-    $record = mysql__select_row_assoc($mysqli, "SELECT rec_ID, rec_NonOwnerVisibility, rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = {$recID}");
-    if(!$record || empty($record)){
-        echo "Cannot retrieve record #{$recID}";
+    $recordset = recordSearch($system, ['q' => "ids:{$recID}", 'detail' => ['rec_NonOwnerVisibility','rec_OwnerUGrpID','rec_RecTypeID']]);
+    if(empty($recordset['data']['records'])){
+        echo $system->hasAccess(1) ? "Cannot find record #{$recID}" : "<strong style='color: red;'>You do not have permission to view this record</strong>";
         exit;
     }
 
-    $record['details'] = [];
+    $currentRecord = $recordset['data']['records'][$recID];
+    $record = ['rec_ID' => $recID, 'rec_NonOwnerVisibility' => $currentRecord[1], 'rec_OwnerUGrpID' => $currentRecord[2], 'rec_RecTypeID' => $currentRecord[3], 'details' => []];
+
     recordSearchDetails($system, $record, ['file']);
     if($record['details'] === []){
         echo "No files to display in record #{$recID}";
@@ -155,6 +157,11 @@ if($imageURL !== ''){
     $ulfQuery = count($fileIDs) === 1 ? "ulf_ID = {$fileIDs[0]}" : 'ulf_ID IN (' . implode(',', $fileIDs) . ')';
 
     $__getFileDetails($ulfQuery);
+}
+
+if(empty($files)){
+    echo 'No files to display';
+    exit;
 }
 ?>
 
@@ -399,6 +406,10 @@ if($imageURL !== ''){
                 }
 
                 const file = files[fileIndex];
+                if(!file){
+                    showError('No file to display');
+                    return;
+                }
 
                 if(file.type === 'pdf'){
                     showPDFPage(fileIndex, 1);
@@ -479,7 +490,7 @@ if($imageURL !== ''){
                         if(fileElement){
                             fileElement.textContent = `File ${fileIndex + 1} of ${files.length}`;
                         }
-                    }else{console.log('hide', fileControls);
+                    }else{
                         fileControls.style.display = 'none';
                     }
                 }

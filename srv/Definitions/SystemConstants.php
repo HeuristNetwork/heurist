@@ -213,6 +213,7 @@ final class SystemConstants
         'DT_CMS_TARGET' => array('dty', '99-949'),
         'DT_CMS_HEADER' => array('dty', '2-929'),
         'DT_CMS_CSS' => array('dty', '99-946'),
+        'DT_CMS_BANNER' => array('dty', '99-951'), // banner image: background of the website header (plan 27f §13)
         'DT_CMS_PAGETITLE' => array('dty', '99-952'), //show page title above content
         'DT_CMS_TOPMENUSELECTABLE' => array('dty', '2-938'), // allow top menu to be selectable, if a submenu is present
         'DT_CMS_SCRIPT' => array('dty', '2-927'),
