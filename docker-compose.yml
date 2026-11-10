@@ -73,7 +73,6 @@ services:
       HEURIST_SERVER_NAME: ${HEURIST_SERVER_NAME:-}
       HEURIST_BASE_URL: ${HEURIST_BASE_URL:-}
       HEURIST_PUBLIC_PATH: ${HEURIST_PUBLIC_PATH:-}
-      XDEBUG_MODE: debug
       XDEBUG_CONFIG: "client_host=host.docker.internal client_port=9003 start_with_request=yes"
     extra_hosts:
       - "host.docker.internal:host-gateway"

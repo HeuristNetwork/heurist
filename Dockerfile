@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" gd mbstring mysqli pdo_mysql zip \
-    && pecl install xdebug && docker-php-ext-enable xdebug \
+    && pecl install xdebug \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 
