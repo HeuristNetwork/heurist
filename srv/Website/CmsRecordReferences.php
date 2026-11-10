@@ -3,7 +3,8 @@
 * CmsRecordReferences.php - Record ids a v4 page refers to (check of a website, review 2026-11-08)
 *
 * Picked records only, queries are not followed:
-*   field     `data-h-field="<id>.<field>"` (not `website.` / `page.`)
+*   field     `data-h-field="<id>.<field>"`; `website.` / `page.` give the website / page id with `own` (only the
+*             visibility of the field and its values is checked for them)
 *   media     media element, `config.media[id].settings.record`
 *   report    Generated report widget, `settings.files{language: output id}`
 *   cards     Record cards widget with manual records, `settings.query[0].ids`
@@ -32,9 +33,12 @@ final class CmsRecordReferences
      *
      * @param array $config Parsed configuration (CmsValidator::parse()['config']) of the record the parts belong to.
      * @param array<int,string> $parts HTML fragments (content, or header and footer).
-     * @return array<int,array{id:int,node:string,kind:string}>
+     * @param int $websiteId Record of `website.` field references (0: none).
+     * @param int $pageId Record of `page.` field references.
+     * @return array<int,array{id:int,node:string,kind:string,field?:string,own?:bool}> `field`: id or concept code of a
+     *         record field.
      */
-    public static function collect(array $config, array $parts): array
+    public static function collect(array $config, array $parts, int $websiteId = 0, int $pageId = 0): array
     {
         $instances = is_array($config['instances'] ?? null) ? $config['instances'] : array();
         $media = is_array($config['media'] ?? null) ? $config['media'] : array();
@@ -42,8 +46,12 @@ final class CmsRecordReferences
         foreach($parts as $html){
             foreach(CmsHtml::nodes((string)$html) as $node){
                 $name = (string)($node['node'] !== '' ? $node['node'] : ($node['instance'] ?? ''));
-                if($node['field'] !== null && preg_match('/^(\d+)\./', $node['field'], $match) === 1){
-                    $result[] = array('id' => intval($match[1]), 'node' => $name, 'kind' => 'field');
+                if($node['field'] !== null && preg_match('/^(website|page|\d+)\.(\d+(?:-\d+)?)$/', $node['field'], $match) === 1){
+                    $own = !ctype_digit($match[1]);
+                    $id = $match[1] === 'website' ? $websiteId : ($match[1] === 'page' ? $pageId : intval($match[1]));
+                    if($id > 0){
+                        $result[] = array('id' => $id, 'node' => $name, 'kind' => 'field', 'field' => $match[2]) + ($own ? array('own' => true) : array());
+                    }
                 }
                 if($node['media'] !== null && is_array($media[$node['media']] ?? null)){
                     $record = intval($media[$node['media']]['settings']['record'] ?? 0);

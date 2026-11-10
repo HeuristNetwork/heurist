@@ -70,6 +70,7 @@ use Heurist\Files\Upload\ChunkedUpload;
 use Heurist\Records\Edit\RecordTitle;
 use Heurist\Records\Edit\TitleMask;
 use Heurist\Records\Edit\CalculatedFields;
+use Heurist\Records\Edit\FieldDependencies;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Edit\RecordValidator;
 use Heurist\Records\Data\RecordDataService;
@@ -499,8 +500,9 @@ final class ServiceFactory
             'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS')
         ), null, $this->javaScriptAllowed());
         // website format v4 (plan 27a): configuration and hosts of website and page records
-        $validator->addRecordCheck(new CmsRecordCheck(
-            (new WebsiteRepository($this->database, $this->runtime))->codes(), $this->runtime->baseUrl));
+        $cmsCodes = (new WebsiteRepository($this->database, $this->runtime))->codes();
+        $validator->addRecordCheck(new CmsRecordCheck($cmsCodes, $this->runtime->baseUrl),
+            array($cmsCodes['home'] ?? 0, $cmsCodes['page'] ?? 0));
         $calculated = new CalculatedFields($definitions, $store, function(string $formula, int $recordId): array {
             return $this->smartyRunner()->run(array('body' => $formula), array($recordId),
                 array('mode' => 'txt', 'purpose' => 'render', 'record' => true));
@@ -518,7 +520,7 @@ final class ServiceFactory
                 'content' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
                 'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS'),
                 'workflowStage' => $this->codes->id('DT_WORKFLOW_STAGE')
-            ), $titleMask, $calculated),
+            ), $titleMask, $calculated, new FieldDependencies($definitions, $titleMask, $this->entityDirectory)),
             'delete' => new RecordDeleteService($store, $permissions, $definitions, $this->runtime)
         );
     }

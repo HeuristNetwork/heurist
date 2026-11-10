@@ -288,7 +288,7 @@ public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
      * @param string $output Output format hint (e.g., 'csv'). Primarily affects detail level in `mysql__select_all`.
      * @return array|null An array of associative arrays representing the fetched rows, or null on error.
      */
-public static function getRecordsFromImportTable2( $import_table, $id_field, $mode, $mapping, $offset, $limit=100, $output ){
+public static function getRecordsFromImportTable2( $import_table, $id_field, $mode, $mapping, $offset, $limit, $output ){
 
     self::initialize();
 

@@ -68,6 +68,9 @@ final class RecordValidator
     private array $files = array();
     /** @var array<int,callable> Checks of a whole record (rectype, details, result), e.g. the website format v4. */
     private array $recordChecks = array();
+    /** @var array<int,int> Record types of the record checks (plan 32); empty = a check without a list (all types). */
+    private array $recordCheckTypes = array();
+    private bool $recordCheckAllTypes = false;
 
     /**
      * @param DatabaseInterface $database Database of the record.
@@ -103,7 +106,9 @@ final class RecordValidator
      * @param array<int,array<int,mixed>> $details dty => values (RecordInput::details()).
      * @param array $options checkPointers (default true): target records must exist and
      *        match the constraint; checkVocabulary (default true): terms must be in the
-     *        field vocabulary; required (default true): check required fields.
+     *        field vocabulary; required (default true): check required fields;
+     *        recordDetails: details given to the record checks (addRecordCheck) instead of
+     *        $details (PATCH of some fields: the whole record, plan 32).
      */
     public function validate(int $rectypeId, array $details, array $options = array()): ValidationResult
     {
@@ -161,7 +166,7 @@ final class RecordValidator
         }
 
         foreach($this->recordChecks as $check){
-            $check($rectypeId, $details, $result);
+            $check($rectypeId, $options['recordDetails'] ?? $details, $result);
         }
 
         if($options['required'] ?? true){
@@ -185,10 +190,23 @@ final class RecordValidator
      * services the record layer does not know (the website format v4, plan 27a).
      *
      * @param callable(int,array,ValidationResult):void $check Record type, details as given, result.
+     * @param array<int,int> $rectypes Record types the check is for (empty = it may be for any type).
      */
-    public function addRecordCheck(callable $check): void
+    public function addRecordCheck(callable $check, array $rectypes = array()): void
     {
         $this->recordChecks[] = $check;
+        $rectypes = array_values(array_filter(array_map('intval', $rectypes)));
+        if(empty($rectypes)){
+            $this->recordCheckAllTypes = true;
+        }else{
+            $this->recordCheckTypes = array_values(array_unique(array_merge($this->recordCheckTypes, $rectypes)));
+        }
+    }
+
+    /** Whether a record check needs the whole record of this type (PATCH reads the stored values then, plan 32). */
+    public function hasRecordCheck(int $rectypeId): bool
+    {
+        return $this->recordCheckAllTypes || in_array($rectypeId, $this->recordCheckTypes, true);
     }
 
     /** True for a valid non-owner visibility value. */

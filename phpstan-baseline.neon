@@ -313,12 +313,6 @@ parameters:
 			path: hserv/records/import/importParser.php
 
 		-
-			message: '#^Deprecated in PHP 8\.0\: Required parameter \$output follows optional parameter \$limit\.$#'
-			identifier: parameter.requiredAfterOptional
-			count: 1
-			path: hserv/records/import/importSession.php
-
-		-
 			message: '#^Static call to instance method ElasticSearch\:\:buildIndexForRectype\(\)\.$#'
 			identifier: method.staticCall
 			count: 1

@@ -8,9 +8,16 @@
 *     (import); owner is the current user and visibility "viewable" unless the
 *     body gives them (defaults of website pages: Website/WebsiteEntityHandler, plan 27d);
 *   - update: PUT replaces the whole record (missing fields and groups are
-*     cleared), PATCH replaces only the fields in the body ([] clears one) and
-*     keeps missing headers; rec_Modified of the body must match the stored one
-*     unless forced (409);
+*     cleared); rec_Modified of the body must match the stored one unless forced (409);
+*   - PATCH (plan 32, patchFields): only the fields of the body are written, the other
+*     rows stay as they are; missing headers are kept. "details" replaces the values of
+*     a field ([] deletes it; a required field is never left empty), "detailsAdd" appends
+*     values to a multi-value field, "detailsMatch" limits replace / delete to the values
+*     that match a value condition of the query format (FieldPredicateCompiler), "addIfNone"
+*     adds the new values when nothing matches. Only the sent values are validated (record
+*     checks such as CmsRecordCheck get the whole record); the title, the calculated fields
+*     and the child titles are updated only when FieldDependencies says they depend on a
+*     changed field;
 *   - values of forbidden fields are kept as stored;
 *   - workflow stage (sysWorkflowRules): an allowed stage sets the owner and
 *     visibility of its rule, a refused stage keeps the stored stage (no emails);
@@ -37,6 +44,10 @@ declare(strict_types=1);
 namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Records\Query\Compiler\FieldPredicateCompiler;
+use Heurist\Records\Query\Compiler\SqlBuildContext;
+use Heurist\Records\Query\Compiler\SqlTables;
+use Heurist\Records\Query\QueryValidationException;
 use Heurist\Records\Store\RecordStore;
 use Heurist\Records\Store\SplitValues;
 use Heurist\Runtime\DatabaseSettings;
@@ -54,6 +65,8 @@ final class RecordSaveService
     private RecordTitle $title;
     private ?TitleMask $titleMask;
     private ?CalculatedFields $calculated;
+    private ?FieldDependencies $dependencies;
+    private ?FieldPredicateCompiler $matcher = null;
     /** @var array<string,int> cmsPage, workflowStage */
     private array $codes;
 
@@ -62,6 +75,7 @@ final class RecordSaveService
      *        cmsTranslations (DT_CMS_PAGE_TRANSLATIONS), workflowStage (DT_WORKFLOW_STAGE).
      * @param TitleMask|null $titleMask Title from the mask of the record type (null: DT_NAME only).
      * @param CalculatedFields|null $calculated Calculated fields run on save (null: none).
+     * @param FieldDependencies|null $dependencies What a PATCH recalculates (null: built in memory from $titleMask).
      */
     public function __construct(
         RecordStore $store,
@@ -72,7 +86,8 @@ final class RecordSaveService
         RecordTitle $title,
         array $codes = array(),
         ?TitleMask $titleMask = null,
-        ?CalculatedFields $calculated = null
+        ?CalculatedFields $calculated = null,
+        ?FieldDependencies $dependencies = null
     ) {
         $this->store = $store;
         $this->validator = $validator;
@@ -83,6 +98,7 @@ final class RecordSaveService
         $this->codes = array_map('intval', $codes);
         $this->titleMask = $titleMask;
         $this->calculated = $calculated;
+        $this->dependencies = $dependencies ?? ($titleMask !== null ? new FieldDependencies($definitions, $titleMask) : null);
     }
 
     /**
@@ -107,7 +123,13 @@ final class RecordSaveService
             throw RecordEditException::invalid('rec_ID of the body ('.$input->intHeader('rec_ID').') differs from the record id of the URL ('.$pathId.')');
         }
         $this->permissions->assertAccount($insert ? 'add' : 'edit');
-        $plan = $insert ? $this->planInsert($pathId, $input) : $this->planUpdate($pathId, $input, $method === 'PATCH', $force);
+        if($method === 'PATCH'){
+            return $this->patchFields($pathId, $input, $force, $dryRun);
+        }
+        if($input->hasPatchOptions()){
+            throw RecordEditException::invalid('detailsAdd, detailsMatch and addIfNone are options of PATCH');
+        }
+        $plan = $insert ? $this->planInsert($pathId, $input) : $this->planUpdate($pathId, $input, $force);
 
         $result = $this->validator->validate($plan['rectype'], $plan['details']);
         $issues = $result->issues();
@@ -215,6 +237,17 @@ final class RecordSaveService
             $pending = array_merge(array_diff($before['children'], $after['children']),
                 array_diff($after['children'], $before['children']));
         }
+        $this->refreshTitles($pending, $recordId);
+    }
+
+    /**
+     * Fill the titles of some child records again; a changed title goes on to their own children.
+     *
+     * @param array<int,int> $pending Child record ids.
+     * @param int $recordId The saved record (not refreshed).
+     */
+    private function refreshTitles(array $pending, int $recordId): void
+    {
         $parentField = $this->titleMask->parentField();
         $pattern = '/parent entity|record parent|2-247'.($parentField > 0 ? '|\[\s*'.$parentField.'\b' : '').'/i';
         $usesParent = array(); // record type => its mask refers to the parent
@@ -278,8 +311,27 @@ final class RecordSaveService
         );
     }
 
-    /** Values of a changed record (PUT or PATCH). */
-    private function planUpdate(int $recordId, RecordInput $input, bool $patch, bool $force): array
+    /** Values of a replaced record (PUT). */
+    private function planUpdate(int $recordId, RecordInput $input, bool $force): array
+    {
+        $plan = $this->planHeader($recordId, $input, false, $force);
+        $forbidden = array();
+        foreach($this->definitions->structureRows($plan['rectype']) as $fieldId => $row){
+            if($row['requirement'] === 'forbidden'){ $forbidden[] = $fieldId; }
+        }
+        $plan['currentStage'] = $this->currentStage($recordId);
+        $plan['details'] = $input->details();
+        $plan['keepFields'] = $forbidden;
+        return $plan;
+    }
+
+    /**
+     * Header values of a changed record (PUT or PATCH): permissions, the conflict check,
+     * owner, groups, visibility, URL, scratchpad. PATCH keeps the missing headers.
+     *
+     * @throws RecordEditException 400, 403, 404, 409
+     */
+    private function planHeader(int $recordId, RecordInput $input, bool $patch, bool $force): array
     {
         if($recordId < 1){
             throw RecordEditException::invalid('PUT and PATCH change an existing record; use POST to insert');
@@ -315,27 +367,12 @@ final class RecordSaveService
             ? ($this->store->records()->owners(array($recordId))[$recordId]['viewGroups'] ?? array()) : $input->idsHeader('rec_NonOwnerVisibilityGroups');
         if($visibility !== 'viewable'){ $viewGroups = array(); }
 
-        $forbidden = array();
-        foreach($this->definitions->structureRows($rectype) as $fieldId => $row){
-            if($row['requirement'] === 'forbidden'){ $forbidden[] = $fieldId; }
-        }
-        if($patch){
-            // the stored rows: long values saved in parts are joined, a part alone is not valid (2026-10-31)
-            $details = SplitValues::joinDetails($this->store->records()->editValues($recordId), $rectype,
-                $this->codes['cmsPage'] ?? 0, $this->codes['content'] ?? 0, $this->codes['cmsTranslations'] ?? 0);
-            foreach($input->details() as $fieldId => $values){ $details[$fieldId] = $values; }
-            foreach($forbidden as $fieldId){ unset($details[$fieldId]); }
-        }else{
-            $details = $input->details();
-        }
-        $stage = $this->codes['workflowStage'] ?? 0;
-        $currentStage = $stage > 0 ? intval($this->store->records()->editValues($recordId, array($stage))[$stage][0] ?? 0) : 0;
-
         $keepUrl = $patch && !$input->has('rec_URL');
         $keepScratchPad = $patch && !$input->has('rec_ScratchPad');
         return array(
             'recordId' => $recordId,
             'rectype' => $rectype,
+            'stored' => $stored,
             'owner' => $owner,
             'currentOwners' => $owners,
             'editGroups' => $this->withoutOwner($editGroups, $owner),
@@ -343,10 +380,338 @@ final class RecordSaveService
             'viewGroups' => $viewGroups,
             'url' => $keepUrl ? $stored['rec_URL'] : $this->url($input->header('rec_URL')),
             'scratchPad' => $keepScratchPad ? $stored['rec_ScratchPad'] : $this->text($input->header('rec_ScratchPad')),
-            'details' => $details,
-            'keepFields' => $forbidden,
-            'currentStage' => $currentStage
+            'details' => array(),
+            'keepFields' => array(),
+            'currentStage' => 0
         );
+    }
+
+    /** Stored workflow stage of a record (0: none, or no stage field in this database). */
+    private function currentStage(int $recordId): int
+    {
+        $stage = $this->codes['workflowStage'] ?? 0;
+        return $stage > 0 ? intval($this->store->records()->editValues($recordId, array($stage))[$stage][0] ?? 0) : 0;
+    }
+
+    // -------------------------------------------------------------- PATCH (plan 32)
+
+    /**
+     * Change some fields of a record: only their rows are deleted and inserted, only the sent
+     * values are validated, and the title, calculated fields and child titles are updated only
+     * when they depend on a changed field (FieldDependencies).
+     *
+     * @return array{recordId:int,created:bool,issues:array<int,array>,changed:array<int,int>}
+     *         changed = field => number of removed + inserted value rows
+     * @throws RecordEditException
+     */
+    private function patchFields(int $recordId, RecordInput $input, bool $force, bool $dryRun): array
+    {
+        $plan = $this->planHeader($recordId, $input, true, $force);
+        $rectype = $plan['rectype'];
+        $structure = $this->definitions->structureRows($rectype);
+        $replace = $input->details();
+        $add = $input->detailsAdd();
+        $match = $input->detailsMatch();
+        $addIfNone = $input->addIfNone();
+        $this->checkPatchOptions($rectype, $replace, $add, $match, $addIfNone);
+
+        $matched = array();
+        foreach($match as $fieldId => $condition){
+            $matched[$fieldId] = $this->matchingIds($recordId, $fieldId, $condition);
+        }
+        $counts = $this->store->records()->fieldCounts($recordId,
+            array_values(array_unique(array_merge(array_keys($replace), array_keys($add)))));
+
+        $options = array('required' => false);
+        if($this->validator->hasRecordCheck($rectype)){
+            $options['recordDetails'] = $this->mergedDetails($recordId, $rectype, $replace, $add, $matched, $addIfNone);
+        }
+        $result = $this->validator->validate($rectype, $replace + $add, $options);
+        $issues = $result->issues();
+        if($result->hasErrors()){
+            throw new RecordEditException(422, 'validation', 'The record has invalid values', $issues);
+        }
+        $rows = $result->rows();
+        $stage = $this->codes['workflowStage'] ?? 0;
+        if($stage > 0 && isset($replace[$stage])){ $plan['currentStage'] = $this->currentStage($recordId); }
+        $byWorkflow = $this->applyWorkflow($plan, $rows, $issues);
+        if(!$byWorkflow){
+            $this->permissions->assertOwnerChange($plan['currentOwners'], $plan['owner'], $plan['editGroups']);
+        }
+
+        $newRows = array();
+        foreach($rows as $row){ $newRows[intval($row['dty'])][] = $row; }
+        $deleteFields = array();
+        $deleteIds = array();
+        $insert = array();
+        $changed = array();
+        foreach($replace as $fieldId => $values){
+            $fieldRows = $newRows[$fieldId] ?? array();
+            $stored = $counts[$fieldId] ?? 0;
+            if(!isset($match[$fieldId])){
+                $deleteFields[] = $fieldId;
+                $remaining = count($fieldRows);
+                $changed[$fieldId] = $stored + count($fieldRows);
+            }elseif(!empty($matched[$fieldId])){
+                $deleteIds = array_merge($deleteIds, $matched[$fieldId]);
+                $remaining = $stored - count($matched[$fieldId]) + count($fieldRows);
+                $changed[$fieldId] = count($matched[$fieldId]) + count($fieldRows);
+            }elseif(in_array($fieldId, $addIfNone, true)){
+                $remaining = $stored + count($fieldRows);
+                $changed[$fieldId] = count($fieldRows);
+            }else{
+                $fieldRows = array(); // nothing matches: no change
+                $remaining = $stored;
+                $changed[$fieldId] = 0;
+            }
+            if($remaining === 0 && ($structure[$fieldId]['requirement'] ?? '') === 'required'){
+                $name = $structure[$fieldId]['name'];
+                throw new RecordEditException(422, 'validation', 'Field "'.$name.'" is required', array(
+                    array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'required', 'severity'=>'error',
+                        'message'=>'Field "'.$name.'" is required: it cannot be deleted')
+                ));
+            }
+            $insert = array_merge($insert, $fieldRows);
+        }
+        foreach($add as $fieldId => $values){
+            $fieldRows = $newRows[$fieldId] ?? array();
+            $this->checkAdd($recordId, $rectype, $fieldId, $values, $counts[$fieldId] ?? 0, $issues);
+            $insert = array_merge($insert, $fieldRows);
+            $changed[$fieldId] = count($fieldRows);
+        }
+        if($dryRun){
+            return array('recordId'=>$recordId, 'created'=>false, 'issues'=>$issues, 'changed'=>$changed);
+        }
+
+        $changedFields = array_keys(array_filter($changed));
+        $affected = $this->dependencies !== null ? $this->dependencies->affected($rectype, $changedFields) : null;
+        $childBefore = array();
+        foreach($affected['childFields'] ?? array() as $fieldId){
+            $childBefore[$fieldId] = $this->linkedIds($recordId, $fieldId);
+        }
+        $database = $this->store->database();
+        $database->beginTransaction();
+        try{
+            $this->store->setUser($this->runtime->userId);
+            $this->store->updateRecord($recordId, array(
+                'owner' => $plan['owner'],
+                'visibility' => $plan['visibility'],
+                'url' => $plan['url'],
+                'scratchPad' => $plan['scratchPad']
+            ));
+            if($byWorkflow || $input->has('rec_OwnerUGrpID') || $input->has('rec_EditGroups')
+                || $input->has('rec_NonOwnerVisibility') || $input->has('rec_NonOwnerVisibilityGroups')
+                || $plan['visibility'] !== (string)$plan['stored']['rec_NonOwnerVisibility']){
+                $this->store->setPermissions($recordId, $plan['editGroups'], $plan['viewGroups']);
+            }
+            $this->store->deleteFields($recordId, $deleteFields);
+            $this->store->deleteDetailIds($recordId, $deleteIds);
+            $this->store->insertDetails($recordId, $insert);
+            if(!empty($changedFields)){
+                $this->recalculate($recordId, $rectype, $plan['stored'], $affected, $childBefore, $issues);
+            }
+            $database->commit();
+        }catch(Throwable $exception){
+            $database->rollback();
+            throw $exception;
+        }
+        return array('recordId'=>$recordId, 'created'=>false, 'issues'=>$issues, 'changed'=>$changed);
+    }
+
+    /**
+     * Checks of the PATCH options that need no values: one key per field, conditions and
+     * addIfNone only for fields of "details", no condition on a field saved in parts.
+     *
+     * @throws RecordEditException 400
+     */
+    private function checkPatchOptions(int $rectype, array $replace, array $add, array $match, array $addIfNone): void
+    {
+        foreach(array_keys($add) as $fieldId){
+            if(array_key_exists($fieldId, $replace)){
+                throw RecordEditException::invalid('Field '.$fieldId.' is in "details" and in "detailsAdd"');
+            }
+        }
+        foreach(array_merge(array_keys($match), $addIfNone) as $fieldId){
+            if(!array_key_exists($fieldId, $replace)){
+                throw RecordEditException::invalid('"detailsMatch" and "addIfNone" are for fields of "details"; field '.$fieldId.' is not there');
+            }
+        }
+        foreach(array_keys($match) as $fieldId){
+            if($this->isSplitField($rectype, $fieldId)){
+                throw RecordEditException::invalid('Field '.$fieldId.' is saved in parts: replace or delete all its values (no "detailsMatch")');
+            }
+        }
+    }
+
+    /** Website page content and page translations are saved in parts (SplitValues). */
+    private function isSplitField(int $rectype, int $fieldId): bool
+    {
+        $content = $this->codes['content'] ?? 0;
+        $translations = $this->codes['cmsTranslations'] ?? 0;
+        return ($translations > 0 && $fieldId === $translations)
+            || ($content > 0 && $fieldId === $content && $rectype === ($this->codes['cmsPage'] ?? 0));
+    }
+
+    /**
+     * Rules of "detailsAdd" for one field: multi-value only, not more than its maximum; an added
+     * language that exists already is refused for the page translations (their parts would be
+     * joined) and a warning for the other multilingual fields.
+     *
+     * @throws RecordEditException 422
+     */
+    private function checkAdd(int $recordId, int $rectype, int $fieldId, array $values, int $stored, array &$issues): void
+    {
+        $row = $this->definitions->structureRows($rectype)[$fieldId] ?? null;
+        $name = $row['name'] ?? ($this->definitions->field($fieldId)['name'] ?? (string)$fieldId);
+        // values in another language ("fre:") of a multilingual field do not count for rst_MaxValues (as in RecordValidator)
+        $multilang = $this->validator->isMultilang($rectype, $fieldId);
+        $existing = array();
+        if($multilang){
+            $stored = 0;
+            foreach($this->store->records()->editValues($recordId, array($fieldId))[$fieldId] ?? array() as $value){
+                $language = self::languageOf($value);
+                if($language !== ''){ $existing[$language] = true; }else{ $stored++; }
+            }
+        }
+        $given = count(array_filter($values, static function($value) use ($multilang){
+            return $value !== null && $value !== '' && $value !== array() && (!$multilang || self::languageOf($value) === '');
+        }));
+        if($row !== null && $row['max'] === 1 && $given > 0){
+            throw new RecordEditException(422, 'validation', 'Field "'.$name.'" has one value', array(
+                array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'single_value', 'severity'=>'error',
+                    'message'=>'Field "'.$name.'" has one value: replace it with "details"')
+            ));
+        }
+        if($row !== null && $row['max'] > 1 && !$this->isSplitField($rectype, $fieldId) && $stored + $given > $row['max']){
+            throw new RecordEditException(422, 'validation', 'Field "'.$name.'" allows '.$row['max'].' values', array(
+                array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'max', 'severity'=>'error',
+                    'message'=>'Field "'.$name.'" allows '.$row['max'].' values; it has '.$stored.', '.$given.' more given')
+            ));
+        }
+        if(!$multilang){ return; }
+        foreach($values as $index => $value){
+            $language = self::languageOf($value);
+            if($language === '' || !isset($existing[$language])){ continue; }
+            if($fieldId === ($this->codes['cmsTranslations'] ?? 0)){
+                throw new RecordEditException(422, 'validation', 'The translation "'.$language.'" exists', array(
+                    array('field'=>(string)$fieldId, 'index'=>$index, 'code'=>'language_exists', 'severity'=>'error',
+                        'message'=>'Field "'.$name.'" has a translation "'.$language.'" already: replace the field with "details"')
+                ));
+            }
+            $issues[] = array('field'=>(string)$fieldId, 'index'=>$index, 'code'=>'language_exists', 'severity'=>'warning',
+                'message'=>'Field "'.$name.'" has a value in language "'.$language.'" already');
+        }
+    }
+
+    /** Language prefix ("fre:") of a value, lower case ('' = none). */
+    private static function languageOf($value): string
+    {
+        $text = is_array($value) ? (string)($value['value'] ?? '') : (string)$value;
+        return preg_match('/^([A-Za-z]{2,3}):/', $text, $found) ? strtolower($found[1]) : '';
+    }
+
+    /**
+     * Value rows of a field that match a value condition of the query format.
+     *
+     * @return array<int,int> dtl_ID
+     * @throws RecordEditException 422 for a condition the query compiler refuses
+     */
+    private function matchingIds(int $recordId, int $fieldId, string $condition): array
+    {
+        if(trim($condition) === ''){
+            throw RecordEditException::invalid('The value condition of field '.$fieldId.' is empty');
+        }
+        if($this->matcher === null){
+            $this->matcher = new FieldPredicateCompiler($this->store->database(), new SqlTables($this->store->records()->schema()));
+        }
+        $state = new SqlBuildContext();
+        try{
+            $sql = $this->matcher->valueCondition($fieldId, $condition, $state);
+        }catch(QueryValidationException $exception){
+            throw new RecordEditException(422, 'validation', $exception->getMessage(), array(
+                array('field'=>(string)$fieldId, 'index'=>null, 'code'=>'match', 'severity'=>'error',
+                    'message'=>'Value condition "'.$condition.'": '.$exception->getMessage())
+            ));
+        }
+        $tables = new SqlTables($this->store->records()->schema());
+        return $this->store->records()->matchingDetailIds($recordId, $fieldId, $tables->resolve($sql), $state->values());
+    }
+
+    /**
+     * The record after the PATCH in the write format, for the record checks (CmsRecordCheck):
+     * the stored values (split values joined) with the changes applied.
+     */
+    private function mergedDetails(int $recordId, int $rectype, array $replace, array $add, array $matched, array $addIfNone): array
+    {
+        $exclude = array();
+        foreach($matched as $ids){ $exclude = array_merge($exclude, $ids); }
+        $details = SplitValues::joinDetails($this->store->records()->editValues($recordId, null, $exclude), $rectype,
+            $this->codes['cmsPage'] ?? 0, $this->codes['content'] ?? 0, $this->codes['cmsTranslations'] ?? 0);
+        foreach($replace as $fieldId => $values){
+            if(!array_key_exists($fieldId, $matched)){
+                $details[$fieldId] = $values;
+            }elseif(!empty($matched[$fieldId]) || in_array($fieldId, $addIfNone, true)){
+                $details[$fieldId] = array_merge($details[$fieldId] ?? array(), $values);
+            }
+        }
+        foreach($add as $fieldId => $values){
+            $details[$fieldId] = array_merge($details[$fieldId] ?? array(), $values);
+        }
+        return $details;
+    }
+
+    /** Targets of the pointer values of one field of a record. */
+    private function linkedIds(int $recordId, int $fieldId): array
+    {
+        return array_values(array_unique(array_map('intval', array_column(
+            $this->store->records()->links(array($recordId), array('kind' => 'pointer', 'fields' => array($fieldId))), 1
+        ))));
+    }
+
+    /**
+     * Calculated fields, title and child titles after a PATCH, only where FieldDependencies
+     * says they depend on the changed fields (no dependencies known: title and all calculated fields).
+     *
+     * @param array|null $affected FieldDependencies::affected().
+     * @param array<int,array<int,int>> $childBefore Child pointer field => targets before the change.
+     */
+    private function recalculate(int $recordId, int $rectype, array $stored, ?array $affected, array $childBefore, array &$issues): void
+    {
+        if($this->calculated !== null && ($affected === null || !empty($affected['calc']))){
+            foreach($this->calculated->update($recordId, $rectype, $affected['calc'] ?? null) as $fieldId => $message){
+                $issues[] = array('field'=>(string)$fieldId, 'index'=>0, 'code'=>'calculation', 'severity'=>'warning',
+                    'message'=>'Calculated field '.$fieldId.' was not updated: '.$message);
+            }
+        }
+        $oldTitle = (string)($stored['rec_Title'] ?? '');
+        $newTitle = $oldTitle;
+        if($affected === null || $affected['title']){
+            $newTitle = $this->titleMask !== null ? $this->titleMask->fill($recordId) : null;
+            if($newTitle === null){
+                $rows = array_map(static fn($row) => array('dty' => $row['field'], 'value' => $row['value']),
+                    $this->store->records()->details(array($recordId)));
+                $newTitle = $this->title->fromRows($rows, $recordId);
+            }
+            if($newTitle !== $oldTitle){ $this->store->setTitle($recordId, $newTitle); }
+        }
+        if($affected === null || $this->titleMask === null){ return; }
+
+        $pending = array();
+        $types = $affected['childTypes'];
+        if($newTitle !== $oldTitle){ $types = array_merge($types, $affected['childOnTitle']); }
+        if(!empty($types)){
+            $children = $this->childIds($recordId, $rectype);
+            if(!empty($children)){
+                foreach($this->store->records()->headers($children, array('rec_ID', 'rec_RecTypeID')) as $id => $header){
+                    if(in_array(intval($header['rec_RecTypeID']), $types, true)){ $pending[] = intval($id); }
+                }
+            }
+        }
+        foreach($childBefore as $fieldId => $before){
+            $after = $this->linkedIds($recordId, $fieldId);
+            $pending = array_merge($pending, array_diff($before, $after), array_diff($after, $before));
+        }
+        if(!empty($pending)){ $this->refreshTitles($pending, $recordId); }
     }
 
     /**

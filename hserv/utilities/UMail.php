@@ -94,7 +94,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
     if(is_array($email_text)){
         $email_text =  json_encode($email_text);
     }
-    
+
     if(!$email_to){
         if(isset($system)){
             $system->addError(HEURIST_ACTION_BLOCKED,
@@ -109,31 +109,6 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
 
     // strip all whitespaces
     $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
-
-    //using heuristref.net as mail relay for gmail recipients
-    if(isset($mailRelayPwd) && $mailRelayPwd!=''
-    && count($email_to)==1 && endsWith($email_to[0], '@gmail.com')){
-
-        $data = array('pwd' => $mailRelayPwd,
-            'from_name' => $replyToName,
-            'from' => $replyTo,
-            'to' => implode(',',$email_to),  //cs list of recipients
-            'title' => $email_title,
-            'text' => $email_text,
-            'html' => 1);
-
-        $data_str = http_build_query($data);
-
-        $ch =  curl_init("https://heuristref.net/HEURIST/mailRelay.php");
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data_str);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $responce = curl_exec($ch);
-        curl_close($ch);
-
-        return $responce==1;
-    }
-
 
     //send an email with attachment
     $email = new PHPMailer();
@@ -240,7 +215,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
  * @return string "ok" on success, or an error message string on failure.
  */
 function sendEmail_native($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
-    
+
     global $system;
 
     $res = "ok";

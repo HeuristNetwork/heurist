@@ -15,7 +15,7 @@ Routes (`Controller/RecordEditController.php`, wired in `hserv/controller/api.ph
 |---|---|---|
 | POST | `/records/{id}` | insert; id 0 = next id, negative = that id (import) |
 | PUT | `/records/{id}` | update, the body replaces the whole record |
-| PATCH | `/records/{id}` | update, only the fields of the body |
+| PATCH | `/records/{id}` | update, only the fields of the body are written (plan 32: `detailsAdd`, `detailsMatch`, `addIfNone`, `?fields=`, `meta.changed`) |
 | DELETE | `/records/{id}[?force=1]` | delete; 409 with the references unless force |
 | POST | `/records/{id}/duplicate` | copy |
 | POST | `/records/{id}/validate` | checks of a save, nothing written |
@@ -50,7 +50,15 @@ The body is the record object of `GET /records/{id}` (input = output):
 - `RecordPermissionService.php` — account state, ownership and edit groups
   (`userCheckPermissions`, `recordCanChangeOwnerwhipAndAccess`).
 - `RecordSaveService.php` — insert/PUT/PATCH: ownership defaults, concurrency,
-  workflow stage rules (no emails), one transaction, title.
+  workflow stage rules (no emails), one transaction, title. PATCH (plan 32) deletes and
+  inserts only the rows of the given fields: replace (`details`), delete (`[]`, refused for
+  a required field), add (`detailsAdd`, multi-value fields), value conditions of the query
+  format (`detailsMatch`, `FieldPredicateCompiler::valueCondition`), `addIfNone`; only the
+  sent values are validated (record checks get the whole record).
+- `FieldDependencies.php` — which title, calculated fields and child titles depend on a
+  field (plan 32); cached as `def-snapshot-dependencies.json` in the database `entity`
+  folder, removed with the snapshots by legacy `cleanDefCache()`. A PATCH recalculates only
+  what depends on a changed field.
 - `RecordDeleteService.php` — references check (recLinks), forced delete.
 - `RecordDuplicateService.php` — copy with "Copy of " name.
 - Writes are `Store/RecordStore.php`, reads `Store/RecordRepository.php` (plan 15).
@@ -68,4 +76,4 @@ Checking/converting title masks, calculated fields of other records that depend 
 the saved one, ElasticSearch, HTML output cache, workflow emails,
 parent/child pointers (child records are not created or deleted with their parent),
 relationship re-titling and re-titling of the records that point to the saved one,
-entry masks, batch save, guest user rights (plan 21 §6a: none ported for now). Test: `tests/RecordEditApiTest.php --db=NAME --user=ID [--write]`.
+entry masks, batch save, guest user rights (plan 21 §6a: none ported for now). Test: `tests/RecordEditApiTest.php --db=NAME --user=ID [--write]`, `tests/FieldPatchTest.php` (plan 32).

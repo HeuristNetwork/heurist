@@ -51,12 +51,15 @@ final class CalculatedFields
     /**
      * Calculate and store the calculated fields of a saved record.
      *
+     * @param array<int,int>|null $onlyFields Only these calculated fields (PATCH, plan 32: FieldDependencies); null = all.
      * @return array<int,string> field id => error message of formulas that failed
      */
-    public function update(int $recordId, int $rectypeId): array
+    public function update(int $recordId, int $rectypeId, ?array $onlyFields = null): array
     {
         $errors = array();
+        if($onlyFields !== null && empty($onlyFields)){ return $errors; }
         foreach($this->definitions->calculatedFields($rectypeId) as $fieldId => $formula){
+            if($onlyFields !== null && !in_array($fieldId, $onlyFields, true)){ continue; }
             if(trim($formula) === ''){
                 $errors[$fieldId] = 'Formula not defined';
                 continue;
