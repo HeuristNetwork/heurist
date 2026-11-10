@@ -26,7 +26,7 @@ use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Store\RecordSchema;
-use Heurist\Records\Store\RecordStore;
+use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
 
 /** Reads file records from fileRecords/fileRecDetails. */

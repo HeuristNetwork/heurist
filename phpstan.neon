@@ -1,0 +1,12 @@
+includes:
+	- phpstan-baseline.neon
+
+parameters:
+    level: 0
+    scanDirectories:
+        - vendor
+    excludePaths:
+        - vendor
+        - data (?)
+    paths:
+        - .

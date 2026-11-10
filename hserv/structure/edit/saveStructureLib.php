@@ -1,9 +1,9 @@
 <?php
 /**
 * saveStructureLib.php - Functions library to update the system structural definitions
-* 
+*
 * DEPRECATED
-* 
+*
 * This library provides a set of functions for directly manipulating Heurist database
 * structure definitions. These functions are typically used by administrative interfaces
 * to create, update, delete, or otherwise manage core schema elements such as:
@@ -133,7 +133,6 @@ $dtyColumnNames = array(
     "dty_PtrTargetRectypeIDs"=>"s",
     "dty_JsonTermIDTree"=>"s",
     "dty_TermIDTreeNonSelectableIDs"=>"s",
-    "dty_PtrTargetRectypeIDs"=>"s",
     "dty_FieldSetRectypeID"=>"i",
     "dty_ShowInLists"=>"i",
     "dty_NonOwnerVisibility"=>"s",

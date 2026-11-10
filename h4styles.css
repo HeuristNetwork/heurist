@@ -683,7 +683,7 @@ div .veiled{
 
 
 /* @todo to avoid !important put these classes at the very end of styles */
-div .selected, div.selected:hover{
+div .selected:not(.jss_worksheet *), div.selected:hover:not(.jss_worksheet *){
     background: -moz-linear-gradient(top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent !important;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8)) !important;
     border-color: #62A7F8;
