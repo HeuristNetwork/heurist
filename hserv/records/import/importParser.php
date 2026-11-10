@@ -1280,7 +1280,7 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
             }
         }
 
-        $query = $query."`field_".$i."` ".$fieldtype.', ' ;
+        $query = $query."`field_".$i."` ".$fieldtype.', ';
 
         $columns .= "field_{$i},";
         $counts .= "count(distinct field_{$i}),count(field_{$i}),";

@@ -4190,7 +4190,7 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     
                         case 'file':
                             $file_details = mysql__select_row($mysqli, "SELECT ulf_OrigFileName, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID = ?", ['i', $value]);
-                            $replace[] = strpos($file_details[0], '_') === 0 && !empty($file_details[1]) ? $file_details[1] : $file_details[0] ;
+                            $replace[] = strpos($file_details[0], '_') === 0 && !empty($file_details[1]) ? $file_details[1] : $file_details[0];
                             break;
     
                         default:
