@@ -58,7 +58,7 @@ $sortType = 0;
  */
 function heurist_legacy_contains_sql($db, $column, $text, $table){
     static $indexCache = array();
-    
+
     $text = trim($text);
 
     if(strlen($text) >= 2 && $text[0] === '%' && substr($text, -1) === '%'){
@@ -67,7 +67,7 @@ function heurist_legacy_contains_sql($db, $column, $text, $table){
 
     if($text === '' || strpbrk($text, '%_') !== false){
         return null;
-    }    
+    }
 
     if(!in_array($table, array('Records','recDetails'), true)) { return null; }
     $name = $table==='Records' ? 'rec_Title' : 'dtl_Value';
@@ -1350,8 +1350,8 @@ class Predicate {
     /** @var AndLimb Reference to the parent AndLimb object that contains this predicate. */
     public $parent;
 
-    /** 
-     * @var bool Flag used by some predicate types (like RelatedFromParentPredicate, RelatedToParentPredicate) 
+    /**
+     * @var bool Flag used by some predicate types (like RelatedFromParentPredicate, RelatedToParentPredicate)
      * to control whether to recursively find inverse relationships. Defaults to true.
      */
     public $need_recursion = true;
@@ -1411,7 +1411,7 @@ class Predicate {
                 } else {
                     // Should not happen in a well-formed structure
                     // Trigger error or handle as appropriate if $c has no parent but is not Query
-                    break; 
+                    break;
                 }
             }
             $this->query = ($c && strtolower(get_class($c)) == 'query') ? $c : null;
@@ -1531,7 +1531,7 @@ class Predicate {
      */
     public function makeDateClause() {
 
-        // if($this->isEmptyValue()){ return SQL_NULL; } 
+        // if($this->isEmptyValue()){ return SQL_NULL; }
 
         if (strpos($this->value,"<>")) { // Value represents a range
             $vals = explode("<>", $this->value);
@@ -1824,43 +1824,42 @@ class AnyPredicate extends Predicate {
         $val = $mysqli->real_escape_string($this->value);
 
         if($this->parent->fulltext){
-               // Attempt full-text search on detail values and titles of linked resources.
-               $res_details_ft = 'select dtl_RecID from recDetails '
-                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-                . ' left join Records link on dtl_Value=link.rec_ID ' // Join to get linked record titles
-                .' where if(dty_Type="resource", '
-                    .'link.rec_Title like "%'.$val.'%", ' // Fallback to LIKE for linked resource titles
-                    .' MATCH(dtl_Value) AGAINST("'.$val.'"))'; // Full-text on dtl_Value
+            // Attempt full-text search on detail values and titles of linked resources.
+            $res_details_ft = 'select dtl_RecID from recDetails '
+            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+            . ' left join Records link on dtl_Value=link.rec_ID ' // Join to get linked record titles
+            .' where if(dty_Type="resource", '
+                .'link.rec_Title like "%'.$val.'%", ' // Fallback to LIKE for linked resource titles
+                .' MATCH(dtl_Value) AGAINST("'.$val.'"))'; // Full-text on dtl_Value
 
-                $list_ids = mysql__select_list2($mysqli, $res_details_ft);
-                $condition_details = '';
-                if($list_ids && !empty($list_ids)){
-                    $condition_details = predicateId('TOPBIBLIO.rec_ID',$list_ids);
-                }
+            $list_ids = mysql__select_list2($mysqli, $res_details_ft);
+            $condition_details = '';
+            if($list_ids && !empty($list_ids)){
+                $condition_details = predicateId('TOPBIBLIO.rec_ID',$list_ids);
+            }
 
-                // Full-text on main record title (if supported, otherwise LIKE)
-                // Assuming rec_Title might not always have FT index or might be handled differently
-                $condition_title = 'TOPBIBLIO.rec_Title like "%'.$val.'%"'; 
+            // Full-text on main record title (if supported, otherwise LIKE)
+            // Assuming rec_Title might not always have FT index or might be handled differently
+            $condition_title = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+            $condition_url = 'TOPBIBLIO.rec_URL like "%'.$val.'%"';
 
-                if($condition_details && $condition_title){
-                    return "($condition_details OR $condition_title)";
-                } elseif ($condition_details){
-                    return "($condition_details)";
-                } elseif ($condition_title){
-                    return "($condition_title)";
-                }
-                return '(1=0)'; // Nothing to search
+            $conditionals = "$condition_title OR $condition_url";
+
+            return !empty($condition_details) ? "($condition_details OR $conditionals)" : "($conditionals)";
         }
 
         // Ordinary text uses an indexed candidate search when possible.
         $detailText = 'rd.dtl_Value like "%'.$val.'%"';
         $linkedTitle = 'link.rec_Title like "%'.$val.'%"';
+        $linkedURL = 'link.rec_URL like "%'.$val.'%"';
         $recordTitle = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+        $recordURL = 'TOPBIBLIO.rec_URL like "%'.$val.'%"';
         if(!$this->parent->negate && strpos($this->value, '%')===false){
             $detailText = heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $this->value, 'recDetails') ?? $detailText;
             $linkedTitle = heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $this->value, 'Records') ?? $linkedTitle;
             $recordTitle = heurist_legacy_contains_sql($mysqli, 'TOPBIBLIO.rec_Title', $this->value, 'Records') ?? $recordTitle;
         }
+
         // Standard LIKE search if no indexed condition is available
         $not = ($this->parent->negate)? SQL_NOT : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
@@ -1869,8 +1868,8 @@ class AnyPredicate extends Predicate {
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
         . '  and if(dty_Type != "resource", ' // If not a resource field
         . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), '.$detailText.'), ' // Search enum by label/code or other detail by value
-        .''.$linkedTitle.'))' // Search linked resource title
-        .' or '.$recordTitle.') '; // Also search main record title
+        .''.$linkedTitle.' or '.$linkedURL.'))' // Search linked resource title
+        .' or '.$recordTitle.' or '.$recordURL.') '; // Also search main record title
     }
 }
 
@@ -2487,7 +2486,11 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
  * Handles multiple tags (OR logic), workgroup-specific tags, and numeric tag IDs.
  */
 class TagPredicate extends Predicate {
-    /** @var array<string> Array of workgroup names associated with tags. Parallel to `$this->value`. Empty string if no workgroup. */
+
+    /**
+     * Array of workgroup names associated with tags. Parallel to `$this->value`. Empty string if no workgroup.
+     * @var array<string>
+     */
     public $wg_value;
 
     /**
@@ -2569,7 +2572,7 @@ class TagPredicate extends Predicate {
                 }
         }
 */
-        return null;        
+        return null;
     }
 
     /**
@@ -3332,7 +3335,7 @@ class LinkedToPredicate extends Predicate {
             // The SQL_LINKED_EXISTS is about TOPBIBLIO having a link.
             // Replacing bd.dtl_RecID with a check against $ids means we are checking if THESE $ids records have links.
             // This does not check if TOPBIBLIO is linked TO by $ids.
-            if(count($ids)>1){ 
+            if(count($ids)>1){
                 return str_replace('LIMIT 1',' and bd.dtl_RecID IN (' . join(',', $ids) . ') LIMIT 1',SQL_LINKED_EXISTS);
             } elseif(!empty($ids)) { // Single ID
                 return str_replace('LIMIT 1',' and bd.dtl_RecID = ' . $ids[0] . ' LIMIT 1',SQL_LINKED_EXISTS);
@@ -3633,7 +3636,7 @@ class SpatialPredicate extends Predicate {
      *
      * Supports:
      *   geo:"-16,32,40,72"   => viewport extent, ST_Intersects
-     *   geo:"POLYGON (...)"  => legacy WKT, ST_Contains     * 
+     *   geo:"POLYGON (...)"  => legacy WKT, ST_Contains     *
      * @return string The SQL condition string using an EXISTS subquery.
      */
     public function makeSQL() {
@@ -3671,7 +3674,7 @@ class SpatialPredicate extends Predicate {
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and {$spatialFunction}(ST_GeomFromText('{$wkt}'), bd.dtl_Geo) limit 1))";
     }
-    
+
 }
 
 /**

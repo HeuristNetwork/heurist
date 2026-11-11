@@ -3121,7 +3121,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // special case for relationship record - assign constraints 
             // for reltype selector and target pointer fields
             const RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'];
-            const RT_CUSTOM_REPORT = window.hWin.HAPI4.sysinfo['dbconst']['RT_CUSTOM_REPORT'];
+            const RT_REPORT_TEMPLATE = window.hWin.HAPI4.sysinfo['dbconst']['RT_REPORT_TEMPLATE'];
             const DT_FILE_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_NAME'];
             let DT_RELATION_TYPE, DT_RESOURCE;
             if(rectypeID == RT_RELATION && that.options.relmarker_field>0){
@@ -3176,7 +3176,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                         // template file name of a Custom Report: set once by the report API (plan 30 §14),
                         // another value would point the report at the template of another report
-                        if(rectypeID == RT_CUSTOM_REPORT && dt_ID == DT_FILE_NAME){
+                        if(rectypeID == RT_REPORT_TEMPLATE && dt_ID == DT_FILE_NAME){
                             rfr['rst_Display'] = 'readonly';
                         }
 

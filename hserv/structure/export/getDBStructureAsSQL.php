@@ -2,8 +2,8 @@
 /**
 * getDBStructureAsSQL.php - Returns database definitions (rectypes, details etc.) as SQL statements ready for INSERT processing
 *
-* @param includeUgrps=1 will output user and group information in addition to definitions
-* @param approvedDefsOnly=1 will only output Reserved and Approved definitions
+* Uses $_REQUEST["includeUgrps"] (default: 1) will output user and group information in addition to definitions
+* Uses $_REQUEST["approvedDefsOnly"] (default: 1) will only output Reserved and Approved definitions
 *
 * @project     Heurist academic knowledge management system
 * @package Structure

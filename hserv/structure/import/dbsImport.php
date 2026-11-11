@@ -1738,7 +1738,7 @@ $mysqli->commit();
         if($local_recid===0){ //registered concept code
             $local_recid = $this->_getLocalCode('rectype', $this->target_defs, $ccode);
         }else{
-            $local_recid = 0 ;//Important: it is assumed that record type from unregistered db doesn't exist in target
+            $local_recid = 0;//Important: it is assumed that record type from unregistered db doesn't exist in target
         }
 
         if($local_recid>0){  //already exist in destination

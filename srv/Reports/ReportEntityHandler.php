@@ -8,7 +8,7 @@
 *   GET | POST /report/{id}/execute           one record as HTML (`recordId`, or `q` limited to 1; `lang`)
 *   GET /report/{id}/export                   the template with concept codes (.gpl)
 *   POST /report/import                       a template file (multipart `import_template`, `isCardView`)
-*   GET | POST | DELETE /report/setup         state and unregistered files | install | delete a file (`file`)
+*   GET | POST | DELETE /report/setup         state and unregistered files | install | delete a file (`name`; not `file`: the root router sends `?file=` to fileDownload.php)
 *
 * output (Custom Report Schedule 2-1105): a generated report, a record with one file.
 *   GET | DELETE /output/{id}/asset           the file (`download=1`: as a file named by the title)
@@ -238,7 +238,7 @@ final class ReportEntityHandler extends RecordEntityHandler
             if($action === 'setup'){
                 self::allow($method, array('GET', 'POST', 'DELETE'));
                 if($method === 'GET'){ return $service->status(); }
-                return $method === 'POST' ? $service->setup() : $service->deleteUnregistered((string)($params['file'] ?? ''));
+                return $method === 'POST' ? $service->setup() : $service->deleteUnregistered((string)($params['name'] ?? ''));
             }
             if($action === 'import'){
                 self::allow($method, array('POST'));

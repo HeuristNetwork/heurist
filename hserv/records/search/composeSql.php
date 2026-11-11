@@ -2375,10 +2375,13 @@ class HPredicate {
         
         $detal_compare =  'rd.dtl_Value ';
         $title_compare =  'link.rec_Title ';
+        $url_compare =  $this->exact ? 'link.rec_URL = "'.$val.'" ' : 'link.rec_URL LIKE "%'.$val.'%" ';
+        $url_compare =  $this->exact ? 'link.rec_URL NOT LIKE "%'.$val.'%" ' : $url_compare;
 
         if($this->fulltext){
             $detal_compare = "MATCH($detal_compare) $val";
             $title_compare = "MATCH($title_compare) $val";
+            $url_compare = "MATCH($url_compare) $val";
         }else{
             $ftDetail = (!$this->negate && !$this->exact)
                 ? heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $val_wo_prefixes, 'recDetails') : null;
@@ -2388,15 +2391,16 @@ class HPredicate {
                 $detal_compare = $ftDetail;
                 $title_compare = $ftTitle;
             }else{
-            //$ignoreApostrophe = (stripos($val, 'LIKE') !== false);
-            $ignoreApostrophe = (strpos(trim($val), 'LIKE')===0);
-            if($ignoreApostrophe){
-                $detal_compare = "replace($detal_compare,\"'\",'') $val";
-                $title_compare = "replace($title_compare,\"'\",'') $val";
-            } else {
-                $detal_compare = "$detal_compare $val";
-                $title_compare = "$title_compare $val";
-            }
+                //$ignoreApostrophe = (stripos($val, 'LIKE') !== false);
+                $ignoreApostrophe = (strpos(trim($val), 'LIKE')===0);
+                if($ignoreApostrophe){
+                    $detal_compare = "replace($detal_compare,\"'\",'') $val";
+                    $title_compare = "replace($title_compare,\"'\",'') $val";
+                    $url_compare = "replace($url_compare,\"'\",'') $val";
+                } else {
+                    $detal_compare = "$detal_compare $val";
+                    $title_compare = "$title_compare $val";
+                }
             }
         }
 
@@ -2405,7 +2409,7 @@ SELECT rl.rl_SourceID as dtl_RecID
 FROM Records link 
 JOIN recLinks rl
 ON rl.rl_TargetID = link.rec_ID
-WHERE $title_compare
+WHERE $title_compare OR $url_compare
     AND rl.rl_DetailTypeID IS NOT NULL 
 
 UNION ALL

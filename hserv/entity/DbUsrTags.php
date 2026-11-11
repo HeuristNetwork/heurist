@@ -298,9 +298,16 @@ class DbUsrTags extends DbEntityBase
      */
     public function batch_action(){
 
+        if(!$this->system->hasAccess()){ // restrict to logged in users only
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Only logged in users may alter record tags.');
+            return false;
+        }
+
+        $mode = @$this->data['mode'] ?? 'assign';
+
         //tags ids
         $this->recordIDs = prepareIds($this->data['tagIDs']);
-        if(empty($this->recordIDs)){
+        if(empty($this->recordIDs) && $mode !== 'replace'){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of tag identificators');
             return false;
         }
@@ -322,11 +329,24 @@ class DbUsrTags extends DbEntityBase
             return false;
         }
 
+        $mysqli = $this->system->getMysqli();
+        $userGroupIDs = $this->system->getUserGroupIds();
+        $userGroupIDs[] = 0;
+
+        if(!$this->system->isAdmin()){ // check user permission for records
+
+            $permissionQuery = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('. implode(',', $assignIDs) .') AND (rec_OwnerUGrpID IN ('. implode(',', $userGroupIDs) .') OR rec_OwnerUGrpID != "hidden")';
+            $assignIDs = mysql__select_list2($mysqli, $permissionQuery, 'intval');
+
+            if(empty($assignIDs)){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of record identificators');
+                return false;
+            }
+        }
+
         $res_tag_added = 0; //tags assigned
         $res_tag_removed = 0; //tags removed
         $res_bookmarks = 0; //new bookmarks
-
-        $mysqli = $this->system->getMysqli();
 
         //narrow by record type
         $rec_RecTypeID = @$this->data['rec_RecTypeID'];
@@ -340,16 +360,16 @@ class DbUsrTags extends DbEntityBase
             }
         }
 
-
         $keep_autocommit = mysql__begin_transaction($mysqli);
-
-        $mode = @$this->data['mode'];
+        $recIDConditional = 'rtl_RecID IN ('. implode(',', $assignIDs) .')';
 
         if($mode=='replace'){
 
-            // detach/remove all assignments for given records
-            $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'
-                . ' WHERE rtl_RecID in (' . implode(',', $assignIDs) . ')';
+            $userConditional = 'tag_UGrpID IN ('. implode(',', $userGroupIDs) .')';
+
+            // detach/remove all assignments for given records, made by the current user
+            $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks INNER JOIN usrTags ON rtl_TagID = tag_ID'
+                . ' WHERE '. $recIDConditional .' AND '. $userConditional;
             $res = $mysqli->query($query);
             if(!$res){
                 $mysqli->rollback();
@@ -365,7 +385,7 @@ class DbUsrTags extends DbEntityBase
             // detach/remove all assignments for given records
             $query = 'DELETE usrRecTagLinks FROM usrRecTagLinks'
                 . ' WHERE rtl_TagID in (' . implode(',', $this->recordIDs)
-                . ') and rtl_RecID in (' . implode(',', $assignIDs) . ')';
+                . ') AND ' . $recIDConditional;
             $res = $mysqli->query($query);
             if(!$res){
                 $mysqli->rollback();
@@ -382,7 +402,7 @@ class DbUsrTags extends DbEntityBase
         }
 
         //create new assignments
-        if($mode!='remove'){
+        if($mode == 'assign' || $mode == 'replace' && !empty($this->recordIDs)){
 
             $insert_query = 'INSERT IGNORE INTO usrRecTagLinks (rtl_RecID, rtl_TagID) '
                 . 'SELECT rec_ID, tag_ID FROM usrTags, Records '

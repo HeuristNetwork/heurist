@@ -173,7 +173,7 @@ final class ReportService
         if($count > 0){ throw new ReportInUseException($count); }
     }
 
-    /** Delete a template file without a record: DELETE /report/setup?file=name. */
+    /** Delete a template file without a record: DELETE /report/setup?name=file name. */
     public function deleteUnregistered(string $file): array
     {
         $this->policy->requireMember();
@@ -211,7 +211,7 @@ final class ReportService
         );
         if($isCardView){ $details[$this->codes->id('DT_IS_CARD_VIEW')] = array($this->codes->id('TRM_YES')); }
         $saved = ($this->recordSave)()->save('POST', 0, RecordInput::fromBody(
-            array('rec_RecTypeID' => $this->codes->id('RT_CUSTOM_REPORT'), 'details' => $details)));
+            array('rec_RecTypeID' => $this->codes->id('RT_REPORT_TEMPLATE'), 'details' => $details)));
         return $this->report(intval($saved['recordId']));
     }
 

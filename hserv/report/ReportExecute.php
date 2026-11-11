@@ -1400,7 +1400,7 @@ class ReportExecute
                     case 'js': $mimetype = 'text/javascript'; break;
                     case 'txt': $mimetype = 'text/plain'; break;
                     case 'json': $mimetype = MIMETYPE_JSON; break;
-                    default: $mimetype = 'text/'.$this->outputmode  ; break; //text/xml text/html
+                    default: $mimetype = 'text/'.$this->outputmode; break; //text/xml text/html
                 }
                 header("Content-type: $mimetype;charset=UTF-8");
             }

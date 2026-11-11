@@ -83,12 +83,12 @@ class ReportTemplateMgr
     {
         $mysqli = $this->system->getMysqli();
         if(!$mysqli || empty($template_file)
-            || !$this->system->defineConstant('RT_CUSTOM_REPORT') || !$this->system->defineConstant('DT_FILE_NAME')){
+            || !$this->system->defineConstant('RT_REPORT_TEMPLATE') || !$this->system->defineConstant('DT_FILE_NAME')){
             return;
         }
         $base = pathinfo(basename($template_file), PATHINFO_FILENAME);
         $rows = mysql__select_all($mysqli, 'SELECT rec_OwnerUGrpID, rec_NonOwnerVisibility FROM Records, recDetails'
-            .' WHERE dtl_RecID=rec_ID AND rec_RecTypeID='.intval(RT_CUSTOM_REPORT).' AND dtl_DetailTypeID='.intval(DT_FILE_NAME)
+            .' WHERE dtl_RecID=rec_ID AND rec_RecTypeID='.intval(RT_REPORT_TEMPLATE).' AND dtl_DetailTypeID='.intval(DT_FILE_NAME)
             ." AND dtl_Value IN ('".$mysqli->real_escape_string($base)."','".$mysqli->real_escape_string($base.'.tpl')."')");
         foreach(is_array($rows) ? $rows : [] as $row){
             if(!$forWrite && in_array($row[1], ['public', 'viewable'], true)){ continue; }

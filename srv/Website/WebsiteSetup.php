@@ -28,6 +28,8 @@ final class WebsiteSetup
 {
     public const FIELDS = array('2-49', '2-1187', '2-1202');
     public const RECTYPES = array('99-51', '99-52');
+    /** Record types the websites need without the fields: registered files (logo, banner in the record manager of files). */
+    public const IMPORT_TYPES = array('2-1106');
     /** Fields made optional: a new v4 website has no logo (plan 27b, Q3); the legacy editor still asks for it. */
     public const OPTIONAL = array('99-51' => array('2-38'));
 
@@ -49,7 +51,7 @@ final class WebsiteSetup
         if(!$this->runtime->isAdmin){
             throw new WebsiteException(403, 'Only database managers can install the website definitions');
         }
-        return array_merge($this->definitions->install(self::FIELDS, self::RECTYPES),
+        return array_merge($this->definitions->install(self::FIELDS, self::RECTYPES, self::IMPORT_TYPES),
             $this->definitions->makeOptional(self::OPTIONAL));
     }
 }
