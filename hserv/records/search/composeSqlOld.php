@@ -58,7 +58,7 @@ $sortType = 0;
  */
 function heurist_legacy_contains_sql($db, $column, $text, $table){
     static $indexCache = array();
-    
+
     $text = trim($text);
 
     if(strlen($text) >= 2 && $text[0] === '%' && substr($text, -1) === '%'){
@@ -67,7 +67,7 @@ function heurist_legacy_contains_sql($db, $column, $text, $table){
 
     if($text === '' || strpbrk($text, '%_') !== false){
         return null;
-    }    
+    }
 
     if(!in_array($table, array('Records','recDetails'), true)) { return null; }
     $name = $table==='Records' ? 'rec_Title' : 'dtl_Value';
@@ -1350,8 +1350,8 @@ class Predicate {
     /** @var AndLimb Reference to the parent AndLimb object that contains this predicate. */
     public $parent;
 
-    /** 
-     * @var bool Flag used by some predicate types (like RelatedFromParentPredicate, RelatedToParentPredicate) 
+    /**
+     * @var bool Flag used by some predicate types (like RelatedFromParentPredicate, RelatedToParentPredicate)
      * to control whether to recursively find inverse relationships. Defaults to true.
      */
     public $need_recursion = true;
@@ -1411,7 +1411,7 @@ class Predicate {
                 } else {
                     // Should not happen in a well-formed structure
                     // Trigger error or handle as appropriate if $c has no parent but is not Query
-                    break; 
+                    break;
                 }
             }
             $this->query = ($c && strtolower(get_class($c)) == 'query') ? $c : null;
@@ -1531,7 +1531,7 @@ class Predicate {
      */
     public function makeDateClause() {
 
-        // if($this->isEmptyValue()){ return SQL_NULL; } 
+        // if($this->isEmptyValue()){ return SQL_NULL; }
 
         if (strpos($this->value,"<>")) { // Value represents a range
             $vals = explode("<>", $this->value);
@@ -2486,7 +2486,11 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
  * Handles multiple tags (OR logic), workgroup-specific tags, and numeric tag IDs.
  */
 class TagPredicate extends Predicate {
-    /** @var array<string> Array of workgroup names associated with tags. Parallel to `$this->value`. Empty string if no workgroup. */
+
+    /**
+     * Array of workgroup names associated with tags. Parallel to `$this->value`. Empty string if no workgroup.
+     * @var array<string>
+     */
     public $wg_value;
 
     /**
@@ -2568,7 +2572,7 @@ class TagPredicate extends Predicate {
                 }
         }
 */
-        return null;        
+        return null;
     }
 
     /**
@@ -3331,7 +3335,7 @@ class LinkedToPredicate extends Predicate {
             // The SQL_LINKED_EXISTS is about TOPBIBLIO having a link.
             // Replacing bd.dtl_RecID with a check against $ids means we are checking if THESE $ids records have links.
             // This does not check if TOPBIBLIO is linked TO by $ids.
-            if(count($ids)>1){ 
+            if(count($ids)>1){
                 return str_replace('LIMIT 1',' and bd.dtl_RecID IN (' . join(',', $ids) . ') LIMIT 1',SQL_LINKED_EXISTS);
             } elseif(!empty($ids)) { // Single ID
                 return str_replace('LIMIT 1',' and bd.dtl_RecID = ' . $ids[0] . ' LIMIT 1',SQL_LINKED_EXISTS);
@@ -3632,7 +3636,7 @@ class SpatialPredicate extends Predicate {
      *
      * Supports:
      *   geo:"-16,32,40,72"   => viewport extent, ST_Intersects
-     *   geo:"POLYGON (...)"  => legacy WKT, ST_Contains     * 
+     *   geo:"POLYGON (...)"  => legacy WKT, ST_Contains     *
      * @return string The SQL condition string using an EXISTS subquery.
      */
     public function makeSQL() {
@@ -3670,7 +3674,7 @@ class SpatialPredicate extends Predicate {
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and {$spatialFunction}(ST_GeomFromText('{$wkt}'), bd.dtl_Geo) limit 1))";
     }
-    
+
 }
 
 /**

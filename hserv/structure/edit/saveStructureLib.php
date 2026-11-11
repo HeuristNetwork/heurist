@@ -103,9 +103,7 @@ $rstColumnNames = array(
     "rst_TermsAsButtons"=>"i"
 );
 
-/**
- * @var array $rcsColumnNames Defines column names and their types for the `defRelationshipConstraints` table.
- */
+/** @var array $rcsColumnNames Defines column names and their types for the `defRelationshipConstraints` table. */
 $rcsColumnNames = array(
     "rcs_ID"=>"i",
     "rcs_SourceRectypeID"=>"i",
@@ -142,9 +140,7 @@ $dtyColumnNames = array(
     "dty_SemanticReferenceURL"=>"s"
 );
 
-/**
- * @var array $rtgColumnNames Defines column names and their types for the `defRecTypeGroups` table.
- */
+/** @var array $rtgColumnNames Defines column names and their types for the `defRecTypeGroups` table. */
 $rtgColumnNames = array(
     "rtg_ID"=>"i",
     "rtg_Name"=>"s",
@@ -161,9 +157,7 @@ $dtgColumnNames = array(
     "dtg_Modified"=>"s"
 );
 
-/**
- * @var array $trmColumnNames Defines column names and their types for the `defTerms` table.
- */
+/** @var array $trmColumnNames Defines column names and their types for the `defTerms` table. */
 $trmColumnNames = array(
     "trm_ID"=>"i",
     "trm_Label"=>"s",

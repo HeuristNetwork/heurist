@@ -743,7 +743,7 @@ public static function assignRecordIds($params){
         }*/
 
         $imp_session['columns'][] = $id_fieldname;
-        $imp_session['uniqcnt'][] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'] ;
+        $imp_session['uniqcnt'][] = !isEmptyArray(@$pairs) ? count($pairs) : $imp_session['reccount'];
         $imp_session['column_counts'][] = $imp_session['reccount'];
 
         if(@$params['idfield']){
