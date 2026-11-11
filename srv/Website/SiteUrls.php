@@ -51,6 +51,12 @@ final class SiteUrls
         }
     }
 
+    /** Heurist base URL (ends with "/"). */
+    public function baseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
     /**
      * URLs of a built site: pages as relative files, frames on the live server (pretty form).
      *

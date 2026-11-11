@@ -137,7 +137,9 @@ final class WebsiteEditService
             'languages' => array_map('strtolower', $languages),
             'url' => $url,
             'canEdit' => $this->canEdit($id),
-            'pages' => $pages
+            'pages' => $pages,
+            // the host organisation (logo and URL) for the hosted at line of the footer composer (review 2026-11-10)
+            'host' => HostInfo::read($this->urls->baseUrl())
         );
     }
 
@@ -159,7 +161,7 @@ final class WebsiteEditService
         $details = is_array($body['details'] ?? null) ? $body['details'] : array();
         $title = trim(strip_tags((string)self::first($details[$codes['name']] ?? '')));
         if($title === ''){ throw new WebsiteException(400, 'The website needs a title'); }
-        $site = WebsiteStarter::website($title);
+        $site = WebsiteStarter::website($title, $this->urls->baseUrl(), HostInfo::read($this->urls->baseUrl()));
         $defaults = array(
             $codes['version'] => WebsiteService::VERSION,
             $codes['header'] => $site['header'],

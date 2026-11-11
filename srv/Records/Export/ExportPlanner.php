@@ -4,7 +4,7 @@
 *
 * The complete ordered id list is built before anything is written:
 *   1. the result of the data source query (or the selection), filtered by record
-*      type, cut to the request limit; read in pages of PAGE ids;
+*      type, cut to the request limit; read in pages (Records/Query/RecordScope);
 *   2. the records the expansion rules reach from it (ExpansionEngine), each
 *      added once, after the result, in the order the levels reach them.
 * Every record is therefore written exactly once. The whole list is refused when
@@ -30,18 +30,14 @@ use Heurist\Records\Expansion\ExpansionEngine;
 use Heurist\Records\Expansion\ExpansionRequest;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\QueryExecutor;
+use Heurist\Records\Query\RecordScope;
 use Heurist\Records\Query\RecordSearchService;
-use Heurist\Records\Query\SearchRequest;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Runtime\RuntimeContext;
-use InvalidArgumentException;
 
 /** Resolves export ids and record links. */
 final class ExportPlanner
 {
-    /** Ids read per search request. */
-    private const PAGE = 100000;
-
     /** Ids per recLinks query. */
     private const LINK_BATCH = 1000;
 
@@ -150,40 +146,11 @@ final class ExportPlanner
 
     private function searchIds(ExportRequest $request): array
     {
-        $builder = new QueryBuilder($this->database);
-        if(!empty($request->ids)){
-            $query = array(array('ids' => implode(',', $request->ids)));
-        }else{
-            $query = $request->query;
-            if(is_string($query)){
-                $decoded = json_decode($query, true);
-                $query = is_array($decoded) ? $decoded : $query;
-            }
-            $query = $builder->normalize($query);
-            if(!is_array($query)){
-                throw new InvalidArgumentException('Invalid query');
-            }
-        }
-        if(!empty($request->rectypes)){
-            $query[] = array('t' => implode(',', $request->rectypes));
-        }
-        $service = new RecordSearchService($this->database, $this->runtime, $builder);
         $max = $this->settings->maxRecords();
-        $wanted = $request->limit > 0 ? min($request->limit, $max + 1) : $max + 1;
-        $ids = array();
-        do{
-            $page = min(self::PAGE, $wanted - count($ids));
-            $result = $service->search(new SearchRequest($query, array(
-                'limit' => $page,
-                'offset' => count($ids),
-                'total' => false
-            )));
-            $ids = array_merge($ids, array_map('intval', $result->ids));
-        }while(count($result->ids) === $page && count($ids) < $wanted);
-        if(count($ids) > $max){
-            throw new DomainException('The query finds more than '.$max.' records; an export can have at most '
-                .$max.' (database setting Export: maxRecords). Set a record limit or narrow the query.');
-        }
-        return $ids;
+        return (new RecordScope($this->database, $this->runtime))->ids(
+            $request->query, $request->ids, $request->rectypes, $max, $request->limit,
+            'The query finds more than {max} records; an export can have at most {max}'
+                .' (database setting Export: maxRecords). Set a record limit or narrow the query.'
+        );
     }
 }

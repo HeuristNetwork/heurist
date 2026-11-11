@@ -5,7 +5,7 @@
 *   POST   /records/{id}            insert; id 0 = next id, negative = that id (import)
 *   PUT    /records/{id}            update, the body replaces the whole record
 *   PATCH  /records/{id}            update, only the fields in the body (plan 32: detailsAdd,
-*                                   detailsMatch, addIfNone; meta.changed); ?fields= shortens the answer
+*                                   detailsMatch, addIfNone; meta.changed, meta.values); ?fields= shortens the answer
 *   DELETE /records/{id}[?force=1]  delete; 409 with the references unless force
 *   POST   /records/{id}/duplicate  copy of the record
 *   POST   /records/{id}/validate   check a record body without saving (id <= 0: insert)
@@ -178,6 +178,10 @@ final class RecordEditController
         if(isset($result['changed'])){
             // PATCH (plan 32): field => removed + inserted value rows
             $saved['meta']['changed'] = (object)$result['changed'];
+            // field => {found, added, removed} (the report of the Actions tool, plan 33)
+            $saved['meta']['values'] = (object)($result['values'] ?? array());
+            // owner, visibility or groups changed (Ownership action of the Actions tool, plan 33)
+            $saved['meta']['headerChanged'] = !empty($result['header']);
         }
         return array($result['created'] ? 201 : 200, $saved);
     }
@@ -362,8 +366,9 @@ final class RecordEditController
     /** The saved record as GET /records/{id} returns it, with meta.issues. */
     private function savedRecord(int $recordId, array $issues, array $params): array
     {
-        // ?fields= gives a shorter answer (e.g. rec_ID,rec_Modified,rec_Title after a PATCH, plan 32)
-        $fields = trim((string)($params['fields'] ?? ''));
+        // ?fields= gives a shorter answer (e.g. rec_ID,rec_Modified,rec_Title after a PATCH, plan 32).
+        // Only a text: legacy api.php puts the whole JSON body into "fields" when the URL has none.
+        $fields = is_string($params['fields'] ?? null) ? trim($params['fields']) : '';
         $response = $this->query->executeItem(array(
             'db' => $params['db'] ?? $this->runtime->databaseName,
             'fields' => $fields !== '' ? $fields : '_all'

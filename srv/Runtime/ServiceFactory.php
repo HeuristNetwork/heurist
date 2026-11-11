@@ -38,6 +38,8 @@ use Heurist\Jobs\JobHandlerInterface;
 use Heurist\Jobs\JobRunner;
 use Heurist\Jobs\JobStore;
 use Heurist\Records\Map\MapFeatureService;
+use Heurist\Records\Actions\DeleteGuard;
+use Heurist\Records\Actions\RecordActionJob;
 use Heurist\Records\Export\ExportJob;
 use Heurist\Records\Export\ExportPlanner;
 use Heurist\Records\Export\ExportService;
@@ -75,6 +77,7 @@ use Heurist\Records\Files\FileRepository;
 use Heurist\Records\Edit\RecordValidator;
 use Heurist\Records\Data\RecordDataService;
 use Heurist\Records\Query\Compiler\QueryBuilder;
+use Heurist\Records\Query\RecordScope;
 use Heurist\Records\Query\RecordSearchService;
 use Heurist\Records\Query\SearchRequest;
 use Heurist\Reports\Jobs\ReportGenerateJob;
@@ -139,6 +142,8 @@ final class ServiceFactory
     private bool $translatorAvailable = false;
     private string $associationMembershipStatus = '';
     private string $googleTranslationKey = '';
+    /** $passwordForServerFunctions of heuristConfigIni.php: large deletes of the Actions tool (plan 33). */
+    private string $serverFunctionsPassword = '';
     /** @var array{root?:string,quota?:\Closure} File store root and disk quota (plan 20, /files writes). */
     private array $fileEnvironment = array();
     /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
@@ -200,6 +205,7 @@ final class ServiceFactory
         };
         $factory->associationMembershipStatus = $associationMembershipStatus;
         $factory->googleTranslationKey = (string)($GLOBALS['accessToken_GoogleTranslateAPI'] ?? '');
+        $factory->serverFunctionsPassword = (string)($GLOBALS['passwordForServerFunctions'] ?? '');
         // Provider configuration availability, independent of the user's eligibility.
         $factory->translatorAvailable = !empty($GLOBALS['accessToken_DeepLAPI'] ?? null)
             || !empty($GLOBALS['accessToken_GoogleTranslateAPI'] ?? null);
@@ -873,6 +879,33 @@ final class ServiceFactory
             'relationType' => $this->codes->id('DT_RELATION_TYPE')
         ));
         return array(new ExportJob($service, function(): int { return $this->connectionId(); }));
+    }
+
+    /**
+     * Job type "record-action" (Explorer Actions tool, plan 33): field values, ownership,
+     * titles, calculated fields and delete over a set of records. Limits: maxRecords and
+     * timeLimit of the export settings; a delete of more than 10 records needs the server
+     * password ($passwordForServerFunctions), half of the database only the database owner.
+     *
+     * @return array<int,JobHandlerInterface>
+     */
+    public function recordActionJobHandlers(): array
+    {
+        $settings = new ExportSettings((array)($this->reportEnvironment['exportSettings'] ?? array()));
+        return array(new RecordActionJob(
+            function(): array {
+                $parts = $this->recordWriteParts();
+                return array('save' => $parts['save'], 'delete' => $parts['delete']);
+            },
+            DefinitionLookup::shared($this->database),
+            RecordRepository::shared($this->database),
+            new RecordScope($this->database, $this->runtime),
+            new DeleteGuard(DeleteGuard::serverPassword($this->serverFunctionsPassword)),
+            $this->runtime->isDbOwner,
+            $settings->maxRecords(),
+            $settings->timeLimitSeconds(),
+            function(): int { return $this->connectionId(); }
+        ));
     }
 
     /** Template runner of the srv Smarty engine. */

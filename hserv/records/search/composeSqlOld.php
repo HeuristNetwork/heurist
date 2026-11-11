@@ -1824,43 +1824,42 @@ class AnyPredicate extends Predicate {
         $val = $mysqli->real_escape_string($this->value);
 
         if($this->parent->fulltext){
-               // Attempt full-text search on detail values and titles of linked resources.
-               $res_details_ft = 'select dtl_RecID from recDetails '
-                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-                . ' left join Records link on dtl_Value=link.rec_ID ' // Join to get linked record titles
-                .' where if(dty_Type="resource", '
-                    .'link.rec_Title like "%'.$val.'%", ' // Fallback to LIKE for linked resource titles
-                    .' MATCH(dtl_Value) AGAINST("'.$val.'"))'; // Full-text on dtl_Value
+            // Attempt full-text search on detail values and titles of linked resources.
+            $res_details_ft = 'select dtl_RecID from recDetails '
+            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+            . ' left join Records link on dtl_Value=link.rec_ID ' // Join to get linked record titles
+            .' where if(dty_Type="resource", '
+                .'link.rec_Title like "%'.$val.'%", ' // Fallback to LIKE for linked resource titles
+                .' MATCH(dtl_Value) AGAINST("'.$val.'"))'; // Full-text on dtl_Value
 
-                $list_ids = mysql__select_list2($mysqli, $res_details_ft);
-                $condition_details = '';
-                if($list_ids && !empty($list_ids)){
-                    $condition_details = predicateId('TOPBIBLIO.rec_ID',$list_ids);
-                }
+            $list_ids = mysql__select_list2($mysqli, $res_details_ft);
+            $condition_details = '';
+            if($list_ids && !empty($list_ids)){
+                $condition_details = predicateId('TOPBIBLIO.rec_ID',$list_ids);
+            }
 
-                // Full-text on main record title (if supported, otherwise LIKE)
-                // Assuming rec_Title might not always have FT index or might be handled differently
-                $condition_title = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+            // Full-text on main record title (if supported, otherwise LIKE)
+            // Assuming rec_Title might not always have FT index or might be handled differently
+            $condition_title = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+            $condition_url = 'TOPBIBLIO.rec_URL like "%'.$val.'%"';
 
-                if($condition_details && $condition_title){
-                    return "($condition_details OR $condition_title)";
-                } elseif ($condition_details){
-                    return "($condition_details)";
-                } elseif ($condition_title){
-                    return "($condition_title)";
-                }
-                return '(1=0)'; // Nothing to search
+            $conditionals = "$condition_title OR $condition_url";
+
+            return !empty($condition_details) ? "($condition_details OR $conditionals)" : "($conditionals)";
         }
 
         // Ordinary text uses an indexed candidate search when possible.
         $detailText = 'rd.dtl_Value like "%'.$val.'%"';
         $linkedTitle = 'link.rec_Title like "%'.$val.'%"';
+        $linkedURL = 'link.rec_URL like "%'.$val.'%"';
         $recordTitle = 'TOPBIBLIO.rec_Title like "%'.$val.'%"';
+        $recordURL = 'TOPBIBLIO.rec_URL like "%'.$val.'%"';
         if(!$this->parent->negate && strpos($this->value, '%')===false){
             $detailText = heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $this->value, 'recDetails') ?? $detailText;
             $linkedTitle = heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $this->value, 'Records') ?? $linkedTitle;
             $recordTitle = heurist_legacy_contains_sql($mysqli, 'TOPBIBLIO.rec_Title', $this->value, 'Records') ?? $recordTitle;
         }
+
         // Standard LIKE search if no indexed condition is available
         $not = ($this->parent->negate)? SQL_NOT : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
@@ -1869,8 +1868,8 @@ class AnyPredicate extends Predicate {
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
         . '  and if(dty_Type != "resource", ' // If not a resource field
         . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), '.$detailText.'), ' // Search enum by label/code or other detail by value
-        .''.$linkedTitle.'))' // Search linked resource title
-        .' or '.$recordTitle.') '; // Also search main record title
+        .''.$linkedTitle.' or '.$linkedURL.'))' // Search linked resource title
+        .' or '.$recordTitle.' or '.$recordURL.') '; // Also search main record title
     }
 }
 

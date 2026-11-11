@@ -496,6 +496,19 @@ final class PageRenderer
             }
             if($rules !== ''){ $css .= '.h-site-'.$part.'{'.$rules."}\n"; }
         }
+        // sizes (review 2026-11-10): the width of a vertical header (the column of the body grid on wider screens), the
+        // height of a horizontal header (not when collapsed) and of the footer: a minimum, the content in the middle
+        $header = is_array($layout['header'] ?? null) ? $layout['header'] : array();
+        $footer = is_array($layout['footer'] ?? null) ? $layout['footer'] : array();
+        $middle = 'display:flex;flex-direction:column;justify-content:center;';
+        if(($header['orientation'] ?? '') === 'vertical'){
+            if(CmsValidator::isLayoutSize($header['width'] ?? null)){ $css .= 'html.h-site{--h-site-header-width:'.trim($header['width']).";}\n"; }
+        }elseif(CmsValidator::isLayoutSize($header['height'] ?? null)){
+            $css .= 'body:not(.h-site-header-collapsed)>.h-site-header{min-height:'.trim($header['height']).';'.$middle."}\n";
+        }
+        if(CmsValidator::isLayoutSize($footer['height'] ?? null)){
+            $css .= '.h-site-footer{min-height:'.trim($footer['height']).';'.$middle."}\n";
+        }
         return $css;
     }
 

@@ -86,8 +86,11 @@ final class FieldPredicateCompiler
      * Condition on one detail row (alias $alias) for a value of the query format, by the field type:
      * numbers, terms, text with language prefixes, other values; dates through the date index.
      * Used by fieldCondition() and by PATCH value matching (plan 32).
+     * $substring: "contains" of text is a plain substring (LIKE %x%), not the word match of the
+     * search ("linda" finds "Belinda"); PATCH value matching uses it (one record, no index needed).
      */
-    public function valueCondition(int $fieldId, $value, SqlBuildContext $state, string $alias = 'd', ?string $termField = null): string
+    public function valueCondition(int $fieldId, $value, SqlBuildContext $state, string $alias = 'd', ?string $termField = null,
+        bool $substring = false): string
     {
         $column = $alias.'.dtl_Value';
         $fieldType = $this->fieldType($fieldId);
@@ -102,13 +105,13 @@ final class FieldPredicateCompiler
             return $this->termCondition($column, $value, $state, $termField);
         }
         if(in_array($fieldType, array('freetext','blocktext'), true)){
-            return $this->languageTextCondition($column, $value, $state);
+            return $this->languageTextCondition($column, $value, $state, $substring);
         }
         return $this->scalarCondition($column, $value, $state);
     }
 
     /** Apply Heurist's language-prefix rules for freetext and blocktext details. */
-    public function languageTextCondition(string $column, $value, SqlBuildContext $state): string
+    public function languageTextCondition(string $column, $value, SqlBuildContext $state, bool $substring = false): string
     {
         $text = (string)$value; $prefix = '';
         foreach(array('==','>=','<=','!=','>','<','=','@+','@-','@','-') as $candidate){
@@ -122,7 +125,7 @@ final class FieldPredicateCompiler
         if(($prefix === '=' || $prefix === '==') && $language !== null && $language !== 'all'){
             $comparisonValue = $prefix.$language.':'.$text;
         }
-        $condition = $this->scalarCondition($column, $comparisonValue, $state, true);
+        $condition = $this->scalarCondition($column, $comparisonValue, $state, !$substring);
         if($language === null){
             return '('.$condition.' AND '.$column.' NOT RLIKE "^[A-Za-z]{2,3}:")';
         }
