@@ -335,7 +335,7 @@ class DbUsrTags extends DbEntityBase
 
         if(!$this->system->isAdmin()){ // check user permission for records
 
-            $permissionQuery = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('. implode(',', $assignIDs) .') AND (rec_OwnerUGrpID IN ('. implode(',', $userGroupIDs) .') OR rec_OwnerUGrpID = "public")';
+            $permissionQuery = 'SELECT rec_ID FROM Records WHERE rec_ID IN ('. implode(',', $assignIDs) .') AND (rec_OwnerUGrpID IN ('. implode(',', $userGroupIDs) .') OR rec_OwnerUGrpID != "hidden")';
             $assignIDs = mysql__select_list2($mysqli, $permissionQuery, 'intval');
 
             if(empty($assignIDs)){
