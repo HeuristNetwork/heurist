@@ -18,6 +18,8 @@
 
 class EditorSpreadsheet{
 
+    #DEBUG = false;
+
     #inputDiv;
     #input;
     #inputDisplay = '';
@@ -48,7 +50,7 @@ class EditorSpreadsheet{
     };
     #configuration = {};
     #data = {};
-    #dataType;
+    #dataType; // [csv, json, table]
 
     #loadingScripts = false;
     _boundSaveEvent;
@@ -84,6 +86,11 @@ class EditorSpreadsheet{
 
         let data = this.#input.value.trim();
 
+        if(false && /^<table/.test(data)){
+            this.#dataType = 'table';
+            return this.#parseTable(data);
+        }
+
         try{
 
             const json = JSON.parse(data);
@@ -98,6 +105,7 @@ class EditorSpreadsheet{
 
         }catch(error){
 
+            this.#logError(error);
             if(/^[\[{]/.test(data)){
                 throw new Error(`Invalid JSON: ${error.message}`);
             }
@@ -107,6 +115,7 @@ class EditorSpreadsheet{
             this.#dataType = 'csv';
             return this.#parseCSV(data);
         }catch(error){
+            this.#logError(error);
             throw new Error('Unknown data provided.');
         }
     }
@@ -222,6 +231,22 @@ class EditorSpreadsheet{
         }];
     }
 
+    #parseTable(data){
+
+        data = data.trim();
+
+        if(!/^<table/.test(data)){
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.style.display = 'none';
+        const table = document.getElementById('spreadsheet-container');
+        container.innerHTML = data;
+
+        this.#jspreadsheet = jspreadsheet(document.getElementById('my-target-table'));
+    }
+
     #detectDelimiter(data){
 
         const delimiters = [',', "\t", '|', ';'];
@@ -269,8 +294,13 @@ class EditorSpreadsheet{
 
         try{
             this.#data = this.#parseData();
-        }catch{
+        }catch(error){
+            console.error(error);
             this.#switchToText();
+            return;
+        }
+
+        if(this.#dataType === 'table' || this.#jspreadsheet){
             return;
         }
 
@@ -307,7 +337,21 @@ class EditorSpreadsheet{
 
     updateInput(){
 
-        this.#input.value = this.#dataType === 'json' ? this.#toJSON() : this.#toCSV();
+        switch(this.#dataType){
+            case 'json':
+                this.#input.value = this.#toJSON();
+                break;
+            case 'csv':
+                this.#input.value = this.#toCSV();
+                break;
+            case 'table':    
+                this.#input.value = this.#toTable();
+                break;
+            default:
+                window.hWin.HEURIST4.msg.showMsgFlash('Invalid output format...', 3000);
+                return;
+                break;
+        }
 
         const event = new Event('change', {bubbles: false});
 
@@ -315,7 +359,7 @@ class EditorSpreadsheet{
     }
 
     #toJSON(){
-        return JSON.stringify(this.#jspreadsheet.getData());
+        return JSON.stringify(this.#jspreadsheet[0].getData());
     }
 
     #toCSV(){
@@ -330,6 +374,28 @@ class EditorSpreadsheet{
         ).join("\n");
     }
 
+    #toTable(){
+
+        const headers = this.#jspreadsheet[0].getHeaders().join(',');
+        const data = this.#jspreadsheet[0].getData();
+
+        let table = `<table>`;
+
+        table += `<thead><tr>`;
+        headers.forEach(header => table += `<th>${header}</th>`);
+        table += `</tr></thead>`;
+
+        table += '<tbody>';
+        data.forEach(row => {
+            table += '<tr>';
+            row.forEach(value => table += `<td>${value ?? ''}</td>`)
+            table += '</tr>';
+        })
+        table += '</tbody>';
+
+        return table;
+    }
+
     #loadScripts(){
 
         if(this.#loadingScripts){
@@ -339,11 +405,11 @@ class EditorSpreadsheet{
         this.#loadingScripts = true;
 
         // CSS styles
-        $.getStyles('https://jsuites.net/v5/jsuites.css');
         $.getStyles('https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css');
+        $.getStyles('https://cdn.jsdelivr.net/npm/jsuites@6/dist/jsuites.min.css');
         $.getStyles('https://fonts.googleapis.com/css?family=Material+Icons'); // for toolbar
 
-        $.getMultiScriptsSequental(['https://jsuites.net/v5/jsuites.js','https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js'])
+        $.getMultiScriptsSequental(['https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js','https://cdn.jsdelivr.net/npm/jsuites@6/dist/jsuites.min.js'])
             .then(() => {
                 this.show();
             })
@@ -369,10 +435,13 @@ class EditorSpreadsheet{
             this.#saveButton = null;
         }
 
-        this.#editorContainer.remove();
+        if(this.#editorContainer){
 
-        this.#editor = null;
-        this.#editorContainer = null;
+            this.#editorContainer.remove();
+
+            this.#editor = null;
+            this.#editorContainer = null;
+        }
     }
 
     #switchToText(){
@@ -388,5 +457,11 @@ class EditorSpreadsheet{
 
     clear(){
         this.#jspreadsheet[0].setData([]);
+    }
+
+    #logError(error){
+        if(this.#DEBUG){
+            console.error(error);
+        }
     }
 }

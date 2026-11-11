@@ -20,5 +20,9 @@
     "allow-plugins": {
       "symfony/flex": true
     }
+  },
+  "require-dev": {
+    "symplify/easy-coding-standard": "^13.3",
+    "phpstan/phpstan": "^2.3"
   }
 }

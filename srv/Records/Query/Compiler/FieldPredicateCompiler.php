@@ -77,21 +77,41 @@ final class FieldPredicateCompiler
             return 'EXISTS (SELECT 1 FROM {dateIndex} di INNER JOIN {details} d ON d.dtl_ID=di.rdi_DetailID '
                 .'WHERE di.rdi_RecID='.$recordAlias.'.rec_ID AND di.rdi_DetailTypeID=? AND '.$condition.')';
         }
-        if(in_array($fieldType, array('integer','float','resource'), true)){
-            $condition = $this->numericCondition('CAST(d.dtl_Value AS DECIMAL(65,20))', $value, $state);
-        }elseif(in_array($fieldType, array('enum','relationtype'), true)){
-            $condition = $this->termCondition('d.dtl_Value', $value, $state, $termField);
-        }elseif(in_array($fieldType, array('freetext','blocktext'), true)){
-            $condition = $this->languageTextCondition('d.dtl_Value', $value, $state);
-        }else{
-            $condition = $this->scalarCondition('d.dtl_Value', $value, $state);
-        }
+        $condition = $this->valueCondition($fieldId, $value, $state, 'd', $termField);
         return 'EXISTS (SELECT 1 FROM {details} d WHERE d.dtl_RecID='.$recordAlias.'.rec_ID '
             .'AND d.dtl_DetailTypeID=? AND '.$condition.')';
     }
 
+    /**
+     * Condition on one detail row (alias $alias) for a value of the query format, by the field type:
+     * numbers, terms, text with language prefixes, other values; dates through the date index.
+     * Used by fieldCondition() and by PATCH value matching (plan 32).
+     * $substring: "contains" of text is a plain substring (LIKE %x%), not the word match of the
+     * search ("linda" finds "Belinda"); PATCH value matching uses it (one record, no index needed).
+     */
+    public function valueCondition(int $fieldId, $value, SqlBuildContext $state, string $alias = 'd', ?string $termField = null,
+        bool $substring = false): string
+    {
+        $column = $alias.'.dtl_Value';
+        $fieldType = $this->fieldType($fieldId);
+        if($fieldType === 'date'){
+            $condition = $this->detailDateCondition($value, $state);
+            return $alias.'.dtl_ID IN (SELECT di.rdi_DetailID FROM {dateIndex} di WHERE '.$condition.')';
+        }
+        if(in_array($fieldType, array('integer','float','resource'), true)){
+            return $this->numericCondition('CAST('.$column.' AS DECIMAL(65,20))', $value, $state);
+        }
+        if(in_array($fieldType, array('enum','relationtype'), true)){
+            return $this->termCondition($column, $value, $state, $termField);
+        }
+        if(in_array($fieldType, array('freetext','blocktext'), true)){
+            return $this->languageTextCondition($column, $value, $state, $substring);
+        }
+        return $this->scalarCondition($column, $value, $state);
+    }
+
     /** Apply Heurist's language-prefix rules for freetext and blocktext details. */
-    public function languageTextCondition(string $column, $value, SqlBuildContext $state): string
+    public function languageTextCondition(string $column, $value, SqlBuildContext $state, bool $substring = false): string
     {
         $text = (string)$value; $prefix = '';
         foreach(array('==','>=','<=','!=','>','<','=','@+','@-','@','-') as $candidate){
@@ -105,7 +125,7 @@ final class FieldPredicateCompiler
         if(($prefix === '=' || $prefix === '==') && $language !== null && $language !== 'all'){
             $comparisonValue = $prefix.$language.':'.$text;
         }
-        $condition = $this->scalarCondition($column, $comparisonValue, $state, true);
+        $condition = $this->scalarCondition($column, $comparisonValue, $state, !$substring);
         if($language === null){
             return '('.$condition.' AND '.$column.' NOT RLIKE "^[A-Za-z]{2,3}:")';
         }

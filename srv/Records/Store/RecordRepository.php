@@ -291,6 +291,40 @@ final class RecordRepository
     }
 
     /**
+     * Value rows (dtl_ID) of one field of a record that match a condition on the row alias "d"
+     * (FieldPredicateCompiler::valueCondition, table keys resolved; PATCH value matching, plan 32).
+     *
+     * @param array<int,mixed> $values Values of the placeholders of $condition.
+     * @return array<int,int>
+     */
+    public function matchingDetailIds(int $recordId, int $fieldId, string $condition, array $values): array
+    {
+        return array_map('intval', $this->database->fetchColumn(
+            'SELECT d.dtl_ID FROM '.$this->schema->details().' d WHERE d.dtl_RecID=? AND d.dtl_DetailTypeID=? AND ('
+            .$condition.') ORDER BY d.dtl_ID', array_merge(array($recordId, $fieldId), $values)
+        ));
+    }
+
+    /**
+     * Number of value rows per field of a record.
+     *
+     * @param array<int,int> $fieldIds
+     * @return array<int,int> field => count (fields without values are missing)
+     */
+    public function fieldCounts(int $recordId, array $fieldIds): array
+    {
+        $fieldIds = self::ids($fieldIds);
+        if(empty($fieldIds)){ return array(); }
+        $result = array();
+        foreach($this->database->fetchRows('SELECT dtl_DetailTypeID,COUNT(*) FROM '.$this->schema->details()
+            .' WHERE dtl_RecID=? AND dtl_DetailTypeID IN ('.self::placeholders($fieldIds).') GROUP BY dtl_DetailTypeID',
+            array_merge(array($recordId), $fieldIds)) as $row){
+            $result[intval($row[0])] = intval($row[1]);
+        }
+        return $result;
+    }
+
+    /**
      * Values of fields: record => field => [value, ...] in dtl_ID order (files as their id).
      *
      * @return array<int,array<int,array<int,string>>>
@@ -311,12 +345,15 @@ final class RecordRepository
      * {value, hidden:true}.
      *
      * @param array<int,int>|null $fieldIds Only these fields (null = all).
+     * @param array<int,int> $excludeIds Value rows (dtl_ID) left out (PATCH with a value condition, plan 32).
      * @return array<int,array<int,mixed>>
      */
-    public function editValues(int $recordId, ?array $fieldIds = null): array
+    public function editValues(int $recordId, ?array $fieldIds = null, array $excludeIds = array()): array
     {
         $result = array();
+        $exclude = array_fill_keys(array_map('intval', $excludeIds), true);
         foreach($this->details(array($recordId), $fieldIds) as $row){
+            if(isset($exclude[$row['id']])){ continue; }
             if($row['file'] !== null){
                 $value = (string)$row['file'];
             }elseif($row['wkt'] !== null){

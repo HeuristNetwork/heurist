@@ -239,3 +239,16 @@ descriptors/
 .vscode
 .env
 external
+
+#############
+## Zed
+#############
+.zed/
+.devcontainer/
+
+#############
+## Docker
+#############
+docker-compose.override.yml
+data/db/
+data/filestore/

@@ -51,12 +51,16 @@ final class CalculatedFields
     /**
      * Calculate and store the calculated fields of a saved record.
      *
+     * @param array<int,int>|null $onlyFields Only these calculated fields (PATCH, plan 32: FieldDependencies); null = all.
+     * @param array<int,int>|null $changed Gets the ids of the fields whose value was written (plan 33).
      * @return array<int,string> field id => error message of formulas that failed
      */
-    public function update(int $recordId, int $rectypeId): array
+    public function update(int $recordId, int $rectypeId, ?array $onlyFields = null, ?array &$changed = null): array
     {
         $errors = array();
+        if($onlyFields !== null && empty($onlyFields)){ return $errors; }
         foreach($this->definitions->calculatedFields($rectypeId) as $fieldId => $formula){
+            if($onlyFields !== null && !in_array($fieldId, $onlyFields, true)){ continue; }
             if(trim($formula) === ''){
                 $errors[$fieldId] = 'Formula not defined';
                 continue;
@@ -93,6 +97,7 @@ final class CalculatedFields
                 || count($currentValues) === ($value === '' ? 0 : 1);
             if($current === $value && $pointerCardinalityValid){ continue; }
             $this->store->setFieldValue($recordId, $fieldId, $value === '' ? null : $value);
+            if($changed !== null){ $changed[] = $fieldId; }
         }
         return $errors;
     }

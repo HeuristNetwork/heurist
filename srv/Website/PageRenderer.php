@@ -93,8 +93,9 @@ final class PageRenderer
         if(($layout['header']['position'] ?? '') === 'none'){ $header = ''; }
         if(($layout['footer']['position'] ?? '') === 'none'){ $footer = ''; }
         $bodyClass = self::bodyClasses($layout);
-        // the banner image of the website and own colours of header / footer (plan 27f §13)
-        $styles .= self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
+        // the banner image of the website and own colours of header / footer (plan 27f §13): a block of its own, the
+        // preview of the designer replaces h-site-styles with the draft styles and keeps this one
+        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -110,6 +111,7 @@ final class PageRenderer
             .'<link rel="stylesheet" href="'.self::attr($baseUrl.self::BUNDLE.'heurist-website-main.css').'">'
             .'<style id="h-site-styles">'."\n".$styles.'</style>'
             .($pageStyles !== '' ? '<style id="h-page-styles" data-h-page="'.$pageId.'">'."\n".$pageStyles.'</style>' : '')
+            .($layoutCss !== '' ? '<style id="h-site-layout">'."\n".$layoutCss.'</style>' : '')
             .$this->customCss($site ?? $page)
             .$this->externalFiles($site ?? $page)
             .'</head><body class="'.self::attr($bodyClass).'">'
@@ -493,6 +495,19 @@ final class PageRenderer
                 $rules .= '--h-color-text:'.$text.';--h-color-link:'.$text.';--h-site-heading-color:'.$text.';';
             }
             if($rules !== ''){ $css .= '.h-site-'.$part.'{'.$rules."}\n"; }
+        }
+        // sizes (review 2026-11-10): the width of a vertical header (the column of the body grid on wider screens), the
+        // height of a horizontal header (not when collapsed) and of the footer: a minimum, the content in the middle
+        $header = is_array($layout['header'] ?? null) ? $layout['header'] : array();
+        $footer = is_array($layout['footer'] ?? null) ? $layout['footer'] : array();
+        $middle = 'display:flex;flex-direction:column;justify-content:center;';
+        if(($header['orientation'] ?? '') === 'vertical'){
+            if(CmsValidator::isLayoutSize($header['width'] ?? null)){ $css .= 'html.h-site{--h-site-header-width:'.trim($header['width']).";}\n"; }
+        }elseif(CmsValidator::isLayoutSize($header['height'] ?? null)){
+            $css .= 'body:not(.h-site-header-collapsed)>.h-site-header{min-height:'.trim($header['height']).';'.$middle."}\n";
+        }
+        if(CmsValidator::isLayoutSize($footer['height'] ?? null)){
+            $css .= '.h-site-footer{min-height:'.trim($footer['height']).';'.$middle."}\n";
         }
         return $css;
     }

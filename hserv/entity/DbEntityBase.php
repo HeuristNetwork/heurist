@@ -571,7 +571,7 @@ abstract class DbEntityBase
     private function _cleanDbDefCache(){
 
         if(is_array($this->config) &&
-            in_array($this->config['tablePrefix'], array('rty','dty','rst','trm','rtg','dtg','vcg','swf')))
+            in_array($this->config['tablePrefix'], array('rty','dty','rst','trm','rtg','dtg','vcg','swf','cfn')))
         { //affected entity
             $this->system->cleanDefCache();
         }

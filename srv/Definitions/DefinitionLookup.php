@@ -572,6 +572,23 @@ final class DefinitionLookup
     }
 
     /**
+     * Calculated fields of all record types (one query; plan 32 FieldDependencies).
+     *
+     * @return array<int,array<int,string>> rty => dty => formula
+     */
+    public function allCalculatedFields(): array
+    {
+        $result = array();
+        foreach($this->database->fetchRows(
+            'SELECT rst_RecTypeID,rst_DetailTypeID,cfn_FunctionSpecification FROM defRecStructure '
+            .'JOIN defCalcFunctions ON cfn_ID=rst_CalcFunctionID ORDER BY rst_RecTypeID,rst_DisplayOrder,rst_ID'
+        ) as $row){
+            $result[intval($row[0])][intval($row[1])] = (string)$row[2];
+        }
+        return $result;
+    }
+
+    /**
      * Workflow rule of a stage of a record type (sysWorkflowRules), or null.
      *
      * @return array{restrictedTo:string,setOwnership:?int,setVisibility:string,sendEmail:string,

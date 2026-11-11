@@ -108,7 +108,7 @@ class ExportRecordsROCRATE extends ExportRecords{
 
         $this->prepareCrate();
 
-        $records = [];
+        $sortedRecords = [];
         foreach($this->records as $record){
 
             $recID = is_array($record) ? (int)($record['rec_ID'] ?? 0) : (int)$record;
@@ -117,17 +117,18 @@ class ExportRecordsROCRATE extends ExportRecords{
                 continue;
             }
 
-            $rtyID = mysql__select_value($this->mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_ID = ?", ['i', $recID]);
+            $record = mysql__select_row_assoc($this->mysqli, "SELECT rec_ID, rec_NonOwnerVisibility, rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = {$recID}");
 
-            if(!array_key_exists($rtyID, $records)){
-                $records[$rtyID] = [];
+            if(!array_key_exists($record['rec_RecTypeID'], $sortedRecords)){
+                $sortedRecords[$record['rec_RecTypeID']] = [];
             }
-            $records[$rtyID][] = $recID;
+            $sortedRecords[$record['rec_RecTypeID']][] = $record;
         }
 
-        foreach($records as $rtyID => $recordIDs){
+        foreach($sortedRecords as $rtyID => $records){
 
-            if(!$this->addRecords($rtyID, $recordIDs) || !$this->addFiles($recordIDs) || !$this->addSchema($rtyID)){
+            $recordIDs = array_map(fn($record) => $record['rec_ID'], $records);
+            if(!$this->addRecords($rtyID, $recordIDs) || !$this->addFiles($records) || !$this->addSchema($rtyID)){
                 return false;
             }
         }
@@ -150,6 +151,7 @@ class ExportRecordsROCRATE extends ExportRecords{
         $zip = new ZipArchive();
         if(!$zip->open($crateZip, ZipArchive::CREATE | ZipArchive::OVERWRITE)){
             $this->system->addError(HEURIST_ERROR, 'Unable to create ZIP folder for output.');
+            $this->removeCrate();
             return false;
         }
 
@@ -165,13 +167,14 @@ class ExportRecordsROCRATE extends ExportRecords{
             if(!$zip->addFile($file->getRealPath(), $relativePath)){
                 $zip->close();
                 $this->system->addError(HEURIST_ERROR, 'Failed to write to Zip folder.');
+                $this->removeCrate();
                 return false;
             }
         }
 
         $zip->close();
 
-        folderDelete($this->crateDirectory, true);
+        $this->removeCrate();
 
         header('Content-Type: application/zip');
         header("Content-Disposition: attachment; filename={$filename}");
@@ -267,11 +270,11 @@ class ExportRecordsROCRATE extends ExportRecords{
         return true;
     }
 
-    private function addFiles(array $recordIDs) : bool{
+    private function addFiles(array $records) : bool{
 
-        foreach($recordIDs as $recID){
+        foreach($records as $record){
 
-            $record = ['rec_ID' => $recID, 'details' => []];
+            $record['details'] = [];
             recordSearchDetails($this->system, $record, ['file']);
             if(empty($record['details'])){
                 continue;
@@ -279,7 +282,7 @@ class ExportRecordsROCRATE extends ExportRecords{
 
             $files = $this->processFiles($record['details']);
             if($this->logExport){
-                $this->exportLog['Files'][$recID] = [
+                $this->exportLog['Files'][$record['rec_ID']] = [
                     'File Count' => count($files)
                 ];
             }
@@ -478,12 +481,14 @@ class ExportRecordsROCRATE extends ExportRecords{
 
         if(!$metadata || json_last_error() !== JSON_ERROR_NONE){
             $this->system->addError(HEURIST_ERROR, 'Unable to encode crate metadata.');
+            $this->removeCrate();
             return false;
         }
 
         $writeResult = file_put_contents($this->crateMetadadataFile, $metadata);
         if($writeResult === 0 || $writeResult === false){
             $this->system->addError(HEURIST_ERROR, 'Failed to write crate metadata to file.');
+            $this->removeCrate();
             return false;
         }
 
@@ -492,7 +497,9 @@ class ExportRecordsROCRATE extends ExportRecords{
 
     private function prepareCrate(){
 
-        $this->crateDirectory = "{$this->system->getSysDir(DIR_SCRATCH)}ro-crate/";
+        $timestamp = date('YmdHis');
+
+        $this->crateDirectory = "{$this->system->getSysDir(DIR_SCRATCH)}ro-crate-{$timestamp}/";
         $this->recordDirectory = "{$this->crateDirectory}records/";
         $this->jsonlDirectory = "{$this->recordDirectory}JSON/";
         $this->fileDirectory = "{$this->crateDirectory}files/";
@@ -535,5 +542,14 @@ class ExportRecordsROCRATE extends ExportRecords{
         }
 
         return $files;
+    }
+
+    private function removeCrate(){
+
+        if(empty($this->crateDirectory) || folderExists($this->crateDirectory, false) !== 1){
+            return;
+        }
+
+        folderDelete($this->crateDirectory, true);
     }
 }
