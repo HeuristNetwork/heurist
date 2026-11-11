@@ -2,8 +2,8 @@
 /**
 * ReportRepository.php - Custom Report and Report Schedule records
 *
-* Reads RT_CUSTOM_REPORT records (title, description, template file, card flag)
-* and the RT_REPORT_SCHEDULE records that point to them, with the normal record
+* Reads RT_REPORT_TEMPLATE records (title, description, template file, card flag)
+* and the RT_REPORT_OUTPUT records that point to them, with the normal record
 * visibility rules of the current user.
 *
 * @project     Heurist academic knowledge management system
@@ -33,7 +33,7 @@ final class ReportRepository
 {
     /** Codes that must be defined in the database before records can be used. */
     public const REQUIRED_CODES = array(
-        'RT_CUSTOM_REPORT', 'RT_REPORT_SCHEDULE',
+        'RT_REPORT_TEMPLATE', 'RT_REPORT_OUTPUT',
         'DT_FILE_NAME', 'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES'
     );
 
@@ -122,7 +122,7 @@ final class ReportRepository
         $files = array();
         $fileField = $this->codes->id('DT_FILE_NAME');
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); },
-            $this->repository()->find($this->codes->id('RT_CUSTOM_REPORT'), array('rec_ID')));
+            $this->repository()->find($this->codes->id('RT_REPORT_TEMPLATE'), array('rec_ID')));
         foreach($this->repository()->values($ids, array($fileField)) as $fields){
             foreach($fields[$fileField] ?? array() as $value){
                 $file = strtolower(trim($value));
@@ -149,7 +149,7 @@ final class ReportRepository
      */
     private function loadReports(?int $recordId): array
     {
-        $rows = $this->repository()->find($this->codes->id('RT_CUSTOM_REPORT'),
+        $rows = $this->repository()->find($this->codes->id('RT_REPORT_TEMPLATE'),
             array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID', 'rec_NonOwnerVisibility', 'rec_Modified'),
             RecordAccess::fromRuntime($this->runtime), $recordId === null ? null : array($recordId));
         if(empty($rows)){ return array(); }
@@ -264,7 +264,7 @@ final class ReportRepository
      */
     private function queryOutputs(?array $reportIds, ?int $scheduleId, bool $ignoreAccess): array
     {
-        $scheduleType = $this->codes->id('RT_REPORT_SCHEDULE');
+        $scheduleType = $this->codes->id('RT_REPORT_OUTPUT');
         $reportField = $this->codes->id('DT_REPORT');
         if($scheduleType < 1 || $reportField < 1){ return array(); }
 

@@ -462,8 +462,8 @@ $rtDefines = array(
     'RT_IIIF_CANVAS' => array(2, 111),
     
     // Smarty reports (plan 12)
-    'RT_CUSTOM_REPORT' => array(2, 1104),
-    'RT_REPORT_SCHEDULE' => array(2, 1105),
+    'RT_REPORT_TEMPLATE' => array(2, 1104),
+    'RT_REPORT_OUTPUT' => array(2, 1105),
     
     'RT_REGISTERED_FILE' => array(2, 1106)
 );

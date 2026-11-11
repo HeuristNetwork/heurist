@@ -89,6 +89,9 @@ final class WebsiteEditService
                 $missing[] = 'optional logo 2-38 in 99-51';
             }
         }
+        foreach(WebsiteSetup::IMPORT_TYPES as $rectypeCode){
+            if($definitions->localId('rty', $rectypeCode) < 1){ $missing[] = 'record type '.$rectypeCode; }
+        }
         return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin,
             'canCreate' => $this->runtime->isAdmin, 'codes' => $codes);
     }

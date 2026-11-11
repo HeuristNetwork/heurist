@@ -191,15 +191,18 @@ if (!$version) {
 // Some request types are better handled by redirecting the browser to the exact legacy script
 // that already knows how to serve that kind of resource.
 // This preserves older behaviour and reduces the risk of subtle breakage.
+// Not for API calls (/api/...): their parameters (file, thumb, icon, asset, id ...) belong to the API.
+$scriptPath = is_string($script) ? str_replace('\\', '/', $script) : '';
+$isApiCall = substr($scriptPath, -strlen('/hserv/controller/api.php')) === '/hserv/controller/api.php';
 $serverRoot = __DIR__;
-if ($r = RecordResolver::resolve($version, $_REQUEST, $serverRoot)) {
+if (!$isApiCall && ($r = RecordResolver::resolve($version, $_REQUEST, $serverRoot))) {
     /*if(!empty($r['error'])){
         RecordResolver::renderResolverError($r['error'], $_REQUEST);
     }*/
     header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
     exit;
 }
-if ($r = FileResolver::resolve($version, $_REQUEST)) {
+if (!$isApiCall && ($r = FileResolver::resolve($version, $_REQUEST))) {
     header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
     exit;
 }

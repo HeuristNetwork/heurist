@@ -5,10 +5,10 @@
 Reports manager for Smarty report templates (plans 12 and 30 in heurist-explorer,
 `docs/development/`). The API names reports and generated reports by record id only (plan 30).
 A report is a Custom Report
-record (`RT_CUSTOM_REPORT` 2-1104: name, description, template file name
+record (`RT_REPORT_TEMPLATE` 2-1104: name, description, template file name
 `DT_FILE_NAME` 2-62, card flag `DT_IS_CARD_VIEW` 2-1182) whose template body
 stays in `smarty-templates/*.tpl`, under a name set once when the record is created.
-An output (`RT_REPORT_SCHEDULE` 2-1105, entity `output`, UI Generated report) points to a report
+An output (`RT_REPORT_OUTPUT` 2-1105, entity `output`, UI Generated report) points to a report
 (`DT_REPORT`) and has its own query without parameters (`DT_QUERY_STRING`), language and interval
 (0: on request only). Its file is `generated-reports/{record id}.{format}` (`ReportOutputStore.php`).
 Template files without a record are "unregistered": they do not run until they are registered.

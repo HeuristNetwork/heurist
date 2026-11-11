@@ -19,7 +19,7 @@ The hooks of an entity's record type run for every write of that type, also thro
 `/records/{id}`. Common actions (`validate`, `duplicate`) are those of `/records/{id}`;
 `POST /{entity}/{id}/execute` starts the entity's job (routed by api.php to `/jobs`).
 
-Entities now: `website` (RT_CMS_HOME), `page` (RT_CMS_PAGE), `report` (RT_CUSTOM_REPORT), `output` (RT_REPORT_SCHEDULE), handlers
+Entities now: `website` (RT_CMS_HOME), `page` (RT_CMS_PAGE), `report` (RT_REPORT_TEMPLATE), `output` (RT_REPORT_OUTPUT), handlers
 `Website/WebsiteEntityHandler.php`, `Reports/ReportEntityHandler.php`. Entities kept in legacy tables (tag, bookmark, user ...)
 are served by `/sys` (`System/Query/SystemEntitySchemaRegistry.php`). Their `/{entity}/...` URLs are turned into
 `/sys/{entity}/...` in `hserv/controller/api.php` (plan 28a). A search of a record-based entity

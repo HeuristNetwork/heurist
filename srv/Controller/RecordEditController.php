@@ -212,11 +212,13 @@ final class RecordEditController
     {
         $method = strtoupper($method);
         $rectype = $this->entities !== null ? $this->entities->rectype($entity) : 0;
-        if($rectype < 1){
-            throw RecordEditException::notFound('Unknown entity "'.$entity.'", or its record type is not in this database');
-        }
         $segments = array_values(array_filter(array_map('strval', $segments), 'strlen'));
         $first = (string)($segments[0] ?? '');
+        // /{entity}/setup checks and installs the definitions: it works before the record type exists
+        $isSetup = $first === 'setup' && $this->entities !== null && RecordEntityRegistry::isEntity($entity);
+        if($rectype < 1 && !$isSetup){
+            throw RecordEditException::notFound('Unknown entity "'.$entity.'", or its record type is not in this database');
+        }
         if($first === ''){
             throw new RecordEditException(405, 'method_not_allowed',
                 'Search with GET /records?q=t:'.$rectype.'; an entity URL needs a record id or an action');

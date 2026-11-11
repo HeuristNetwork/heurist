@@ -2406,7 +2406,7 @@ paths:
     post:
       tags: [Entities]
       operationId: reportSetup
-      summary: Install Custom Report and Report Schedule and convert old schedules (database managers)
+      summary: Install Report template and Report output and convert old schedules (database managers)
       security:
       - bearerAuth: []
       responses:
@@ -2419,7 +2419,7 @@ paths:
       security:
       - bearerAuth: []
       parameters:
-      - {name: file, in: query, required: true, schema: {type: string}}
+      - {name: name, in: query, required: true, description: 'Template file name (not file - the root router sends ?file= to fileDownload.php)', schema: {type: string}}
       responses:
         '200': {description: '{file, fileDeleted}'}
         '400': {description: The file has a report record, or the name is invalid, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}

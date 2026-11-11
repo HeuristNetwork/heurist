@@ -27,10 +27,12 @@ interface WebsiteDefinitionsInterface
      * and add them to the structures of the record types where they are missing.
      *
      * @param array<int,string> $fieldCodes Concept codes of fields ("2-1202").
-     * @param array<int,string> $rectypeCodes Concept codes of record types ("99-52").
+     * @param array<int,string> $rectypeCodes Concept codes of record types ("99-52"); imported when missing.
+     * @param array<int,string> $importTypes Other record types imported when missing, without the fields
+     *        (the registered file 2-1106: logo and banner in the record manager of files).
      * @return array<int,string> Report lines.
      */
-    public function install(array $fieldCodes, array $rectypeCodes): array;
+    public function install(array $fieldCodes, array $rectypeCodes, array $importTypes = array()): array;
 
     /**
      * Make required fields of record types optional (plan 27b: the logo of a website).
