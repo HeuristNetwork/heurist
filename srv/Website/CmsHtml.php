@@ -86,8 +86,10 @@ final class CmsHtml
     /**
      * Put the resolved content into the elements with `data-h-field` and into the hosts of widgets (plan 27e).
      *
-     * @param callable(string):?string $field Reference => HTML; null keeps the snapshot of the element.
-     * @param callable(string):?array $host Instance id => {html, class?}; null leaves the host as it is.
+     * @param callable(string,string):?string $field Reference and `data-h-link` of the element ('' without one,
+     *        plan 27g §6) => HTML; null keeps the snapshot of the element.
+     * @param callable(string):?array $host Instance id => {html, class?, style?}; null leaves the host as it is. `style`:
+     *        declarations made by the server (not stored HTML), added to the style attribute of the host.
      */
     public static function fill(string $html, callable $field, callable $host): string
     {
@@ -106,8 +108,11 @@ final class CmsHtml
                 if(!empty($content['class'])){
                     $element->setAttribute('class', trim($element->getAttribute('class').' '.$content['class']));
                 }
+                if(!empty($content['style'])){
+                    $element->setAttribute('style', trim(rtrim($element->getAttribute('style'), '; ').';'.$content['style'], '; '));
+                }
             }else{
-                $value = $field($element->getAttribute('data-h-field'));
+                $value = $field($element->getAttribute('data-h-field'), $element->getAttribute('data-h-link'));
                 if($value === null){ continue; }
             }
             while($element->firstChild){ $element->removeChild($element->firstChild); }

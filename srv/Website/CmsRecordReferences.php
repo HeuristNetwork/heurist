@@ -46,6 +46,7 @@ final class CmsRecordReferences
         foreach($parts as $html){
             foreach(CmsHtml::nodes((string)$html) as $node){
                 $name = (string)($node['node'] !== '' ? $node['node'] : ($node['instance'] ?? ''));
+                // `record.` (plan 27g): the record of the URL, not a record of the website
                 if($node['field'] !== null && preg_match('/^(website|page|\d+)\.(\d+(?:-\d+)?)$/', $node['field'], $match) === 1){
                     $own = !ctype_digit($match[1]);
                     $id = $match[1] === 'website' ? $websiteId : ($match[1] === 'page' ? $pageId : intval($match[1]));

@@ -242,6 +242,7 @@ final class SystemConstants
         'TRM_NAME_ONLY' => array('trm', '2-9634'), // Display name only
         'TRM_ICON_ONLY' => array('trm', '2-9635'), // Display icon only
         'TRM_NAME_AND_ICON' => array('trm', '2-9636'), // Display both name and icon
+        'TRM_HIDDEN_ITEM' => array('trm', '2-10640'), // Menu item hidden in the main menu
         'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array('trm', '3-5081'), // Legend item becomes hidden
         'TRM_LEGEND_OUT_ZOOM_DISABLED' => array('trm', '3-5082'), // Legend item becomes disabled (greyed out)
         // only in srv (not in hserv/consts.php)

@@ -538,18 +538,23 @@ final class WebsiteEditService
         return $summary;
     }
 
-    /** Pages of the menu tree with titles. */
+    /**
+     * Pages of the menu tree with titles. A record page (plan 27g §2.2) has `record: true` and the `template` of its
+     * Record cards widget (report id or file name, '' when not chosen yet).
+     */
     private function pageTree(array $tree, array $pages): array
     {
+        $codes = $this->repository->codes();
         $result = array();
         foreach($tree as $item){
             $page = $pages[$item['id']] ?? null;
             if($page === null){ continue; }
+            $cards = CmsValidator::recordCards(CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config']);
             $result[] = array(
                 'id' => intval($item['id']),
                 'title' => $this->name($page),
                 'children' => $this->pageTree($item['children'], $pages)
-            );
+            ) + ($cards !== null ? array('record' => true, 'template' => is_scalar($cards['template'] ?? null) ? $cards['template'] : '') : array());
         }
         return $result;
     }

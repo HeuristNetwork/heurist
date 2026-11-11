@@ -55,12 +55,13 @@ final class WebsiteService
      * @param int $id Website or standalone page.
      * @param int $pageId Page of the website (0: home content).
      * @param string $language Requested language (?lang=, 2 or 3 letters).
+     * @param int $recordId The record shown by a record page (plan 27g); 0: none.
      * @return array{site:?array,page:array,home:bool,menu:array,pages:array,language:?string,requestedLanguage:?string,
      *         languages:array<int,string>,siteConfig:array,pageConfig:array,siteTexts:array,
-     *         pageTexts:array,issues:array}
-     * @throws WebsiteException
+     *         pageTexts:array,issues:array,recordPage:bool,record:?array}
+     * @throws WebsiteException 404 also for a record the visitor may not see, or a record id on another page.
      */
-    public function context(int $id, int $pageId = 0, string $language = ''): array
+    public function context(int $id, int $pageId = 0, string $language = '', int $recordId = 0): array
     {
         $codes = $this->repository->codes();
         if($codes['home'] < 1 || $codes['page'] < 1){
@@ -121,6 +122,19 @@ final class WebsiteService
         }
         $issues = array_merge($issues, CmsValidator::check($checkConfig, $parts, $pageTexts, $this->baseUrl));
 
+        // a record page (plan 27g): the record of the URL with the rights of the visitor
+        $recordPage = $site !== null && !$home && CmsValidator::recordCards($pageParsed['config']) !== null;
+        $shown = null;
+        if($recordId > 0){
+            if(!$recordPage){
+                throw new WebsiteException(404, 'Page '.intval($page['rec_ID']).' does not show records');
+            }
+            $shown = $this->repository->record($recordId);
+            if($shown === null){
+                throw new WebsiteException(404, 'Record '.$recordId.' was not found or is not public');
+            }
+        }
+
         return array(
             'site' => $site,
             'page' => $page,
@@ -134,7 +148,9 @@ final class WebsiteService
             'pageConfig' => $pageParsed['config'],
             'siteTexts' => $siteTexts,
             'pageTexts' => $pageTexts,
-            'issues' => $issues
+            'issues' => $issues,
+            'recordPage' => $recordPage,
+            'record' => $shown
         );
     }
 

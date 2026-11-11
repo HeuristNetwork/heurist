@@ -619,7 +619,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGE' => array(2, 967),
-    'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only
+    'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only, or hiddne
     'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu 
     'DT_CMS_ACTION' => array(2, 1148),
     
@@ -654,6 +654,7 @@ $trmDefines = array(
     'TRM_NAME_ONLY' => array(2, 9634), // Display name only
     'TRM_ICON_ONLY' => array(2, 9635), // Display icon only
     'TRM_NAME_AND_ICON' => array(2, 9636), // Display both name and icon
+    'TRM_HIDDEN_ITEM' => array(2, 10640), // Menu item will be hidden in main menu
 
     // For DT_LEGEND_OUT_ZOOM (terms defining behavior of map legend items when out of zoom range)
     'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081), // Legend item becomes hidden
