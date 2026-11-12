@@ -18,6 +18,13 @@
 
 class EditorSpreadsheet{
 
+    static #dataEvents = new Set([
+        'onafterchanges',
+        'oninsertrow', 'ondeleterow', 'onmoverow',
+        'oninsertcolumn', 'ondeletecolumn', 'onmovecolumn',
+        'onsort', 'onundo', 'onredo'
+    ]);
+
     #DEBUG = false;
 
     #inputDiv;
@@ -26,8 +33,6 @@ class EditorSpreadsheet{
 
     #editor;
     #editorContainer;
-    #saveButton;
-    #importInput;
 
     #jspreadsheet;
     #defaultConfig = {
@@ -51,9 +56,10 @@ class EditorSpreadsheet{
     #configuration = {};
     #data = {};
     #dataType; // [csv, json, table]
+    #initialInput;
+    #initialTableValue;
 
     #loadingScripts = false;
-    _boundSaveEvent;
 
     constructor(_inputElement, config = {}){
 
@@ -260,26 +266,6 @@ class EditorSpreadsheet{
         return delimiterResults.sort((a, b) => b.count - a.count)[0].delimiter;
     }
 
-    #setupInterface(){
-
-        // Setup save button
-        this.#saveButton = document.createElement('button');
-        this.#saveButton.textContent = 'Save data';
-        this.#saveButton.classList.add('ui-button-action', 'ui-button', 'ui-corner-all', 'ui-widget');
-
-        this._boundSaveEvent = this.updateInput.bind(this);
-        this.#saveButton.addEventListener('click', this._boundSaveEvent);
-
-        this.#editorContainer.prepend(this.#saveButton);
-
-        /* Setup file input, currently unavailable
-        this.#importFile = document.createElement('input');
-        this.#importFile.type = 'file';
-        this.#importFile.after(this.#saveButton);
-        this.#importFile.fileupload({...});
-        */
-    }
-
     show(){
 
         if(typeof jspreadsheet !== 'function'){
@@ -306,6 +292,11 @@ class EditorSpreadsheet{
 
         const config = structuredClone(this.#defaultConfig);
         config.onbeforecreateworksheet = (config, index) => ({ worksheetName: `Sheet ${index + 1}` });
+        config.onevent = (event) => {
+            if(this.#jspreadsheet && EditorSpreadsheet.#dataEvents.has(event)){
+                this.#updateInput();
+            }
+        };
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
         worksheetConfig['data'] = this.#data[0].data;
@@ -322,8 +313,8 @@ class EditorSpreadsheet{
         // Init editor
         this.#jspreadsheet = new jspreadsheet(this.#editorContainer, config);
         this.#editor = this.#inputDiv.querySelector('.jss_spreadsheet');
-
-        this.#setupInterface();
+        this.#initialInput = this.#input.value;
+        this.#initialTableValue = this.#serializeData();
 
         return this.#jspreadsheet;
     }
@@ -335,27 +326,28 @@ class EditorSpreadsheet{
         this.#input.style.display = this.#inputDisplay;
     }
 
-    updateInput(){
+    #updateInput(){
 
-        switch(this.#dataType){
-            case 'json':
-                this.#input.value = this.#toJSON();
-                break;
-            case 'csv':
-                this.#input.value = this.#toCSV();
-                break;
-            case 'table':    
-                this.#input.value = this.#toTable();
-                break;
-            default:
-                window.hWin.HEURIST4.msg.showMsgFlash('Invalid output format...', 3000);
-                return;
-                break;
+        const tableValue = this.#serializeData();
+        // Keep the original field text when the grid is unchanged or edits are undone.
+        const value = tableValue === this.#initialTableValue ? this.#initialInput : tableValue;
+        if(value === this.#input.value){
+            return;
         }
 
-        const event = new Event('change', {bubbles: false});
+        this.#input.value = value;
+        this.#input.dispatchEvent(new Event('change', {bubbles: false}));
+    }
 
-        this.#input.dispatchEvent(event);
+    #serializeData(){
+        switch(this.#dataType){
+            case 'json':
+                return this.#toJSON();
+            case 'csv':
+                return this.#toCSV();
+            case 'table':
+                return this.#toTable();
+        }
     }
 
     #toJSON(){
@@ -429,12 +421,6 @@ class EditorSpreadsheet{
             this.#jspreadsheet = null;
         }
 
-        if(this.#saveButton){
-            this.#saveButton.removeEventListener('click', this._boundSaveEvent);
-            this.#saveButton.remove();
-            this.#saveButton = null;
-        }
-
         if(this.#editorContainer){
 
             this.#editorContainer.remove();
@@ -457,6 +443,7 @@ class EditorSpreadsheet{
 
     clear(){
         this.#jspreadsheet[0].setData([]);
+        this.#updateInput();
     }
 
     #logError(error){
