@@ -613,10 +613,14 @@ if($is_jobs_query && !in_array($http_method, array('GET','POST','DELETE'), true)
 }
 
 // External services (special endpoint, plan 28): POST /api/{db}/external/translate
-// {"text","target","source","format"}; logged-in users only. See srv/Controller/ExternalServiceController.php.
+// {"text","target","source","format"}; logged-in users only. GET / POST /api/{db}/external/email: the email
+// form of a website (plan 27h), guests allowed. See srv/Controller/ExternalServiceController.php.
 $is_external_query = ($resource === 'external');
-if($is_external_query && $http_verb !== 'POST'){
-    exitWithError('Method not allowed', 405, array('Allow' => 'POST'));
+if($is_external_query){
+    $external_get = (($requestUri[4] ?? '') === 'email');
+    if($http_verb !== 'POST' && !($external_get && $http_verb === 'GET')){
+        exitWithError('Method not allowed', 405, array('Allow' => $external_get ? 'GET, POST' : 'POST'));
+    }
 }
 
 // Record-based entities (plan 27d, plan 28): /api/{db}/{entity}/{id}[/{action}] and /{entity}/{action},
@@ -685,6 +689,11 @@ if($is_system_query && in_array($http_verb, array('GET','HEAD'), true)){
 }
 // GET /{entity}/{id}[/{field}]: RecordEditController::executeEntity refuses everything else for a guest
 if($record_entity !== null && $http_verb === 'GET'){
+    $allow_anonymous = true;
+}
+// the email form of a website (plan 27h): visitors are guests; the captcha, the same-site check and the rate
+// limit of EmailFormService protect it
+if($is_external_query && ($requestUri[4] ?? '') === 'email'){
     $allow_anonymous = true;
 }
 

@@ -119,6 +119,10 @@ final class PageContent
                 // alignment from the settings on the host (the purifier removes the style of the stored HTML)
                 $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
                 return is_string($html) ? array('html' => $html) + self::badgesLayout($settings) : null;
+            case 'email':
+                // the email form (plan 27h): messages go to the website (a standalone page: the database owner)
+                $owner = $context['site'] ?? $context['page'] ?? null;
+                return array('html' => EmailFormHtml::render($settings, intval($owner['rec_ID'] ?? 0), $language), 'class' => 'h-site-email');
             case 'gallery':
                 $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
                 if(is_string($html)){ $html = $this->linkRecords($html, $settings, $context); }

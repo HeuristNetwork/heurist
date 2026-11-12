@@ -4,7 +4,7 @@
 *
 * Shared by the write controllers of /files and /sys (plan 20, §10.4): the user
 * must be logged in, the Origin (when the browser sends it) must be this host, and
-* a body must be JSON.
+* a body must be JSON. assertSameSite: the same without the login (email form, plan 27h).
 *
 * @project     Heurist academic knowledge management system
 * @package     Controller
@@ -35,6 +35,19 @@ final class SameSiteGuard
     public static function assert(RuntimeContext $runtime, array $request, bool $json, string $loginMessage): void
     {
         if($runtime->userId < 1){ throw new RecordEditException(401, 'unauthorized', $loginMessage); }
+        self::assertSameSite($request, $json);
+    }
+
+    /**
+     * The same checks without the login: requests of guests that must come from this site (the email form of a
+     * website, plan 27h).
+     *
+     * @param array $request origin, host, contentType of the request.
+     * @param bool $json Whether the request must have a JSON body.
+     * @throws RecordEditException 403, 415
+     */
+    public static function assertSameSite(array $request, bool $json): void
+    {
         $origin = trim((string)($request['origin'] ?? ''));
         if($origin === 'null'){ throw RecordEditException::denied('Requests from another site are not allowed'); }
         if($origin !== ''){
