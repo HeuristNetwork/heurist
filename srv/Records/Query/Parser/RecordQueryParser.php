@@ -30,11 +30,22 @@ final class RecordQueryParser
         'workgroup'=>'owner','wg'=>'owner','access'=>'access','user'=>'user','usr'=>'user',
         'ws'=>'ws','workset'=>'ws','tag'=>'tag','keyword'=>'tag','kwd'=>'tag','field'=>'f','f'=>'f',
         'count'=>'fc','cnt'=>'fc','fc'=>'fc','geo'=>'geo','file'=>'file','linked_to'=>'lt',
-        'linkedto'=>'lt','linkto'=>'lt','link_to'=>'lt','lt'=>'lt','linked_from'=>'lf',
-        'linkedfrom'=>'lf','linkfrom'=>'lf','link_from'=>'lf','lf'=>'lf','related_to'=>'rt',
+        'linkedto'=>'lt','lt'=>'lt','linked_from'=>'lf',
+        'linkedfrom'=>'lf','lf'=>'lf','related_to'=>'rt',
         'relatedto'=>'rt','rt'=>'rt','related_from'=>'rf','relatedfrom'=>'rf','rf'=>'rf',
         'related'=>'related','links'=>'links','connected'=>'connected','relf'=>'relf','r'=>'r','any'=>'any','all'=>'all',
         'not'=>'not','sortby'=>'sortby','sort'=>'sortby','s'=>'sortby'
+    );
+    /**
+     * OUTDATED aliases of the link and relationship predicates, kept only for backward
+     * compatibility with existing saved filters, rule sets and facet definitions written in the
+     * old JSON format (hserv composeSql.php gives them the same meaning). normalize() replaces
+     * them by lt / lf / rt / rf at every level, so the rest of the engine sees only the short
+     * keys. Do not use them in new code or documentation. (2026-11-12)
+     */
+    private const LEGACY_LINK_ALIASES = array(
+        'linked_to'=>'lt', 'linkedto'=>'lt', 'linked_from'=>'lf', 'linkedfrom'=>'lf',
+        'related_to'=>'rt', 'relatedto'=>'rt', 'related_from'=>'rf', 'relatedfrom'=>'rf'
     );
     private const LINK_PREDICATES = array('lt','linked_to','linkedto','lf','linked_from','linkedfrom',
         'rt','related_to','relatedto','rf','related_from','relatedfrom','related','links','connected','relf','r');
@@ -69,6 +80,7 @@ final class RecordQueryParser
         }
 
         $normalized = $this->normalizeLogicalFields($this->expandTextGroups($this->normalizeQueryArray($normalized)));
+        $normalized = $this->replaceLegacyLinkAliases($normalized);
         $this->validate($normalized);
         return $normalized;
     }
@@ -92,18 +104,88 @@ final class RecordQueryParser
 
         $query = $this->extractTextSubqueries($query);
         $tokens = $this->tokenize($query);
+
+        // Conjunctions of the old simple format (2026-11-12): uppercase AND / && splits the
+        // query at the top, uppercase OR splits a part into alternatives, the words of an
+        // alternative are ANDed: "a b OR c d" = (a AND b) OR (c AND d). Sorting is taken out
+        // of the alternatives and applies to the whole query.
+        $result = array();
+        $sort = array();
+        foreach($this->splitTokens($tokens, array('AND','&&')) as $part){
+            $alternatives = array();
+            foreach($this->splitTokens($part, array('OR')) as $alternative){
+                $predicates = array();
+                foreach($this->parseTokens($alternative) as $predicate){
+                    list($base) = $this->predicateParts((string)array_keys($predicate)[0]);
+                    if($base === 'sortby'){ $sort[] = $predicate; }else{ $predicates[] = $predicate; }
+                }
+                if(!empty($predicates)){ $alternatives[] = $predicates; }
+            }
+            if(count($alternatives) === 1){
+                $result = array_merge($result, $alternatives[0]);
+            }elseif(count($alternatives) > 1){
+                $any = array();
+                foreach($alternatives as $predicates){
+                    $any[] = count($predicates) === 1 ? $predicates[0] : array('all'=>$predicates);
+                }
+                $result[] = array('any'=>$any);
+            }
+        }
+        $result = array_merge($result, $sort);
+
+        if(empty($result)){
+            throw new QueryValidationException('Query contains no searchable predicates');
+        }
+        return $result;
+    }
+
+    /** Split tokens at the given separator words (exact case); empty parts are dropped. */
+    private function splitTokens(array $tokens, array $separators): array
+    {
+        $parts = array(array());
+        foreach($tokens as $token){
+            if(in_array($token, $separators, true)){ $parts[] = array(); continue; }
+            $parts[count($parts)-1][] = $token;
+        }
+        return array_values(array_filter($parts));
+    }
+
+    /** Predicates of one alternative: words and keyword predicates, ANDed. */
+    private function parseTokens(array $tokens): array
+    {
         $result = array();
 
         for($index=0; $index<count($tokens); $index++){
             $token = $tokens[$index];
             if($token === ''){ continue; }
 
+            // -keyword:value = not (keyword:value), the old meaning: no value matches.
+            // A word (-Johnson) stays a negated title value.
+            $negate = false;
+            if(strlen($token) > 1 && $token[0] === '-' && $this->looksLikeKeywordToken(substr($token, 1))){
+                $negate = true;
+                $token = substr($token, 1);
+            }
+
             list($rawKeyword, $inlineValue, $hasInlineValue) = $this->splitKeywordValue($token);
-            list($keyword, $suffix) = $this->plainKeyword($rawKeyword);
+            list($keyword, $suffix) = $this->plainKeyword($rawKeyword, $hasInlineValue);
 
             if($keyword === null){
+                $this->assertNotOutdatedKeyword($rawKeyword, $hasInlineValue);
                 $result[] = array('title'=>$this->unquote($token));
                 continue;
+            }
+
+            $next = $tokens[$index+1] ?? null;
+            $nextIsSubquery = $next !== null && preg_match('/^__SUBQUERY_[0-9]+__$/', $next) === 1;
+            if($hasInlineValue && $nextIsSubquery && $inlineValue === ''){
+                // f:134:(t:12 title:Berlin) - the subquery is the value
+                $hasInlineValue = false;
+            }elseif($hasInlineValue && $nextIsSubquery && $suffix === '' && ctype_digit($inlineValue)
+                && in_array($keyword, self::LINK_PREDICATES, true)){
+                // linkedto:134(t:12) - the number is the field
+                $suffix = $inlineValue;
+                $hasInlineValue = false;
             }
 
             if($suffix !== ''){ $keyword .= ':'.$suffix; }
@@ -111,22 +193,55 @@ final class RecordQueryParser
                 $value = $inlineValue;
             }else{
                 if(in_array($keyword, array('user','ws'), true)
-                    && (!isset($tokens[$index+1]) || $this->looksLikeKeywordToken($tokens[$index+1]))){
+                    && ($next === null || $this->looksLikeKeywordToken($next))){
                     $value = 'current';
-                }elseif(!isset($tokens[$index+1])){
+                }elseif($next === null){
                     throw new QueryValidationException('Missing value for query keyword '.$rawKeyword);
                 }else{
                     $value = $tokens[++$index];
                 }
             }
             $value = $this->resolveTextValue($value);
-            $result[] = array($keyword=>$value);
-        }
 
-        if(empty($result)){
-            throw new QueryValidationException('Query contains no searchable predicates');
+            // all:x / any:x with a value (not a group) = any field, as in the old format
+            if(($keyword === 'all' || $keyword === 'any') && !is_array($value)){ $keyword = 'f'; }
+            // a tag is matched exactly anyway: tag=x is tag:x
+            if($keyword === 'tag' && is_string($value) && strpos($value, '=') === 0){ $value = substr($value, 1); }
+
+            $predicate = array($keyword=>$value);
+            $result[] = $negate && $keyword !== 'sortby' ? array('not'=>array($predicate)) : $predicate;
         }
         return $result;
+    }
+
+    /**
+     * Keywords of the old simple format that are not supported any more: an error with a
+     * hint instead of a silent title search. (2026-11-12)
+     */
+    private const OUTDATED_KEYWORDS = array(
+        'linkto'=>'lt (records that point to) or lf (records pointed to)',
+        'link_to'=>'lt (records that point to) or lf (records pointed to)',
+        'linkfrom'=>'lt (records that point to) or lf (records pointed to)',
+        'link_from'=>'lt (records that point to) or lf (records pointed to)',
+        'relationsfor'=>'related:<record id>',
+        'latitude'=>'geo:within or geo:intersects with a WKT area',
+        'longitude'=>'geo:within or geo:intersects with a WKT area',
+        'lat'=>'geo:within or geo:intersects with a WKT area',
+        'long'=>'geo:within or geo:intersects with a WKT area',
+        'lng'=>'geo:within or geo:intersects with a WKT area',
+        'vt'=>'access:', 'visibility'=>'access:',
+        'u'=>'url:', 'n'=>'notes:', 'date'=>'modified:',
+        'hhash'=>null
+    );
+
+    /** Throw for an outdated keyword used as a keyword (with a value). */
+    private function assertNotOutdatedKeyword(string $rawKeyword, bool $usedAsKeyword): void
+    {
+        $lower = strtolower(trim($rawKeyword));
+        if(!$usedAsKeyword || !array_key_exists($lower, self::OUTDATED_KEYWORDS)){ return; }
+        $hint = self::OUTDATED_KEYWORDS[$lower];
+        throw new QueryValidationException('Query keyword '.$lower.' is not supported any more'
+            .($hint === null ? '' : ', use '.$hint));
     }
 
     /** Validate the established Heurist JSON query structure. */
@@ -328,29 +443,65 @@ final class RecordQueryParser
     }
     private function looksLikeKeywordToken(string $token): bool
     {
-        list($rawKeyword) = $this->splitKeywordValue($token);
-        list($keyword) = $this->plainKeyword($rawKeyword);
+        list($rawKeyword, , $hasValue) = $this->splitKeywordValue($token);
+        list($keyword) = $this->plainKeyword($rawKeyword, $hasValue);
         return $keyword !== null;
     }
+
+    /**
+     * Split a token into [keyword, value, has value]. The keyword ends at the first `:`,
+     * or at `=`, `<`, `>` written instead of the colon (old format: title=x, f:1>B,
+     * modified>2001-09-11); the operator stays in the value (title:=x, f:1:>B).
+     * A field may be given by number or name: f:1:x, f:Name:x, f:"Name with spaces"<x.
+     */
     private function splitKeywordValue(string $token): array
     {
         // geo[:<id>]:within|intersects:<value> - the match mode belongs to the key
         if(preg_match('/^(geo(?::?[0-9]+)?:(?:within|intersects)):(.*)$/i', $token, $matches)){
             return array($matches[1], $matches[2], true);
         }
-        if(preg_match('/^([a-z_]+):([0-9]+):(.*)$/i', $token, $matches)){
-            return array($matches[1].$matches[2], $matches[3], true);
+        // <keyword>:<field id><separator><value>
+        if(preg_match('/^([a-z_]+):([0-9]+)([:=<>])(.*)$/is', $token, $matches)){
+            return array($matches[1].$matches[2], ($matches[3] === ':' ? '' : $matches[3]).$matches[4], true);
         }
-        $position = strpos($token, ':');
-        if($position === false){ return array($token, null, false); }
-        return array(substr($token, 0, $position), substr($token, $position+1), true);
+        // f / fc with a field name: f:Name:x, f:"Birth date":<1970 (an any-field value
+        // containing a colon is written in quotes: f:"10:30")
+        if(preg_match('/^(f|field|fc|count|cnt):(?:"([^"]+)"|([^\s:"=<>@\-][^\s:"=<>]*))([:=<>])(.*)$/is', $token, $matches)){
+            $name = $matches[2] !== '' ? $matches[2] : $matches[3];
+            return array($matches[1].':'.$name, ($matches[4] === ':' ? '' : $matches[4]).$matches[5], true);
+        }
+        $position = $this->firstUnquoted($token, ':=<>');
+        if($position === null || $position === 0){ return array($token, null, false); }
+        $separator = $token[$position];
+        return array(substr($token, 0, $position), ($separator === ':' ? '' : $separator).substr($token, $position+1), true);
     }
-    private function plainKeyword(string $raw): array
+
+    /** Position of the first of $chars outside double quotes, or null. */
+    private function firstUnquoted(string $text, string $chars): ?int
+    {
+        $quoted = false;
+        for($i=0, $n=strlen($text); $i<$n; $i++){
+            if($text[$i] === '"'){ $quoted = !$quoted; continue; }
+            if(!$quoted && strpos($chars, $text[$i]) !== false){ return $i; }
+        }
+        return null;
+    }
+
+    /**
+     * [canonical keyword, suffix] of a plain-text keyword, or [null, ''] for a word.
+     * $hasValue: the keyword has an inline value; only then a field name may be glued
+     * on (fGender:male), so a word like "fred" is not f + "red".
+     */
+    private function plainKeyword(string $raw, bool $hasValue = true): array
     {
         $raw = trim($raw);
         $lower = strtolower($raw);
         if(preg_match('/^geo(?::?([0-9]+))?:(within|intersects)$/', $lower, $matches)){
             return array('geo', ($matches[1] !== '' ? $matches[1].':' : '').$matches[2]);
+        }
+        // f:Name / fc:"Birth date" from splitKeywordValue()
+        if(preg_match('/^(f|field|fc|count|cnt):(.+)$/is', $raw, $matches)){
+            return array(self::KEYWORD_ALIASES[strtolower($matches[1])], $matches[2]);
         }
         // a whole keyword wins over prefix splitting (`related` is not `r` + "elated")
         if(isset(self::KEYWORD_ALIASES[$lower])){
@@ -360,8 +511,9 @@ final class RecordQueryParser
             $base = $matches[1]; $suffix = $matches[2];
         }else{
             $base = $lower; $suffix = '';
-            foreach(array('linked_from','linked_to','related_from','related_to','field','file','geo','relf','fc','lf','lt','rf','rt','f','r') as $prefix){
-                if(strpos($lower, $prefix) === 0 && strlen($raw)>strlen($prefix)){
+            // only a field keyword takes a glued name: fGender:male, fcAuthor:>2
+            foreach(array('field','fc','f') as $prefix){
+                if($hasValue && strpos($lower, $prefix) === 0 && strlen($raw)>strlen($prefix)){
                     $base = $prefix; $suffix = substr($raw, strlen($prefix)); break;
                 }
             }
@@ -372,6 +524,34 @@ final class RecordQueryParser
         }
         return array(self::KEYWORD_ALIASES[$base], $suffix);
     }
+    /**
+     * Replace the outdated link aliases (LEGACY_LINK_ALIASES) by lt / lf / rt / rf, keeping the
+     * field suffix ("linkedto:134" -> "lt:134"), in groups and linked subqueries at any depth.
+     */
+    private function replaceLegacyLinkAliases(array $group): array
+    {
+        $result = array();
+        foreach($group as $predicate){
+            if(!is_array($predicate) || count($predicate) !== 1){
+                $result[] = $predicate;
+                continue;
+            }
+            $key = (string)array_keys($predicate)[0];
+            $value = $predicate[$key];
+            list($base, $suffix) = $this->predicateParts($key);
+            if(isset(self::LEGACY_LINK_ALIASES[$base])){
+                $base = self::LEGACY_LINK_ALIASES[$base];
+                $key = $base.($suffix !== '' ? ':'.$suffix : '');
+            }
+            if(is_array($value) && (in_array($base, array('any','all','not'), true)
+                || (in_array($base, self::LINK_PREDICATES, true) && !$this->isScalarValueList($value)))){
+                $value = $this->replaceLegacyLinkAliases($this->normalizeQueryArray($value));
+            }
+            $result[] = array($key=>$value);
+        }
+        return $result;
+    }
+
     /** Normalize schema fields recursively before ordinary query validation. */
     private function normalizeLogicalFields(array $group): array
     {
@@ -436,6 +616,10 @@ final class RecordQueryParser
     private function resolveTextValue($value)
     {
         $value = $this->unquote((string)$value);
+        // an operator before a quoted value: ="Johnson, John", -"New York", <"B"
+        if(preg_match('/^(==|>=|<=|<>|=|<|>|-|@\+|@-|@)"(.*)"$/s', $value, $matches)){
+            return $matches[1].$matches[2];
+        }
         if(preg_match('/^__SUBQUERY_([0-9]+)__$/', $value, $matches)){
             $index = intval($matches[1]);
             if(!isset($this->textSubqueries[$index])){
