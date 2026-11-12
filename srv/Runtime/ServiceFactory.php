@@ -496,7 +496,8 @@ final class ServiceFactory
             new RecordDuplicateService($parts['store'], $parts['permissions'], $parts['definitions'], $this->runtime,
                 $parts['title'], $parts['languages'], array(
                     'name' => $this->codes->id('DT_NAME'),
-                    'cmsPage' => $this->codes->id('RT_CMS_PAGE')
+                    'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+                    'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS')
                 ), $parts['titleMask'], $parts['validator']),
             $this->recordQueryController(),
             $this->runtime,

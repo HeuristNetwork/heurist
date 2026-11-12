@@ -24,6 +24,7 @@ namespace Heurist\Records\Edit;
 
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Store\RecordStore;
+use Heurist\Records\Store\SplitValues;
 use Heurist\Runtime\RuntimeContext;
 use Heurist\Utilities\LanguageCodes;
 use Throwable;
@@ -40,7 +41,7 @@ final class RecordDuplicateService
     private RuntimeContext $runtime;
     private RecordTitle $title;
     private LanguageCodes $languages;
-    /** @var array<string,int> name (DT_NAME), cmsPage (RT_CMS_PAGE) */
+    /** @var array<string,int> name (DT_NAME), cmsPage (RT_CMS_PAGE), cmsTranslations (DT_CMS_PAGE_TRANSLATIONS) */
     private array $codes;
     private ?TitleMask $titleMask;
     private ?RecordValidator $validator;
@@ -106,6 +107,10 @@ final class RecordDuplicateService
             foreach($this->store->records()->editValues($newId) as $fieldId=>$values){
                 $type = $this->definitions->fieldType((int)$fieldId);
                 if(!in_array($type, array('freetext', 'blocktext'), true)){ continue; }
+                if($this->validator !== null && $this->validator->isSplitField($rectype, (int)$fieldId)){
+                    $this->cleanSplitField($rectype, $newId, (int)$fieldId, $values);
+                    continue;
+                }
                 foreach($values as $item){
                     $old = is_array($item) ? (string)($item['value'] ?? '') : (string)$item;
                     $clean = $this->validator !== null ? $this->validator->cleanText($rectype, (int)$fieldId, $type, $old)
@@ -133,6 +138,40 @@ final class RecordDuplicateService
             throw $exception;
         }
         return $newId;
+    }
+
+    /**
+     * A field saved in parts (page content, page translations): the parts are joined, cleaned as a whole
+     * and split again (2026-11-12: a part cleaned alone is cut HTML; the cleaner closed its tags and the
+     * value grew over the column size, "Data too long for column dtl_Value"). Rows are written again
+     * only when the cleaned parts differ from the copied ones.
+     *
+     * @param array<int,mixed> $parts Copied rows of the field in their order (plain or {value, hidden}).
+     */
+    private function cleanSplitField(int $rectype, int $recordId, int $fieldId, array $parts): void
+    {
+        $copied = array();
+        $hidden = false;
+        foreach($parts as $part){
+            $hidden = $hidden || (is_array($part) && !empty($part['hidden']));
+            $copied[] = is_array($part) ? (string)($part['value'] ?? '') : (string)$part;
+        }
+        if(count($copied) < 2){
+            $joined = $copied;
+        }elseif($fieldId === ($this->codes['cmsTranslations'] ?? 0)){
+            $joined = SplitValues::joinTranslations($copied);
+        }else{
+            $joined = SplitValues::joinContent($copied);
+        }
+        $clean = array();
+        foreach($joined as $value){
+            $clean = array_merge($clean, $this->validator->splitValue($rectype, $fieldId, (string)$value));
+        }
+        if($clean === $copied){ return; }
+        $this->store->deleteFields($recordId, array($fieldId));
+        $this->store->insertDetails($recordId, array_map(static function(string $value) use ($fieldId, $hidden): array {
+            return array('dty'=>$fieldId, 'value'=>$value, 'fileId'=>null, 'geo'=>null, 'hidden'=>$hidden ? 1 : null);
+        }, $clean));
     }
 
     /** The user may see the record (owner, edit group, administrator or non-owner visibility). */
