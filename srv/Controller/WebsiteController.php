@@ -4,8 +4,9 @@
 *
 * Pages (FrontController, RequestRouter action "site"):
 *   GET /{db}/site/{id}[/{page id}][?lang=xxx]        website home / page, or a standalone page
+*   GET /{db}/site/{id}/{page id}/{record id}          a record page showing a record (plan 27g)
 *   GET /{db}/site/{id}[/{page id}]/frame/{instance}   one module in an iframe ("mount": "iframe")
-*   (parameter form: ?db=&site=&pageid=&frame=&lang=)
+*   (parameter form: ?db=&site=&pageid=&rec=&frame=&lang=)
 *   ?design=1 (logged-in users): the preview of the CMS designer (plan 27c §6)
 * The API of websites and pages is /api/{db}/website/... and /api/{db}/page/... on the
 * generic record controller (RecordEditController, Website/WebsiteEntityHandler; plan 27d).
@@ -62,19 +63,23 @@ final class WebsiteController
     /**
      * Write a page (or an instance frame).
      *
-     * @param array $params site, pageid, frame, lang.
+     * @param array $params site, pageid, rec, frame, lang.
      * @param bool $pretty The request used a /{db}/site/ URL.
      */
     public function showPage(array $params, bool $pretty): void
     {
         try{
             $context = $this->service->context(intval($params['site'] ?? 0), intval($params['pageid'] ?? 0),
-                (string)($params['lang'] ?? ''));
+                (string)($params['lang'] ?? ''), intval($params['rec'] ?? 0));
             // the preview of the CMS designer (plan 27c §6): logged-in users only; the page runtime
             // opens the designer when the page is not inside it
             $context['design'] = !empty($params['design']) && $this->runtime->userId > 0;
             $renderer = ($this->renderer)($pretty);
             $frame = trim((string)($params['frame'] ?? ''));
+            // a record page needs a record (plan 27g); the designer shows it without one
+            if($context['recordPage'] && $context['record'] === null && !$context['design'] && $frame === ''){
+                throw new WebsiteException(404, 'This page shows a record: open it from a link to a record');
+            }
             $html = $frame !== '' ? $renderer->frame($context, $frame) : $renderer->render($context);
             $this->response->sendHtml($html, 200, array('Cache-Control' => 'no-cache'));
         }catch(WebsiteException $exception){

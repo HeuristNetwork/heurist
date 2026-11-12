@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d9c81e79b07eb35fbc663447796fed76",
+    "content-hash": "9b246c560d4b0f5d920c1b77f12a6898",
     "packages": [
         {
             "name": "easyrdf/easyrdf",
@@ -79,7 +79,8 @@
                 "issues": "http://github.com/easyrdf/easyrdf/issues",
                 "source": "https://github.com/easyrdf/easyrdf/tree/1.1.1"
             },
-            "time": "2020-12-02T08:47:31+00:00"
+            "time": "2020-12-02T08:47:31+00:00",
+            "published-time": "2020-12-02T09:59:23+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -140,7 +141,8 @@
                 "issues": "https://github.com/ezyang/htmlpurifier/issues",
                 "source": "https://github.com/ezyang/htmlpurifier/tree/v4.19.1"
             },
-            "time": "2026-09-15T15:42:51+00:00"
+            "time": "2026-09-15T15:42:51+00:00",
+            "published-time": "2026-09-15T15:42:56+00:00"
         },
         {
             "name": "gasparesganga/php-shapefile",
@@ -192,7 +194,8 @@
                 "issues": "https://github.com/gasparesganga/php-shapefile/issues",
                 "source": "https://github.com/gasparesganga/php-shapefile/tree/v3.4.1"
             },
-            "time": "2023-08-29T12:06:50+00:00"
+            "time": "2023-08-29T12:06:50+00:00",
+            "published-time": "2023-08-29T12:14:34+00:00"
         },
         {
             "name": "ifsnop/mysqldump-php",
@@ -251,7 +254,8 @@
                 "issues": "https://github.com/ifsnop/mysqldump-php/issues",
                 "source": "https://github.com/ifsnop/mysqldump-php/tree/v2.13"
             },
-            "time": "2026-08-02T19:39:47+00:00"
+            "time": "2026-08-02T19:39:47+00:00",
+            "published-time": "2026-08-02T19:42:28+00:00"
         },
         {
             "name": "phayes/geophp",
@@ -291,7 +295,8 @@
                 "issues": "https://github.com/phayes/geoPHP/issues",
                 "source": "https://github.com/phayes/geoPHP/tree/master"
             },
-            "time": "2014-12-02T06:11:22+00:00"
+            "time": "2014-12-02T06:11:22+00:00",
+            "published-time": "2014-12-02T06:09:35+00:00"
         },
         {
             "name": "phpmailer/phpmailer",
@@ -372,20 +377,21 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-10-15T16:49:08+00:00"
+            "time": "2025-10-15T16:49:08+00:00",
+            "published-time": "2025-10-15T16:49:35+00:00"
         },
         {
             "name": "smalot/pdfparser",
-            "version": "v2.12.5",
+            "version": "v2.13.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/smalot/pdfparser.git",
-                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354"
+                "reference": "a71c6dd38e60a995fdb4d36e4433b8b3557c65dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/2cfa0d92bd557875c9f52a75fde0e8392302a354",
-                "reference": "2cfa0d92bd557875c9f52a75fde0e8392302a354",
+                "url": "https://api.github.com/repos/smalot/pdfparser/zipball/a71c6dd38e60a995fdb4d36e4433b8b3557c65dc",
+                "reference": "a71c6dd38e60a995fdb4d36e4433b8b3557c65dc",
                 "shasum": ""
             },
             "require": {
@@ -421,22 +427,23 @@
             ],
             "support": {
                 "issues": "https://github.com/smalot/pdfparser/issues",
-                "source": "https://github.com/smalot/pdfparser/tree/v2.12.5"
+                "source": "https://github.com/smalot/pdfparser/tree/v2.13.1"
             },
-            "time": "2026-04-17T11:37:58+00:00"
+            "time": "2026-10-13T08:49:45+00:00",
+            "published-time": "2026-10-13T09:05:15+00:00"
         },
         {
             "name": "smarty/smarty",
-            "version": "v5.8.4",
+            "version": "v5.8.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/smarty-php/smarty.git",
-                "reference": "94a27cbbc7820198d7adc17a2be8d457fb267753"
+                "reference": "0ae663525dcbc9e996feb2a867e43bc85f960938"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/smarty-php/smarty/zipball/94a27cbbc7820198d7adc17a2be8d457fb267753",
-                "reference": "94a27cbbc7820198d7adc17a2be8d457fb267753",
+                "url": "https://api.github.com/repos/smarty-php/smarty/zipball/0ae663525dcbc9e996feb2a867e43bc85f960938",
+                "reference": "0ae663525dcbc9e996feb2a867e43bc85f960938",
                 "shasum": ""
             },
             "require": {
@@ -491,7 +498,7 @@
             "support": {
                 "forum": "https://github.com/smarty-php/smarty/discussions",
                 "issues": "https://github.com/smarty-php/smarty/issues",
-                "source": "https://github.com/smarty-php/smarty/tree/v5.8.4"
+                "source": "https://github.com/smarty-php/smarty/tree/v5.8.5"
             },
             "funding": [
                 {
@@ -499,20 +506,21 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-29T10:46:32+00:00"
+            "time": "2026-10-04T21:31:42+00:00",
+            "published-time": "2026-10-04T21:31:56+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.38.2",
+            "version": "v1.43.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "d3d318bad5e7a1bfbd026009c8bfb8d8f99ae6b6"
+                "reference": "122889ed24dc000165bcbfd77ec412f15cbdfc6a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/d3d318bad5e7a1bfbd026009c8bfb8d8f99ae6b6",
-                "reference": "d3d318bad5e7a1bfbd026009c8bfb8d8f99ae6b6",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/122889ed24dc000165bcbfd77ec412f15cbdfc6a",
+                "reference": "122889ed24dc000165bcbfd77ec412f15cbdfc6a",
                 "shasum": ""
             },
             "require": {
@@ -564,7 +572,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.38.2"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.43.3"
             },
             "funding": [
                 {
@@ -584,7 +592,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-27T06:59:30+00:00"
+            "time": "2026-10-28T09:35:49+00:00",
+            "published-time": "2026-10-28T10:07:45+00:00"
         }
     ],
     "packages-dev": [
@@ -710,7 +719,8 @@
     "prefer-lowest": false,
     "platform": {
         "ext-pdo": "*",
-        "ext-pdo_mysql": "*"
+        "ext-pdo_mysql": "*",
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.11.0"

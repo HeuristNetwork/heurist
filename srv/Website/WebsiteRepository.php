@@ -63,7 +63,9 @@ final class WebsiteRepository
         'thumbnail' => 'DT_THUMBNAIL',
         'menuFormat' => 'DT_CMS_MENU_FORMAT',
         'menuIconOnly' => 'TRM_ICON_ONLY',
-        'menuNameAndIcon' => 'TRM_NAME_AND_ICON'
+        'menuNameAndIcon' => 'TRM_NAME_AND_ICON',
+        // a page hidden in the main menu (review 2026-11-11): its <li> is written with the class is-menu-hidden
+        'menuHidden' => 'TRM_HIDDEN_ITEM'
     );
 
     /** Depth of the menu tree read for a website (top pages = 1). */
@@ -242,15 +244,18 @@ final class WebsiteRepository
     }
 
     /**
-     * URLs of records the visitor may see.
+     * Title and URL of records the visitor may see (record links, plan 27g §6).
      *
-     * @return array<int,string> Record id => rec_URL (no entry without a URL).
+     * @return array<int,array{title:string,url:string}> Record id => plain title and rec_URL ('' without one).
      */
-    public function recordUrls(array $ids): array
+    public function recordHeads(array $ids): array
     {
         $result = array();
-        foreach(RecordRepository::shared($this->database)->headers($ids, array('rec_URL'), RecordAccess::fromRuntime($this->runtime)) as $id => $row){
-            if((string)($row['rec_URL'] ?? '') !== ''){ $result[$id] = (string)$row['rec_URL']; }
+        $ids = array_values(array_filter(array_map('intval', $ids), static function(int $id){ return $id > 0; }));
+        if(empty($ids)){ return $result; }
+        foreach(RecordRepository::shared($this->database)->headers($ids, array('rec_Title', 'rec_URL'), RecordAccess::fromRuntime($this->runtime)) as $id => $row){
+            $result[intval($id)] = array('title' => trim(html_entity_decode(strip_tags((string)($row['rec_Title'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
+                'url' => trim((string)($row['rec_URL'] ?? '')));
         }
         return $result;
     }

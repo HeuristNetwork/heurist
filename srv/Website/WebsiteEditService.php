@@ -89,6 +89,9 @@ final class WebsiteEditService
                 $missing[] = 'optional logo 2-38 in 99-51';
             }
         }
+        foreach(WebsiteSetup::IMPORT_TYPES as $rectypeCode){
+            if($definitions->localId('rty', $rectypeCode) < 1){ $missing[] = 'record type '.$rectypeCode; }
+        }
         return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin,
             'canCreate' => $this->runtime->isAdmin, 'codes' => $codes);
     }
@@ -137,7 +140,9 @@ final class WebsiteEditService
             'languages' => array_map('strtolower', $languages),
             'url' => $url,
             'canEdit' => $this->canEdit($id),
-            'pages' => $pages
+            'pages' => $pages,
+            // the host organisation (logo and URL) for the hosted at line of the footer composer (review 2026-11-10)
+            'host' => HostInfo::read($this->urls->baseUrl())
         );
     }
 
@@ -159,7 +164,7 @@ final class WebsiteEditService
         $details = is_array($body['details'] ?? null) ? $body['details'] : array();
         $title = trim(strip_tags((string)self::first($details[$codes['name']] ?? '')));
         if($title === ''){ throw new WebsiteException(400, 'The website needs a title'); }
-        $site = WebsiteStarter::website($title);
+        $site = WebsiteStarter::website($title, $this->urls->baseUrl(), HostInfo::read($this->urls->baseUrl()));
         $defaults = array(
             $codes['version'] => WebsiteService::VERSION,
             $codes['header'] => $site['header'],
@@ -533,18 +538,23 @@ final class WebsiteEditService
         return $summary;
     }
 
-    /** Pages of the menu tree with titles. */
+    /**
+     * Pages of the menu tree with titles. A record page (plan 27g §2.2) has `record: true` and the `template` of its
+     * Record cards widget (report id or file name, '' when not chosen yet).
+     */
     private function pageTree(array $tree, array $pages): array
     {
+        $codes = $this->repository->codes();
         $result = array();
         foreach($tree as $item){
             $page = $pages[$item['id']] ?? null;
             if($page === null){ continue; }
+            $cards = CmsValidator::recordCards(CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config']);
             $result[] = array(
                 'id' => intval($item['id']),
                 'title' => $this->name($page),
                 'children' => $this->pageTree($item['children'], $pages)
-            );
+            ) + ($cards !== null ? array('record' => true, 'template' => is_scalar($cards['template'] ?? null) ? $cards['template'] : '') : array());
         }
         return $result;
     }

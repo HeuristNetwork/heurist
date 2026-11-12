@@ -43,10 +43,36 @@ final class WebsiteDefinitions implements WebsiteDefinitionsInterface
         $this->system = $system;
     }
 
-    public function install(array $fieldCodes, array $rectypeCodes): array
+    public function install(array $fieldCodes, array $rectypeCodes, array $importTypes = array()): array
     {
         $report = array();
         ConceptCode::setSystem($this->system);
+
+        // the record types themselves (99-51, 99-52, 2-1106) come from database 2 too, as in the legacy CMS
+        $missingTypes = array();
+        foreach (array_unique(array_merge($rectypeCodes, $importTypes)) as $code) {
+            if (!(intval(ConceptCode::getRecTypeLocalID($code)) > 0)) {
+                $missingTypes[] = $code;
+            }
+        }
+        if (!empty($missingTypes)) {
+            $import = new \DbsImport($this->system);
+            $ok = $import->doPrepare(array(
+                'defType' => 'rectype',
+                'databaseID' => self::SOURCE_DATABASE_ID,
+                'definitionID' => $missingTypes
+            ));
+            if ($ok) {
+                $ok = $import->doImport();
+            }
+            if (!$ok) {
+                $error = $this->system->getError();
+                throw new \RuntimeException('Cannot import the record types '.implode(', ', $missingTypes).' from database 2'
+                    .(is_array($error) && !empty($error['message']) ? ': '.strip_tags((string)$error['message']) : ''));
+            }
+            ConceptCode::setSystem($this->system);
+            $report[] = 'Imported record types '.implode(', ', $missingTypes);
+        }
 
         $missing = array();
         foreach ($fieldCodes as $code) {

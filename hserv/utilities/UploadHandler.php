@@ -862,7 +862,7 @@ class UploadHandler
     }
 
     protected function gd_destroy_image_object($file_path) {
-        $image = (isset($this->image_objects[$file_path])) ? $this->image_objects[$file_path] : null ;
+        $image = (isset($this->image_objects[$file_path])) ? $this->image_objects[$file_path] : null;
         return $image && imagedestroy($image);
     }
 
@@ -1160,7 +1160,7 @@ class UploadHandler
     }
 
     protected function imagick_destroy_image_object($file_path) {
-        $image = (isset($this->image_objects[$file_path])) ? $this->image_objects[$file_path] : null ;
+        $image = (isset($this->image_objects[$file_path])) ? $this->image_objects[$file_path] : null;
         return $image && $image->destroy();
     }
 

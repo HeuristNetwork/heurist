@@ -664,13 +664,18 @@ final class RequestRouter
                 break;
 
             case 'site':
-                // website format v4 (plan 27a): /<db>/site/<id>[/<pageId>][/frame/<instance>]
+                // website format v4 (plan 27a): /<db>/site/<id>[/<pageId>[/<recordId>]][/frame/<instance>]
+                // (recordId: the record shown by a record page, plan 27g)
                 if (isset($rest[0]) && ctype_digit($rest[0])) {
                     $params['site'] = (int)$rest[0];
                     $next = 1;
                     if (isset($rest[1]) && ctype_digit($rest[1])) {
                         $params['pageid'] = (int)$rest[1];
                         $next = 2;
+                        if (isset($rest[2]) && ctype_digit($rest[2])) {
+                            $params['rec'] = (int)$rest[2];
+                            $next = 3;
+                        }
                     }
                     if (($rest[$next] ?? '') === 'frame' && isset($rest[$next + 1])
                         && preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $rest[$next + 1])) {

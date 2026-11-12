@@ -123,7 +123,7 @@ final class CmsValidator
                 // the value of a field comes from its record, it has no translations here (plan 27e)
                 if($node['text'] && $node['field'] === null){ $texts[$id] = true; }
             }
-            if($node['field'] !== null && preg_match('/^(website|page|\d+)\.\d+(-\d+)?$/', $node['field']) !== 1){
+            if($node['field'] !== null && preg_match('/^(website|page|record|\d+)\.\d+(-\d+)?$/', $node['field']) !== 1){
                 $issues[] = self::issue('warning', 'field_reference', 'Field reference "'.$node['field'].'" is not valid', $id);
             }
             // a media element (plan 27c §33): its settings in config.media, one element each
@@ -190,6 +190,24 @@ final class CmsValidator
             }
         }
         return $issues;
+    }
+
+    /**
+     * The Record cards widget of a record page (plan 27g §2.2): the first cards widget in mode `url` (the record of the
+     * page URL). A page with it is a record page.
+     *
+     * @param array $config Parsed configuration of the page (parse()['config']).
+     * @return array|null Settings of the widget, or null: not a record page.
+     */
+    public static function recordCards(array $config): ?array
+    {
+        foreach(is_array($config['instances'] ?? null) ? $config['instances'] : array() as $instance){
+            if(is_array($instance) && ($instance['kind'] ?? '') === 'widget' && ($instance['type'] ?? '') === 'cards'
+                && is_array($instance['settings'] ?? null) && ($instance['settings']['mode'] ?? '') === 'url'){
+                return $instance['settings'];
+            }
+        }
+        return null;
     }
 
     /**

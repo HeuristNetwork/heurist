@@ -51,6 +51,12 @@ final class SiteUrls
         }
     }
 
+    /** Heurist base URL (ends with "/"). */
+    public function baseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
     /**
      * URLs of a built site: pages as relative files, frames on the live server (pretty form).
      *
@@ -63,10 +69,21 @@ final class SiteUrls
         return $urls;
     }
 
-    /** URL of a website page (pageId 0: home) or of a standalone page (id = the page). */
-    public function page(int $id, int $pageId = 0, string $language = ''): string
+    /**
+     * URL of a website page (pageId 0: home) or of a standalone page (id = the page). `recordId`: the record shown by
+     * a record page (plan 27g), `/{db}/site/{id}/{page}/{record}` (`&rec=`); a built site links it to the live server.
+     */
+    public function page(int $id, int $pageId = 0, string $language = '', int $recordId = 0): string
     {
         $lang = $language !== '' ? strtolower($language) : '';
+        if($recordId > 0 && $pageId > 0){
+            if($this->prettyRoot !== ''){
+                return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.'/'.$pageId.'/'.$recordId
+                    .($lang !== '' ? '?lang='.rawurlencode($lang) : '');
+            }
+            return $this->baseUrl.'?db='.rawurlencode($this->database).'&site='.$id.'&pageid='.$pageId.'&rec='.$recordId
+                .($lang !== '' ? '&lang='.rawurlencode($lang) : '');
+        }
         if($this->fileLanguage !== ''){
             return '../'.rawurlencode($lang !== '' ? $lang : $this->fileLanguage).'/'.($pageId > 0 ? $pageId : 'index').'.html';
         }

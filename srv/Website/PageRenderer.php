@@ -42,6 +42,8 @@ final class PageRenderer
     /** @var array{database:string,baseUrl:string,javaScriptAllowed:bool,urls:SiteUrls} */
     private array $environment;
     private ?PageContent $content;
+    /** @var array<int,bool> Page id => record page (isRecordPage). */
+    private array $recordPages = array();
 
     /**
      * @param array<string,int> $codes WebsiteRepository::codes().
@@ -99,14 +101,20 @@ final class PageRenderer
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
+        // a record page (plan 27g): the title of the record, its short summary, the canonical URL with the record
+        $record = $context['record'] ?? null;
+        if($record !== null){ $title = trim(strip_tags((string)($record['rec_Title'] ?? ''))) ?: $title; }
         $documentTitle = $site !== null && !$context['home'] && $siteTitle !== '' ? $title.' – '.$siteTitle : ($title ?: $siteTitle);
         $keywords = trim(strip_tags(WebsiteRepository::value($page, $this->codes['keywords'])));
+        $description = $record !== null ? $this->description($record, $language) : '';
 
         $html = '<!doctype html><html lang="'.self::attr($this->languages->code2($language ?? '') ?? 'en').'" class="h-site'
             .(!empty($context['design']) ? ' h-site-design' : '').'">'
             .'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
             .'<title>'.self::text2html($documentTitle).'</title>'
             .($keywords !== '' ? '<meta name="keywords" content="'.self::attr($keywords).'">' : '')
+            .($description !== '' ? '<meta name="description" content="'.self::attr($description).'">' : '')
+            .($record !== null ? '<link rel="canonical" href="'.self::attr($this->selfUrl($context, $language)).'">' : '')
             .$this->alternateLinks($context)
             .'<link rel="stylesheet" href="'.self::attr($baseUrl.self::BUNDLE.'heurist-website-main.css').'">'
             .'<style id="h-site-styles">'."\n".$styles.'</style>'
@@ -116,7 +124,9 @@ final class PageRenderer
             .$this->externalFiles($site ?? $page)
             .'</head><body class="'.self::attr($bodyClass).'">'
             .($header !== '' ? '<header class="h-site-header">'.$header.'</header>' : '')
-            .'<main class="h-site-main"><section class="h-site-page" data-h-page="'.$pageId.'">'.$content.'</section></main>'
+            // the record of a record page (plan 27g): the navigator keeps a section per page and record
+            .'<main class="h-site-main"><section class="h-site-page" data-h-page="'.$pageId.'"'
+                .($record !== null ? ' data-h-record="'.intval($record['rec_ID']).'"' : '').'>'.$content.'</section></main>'
             .($footer !== '' ? '<footer class="h-site-footer">'.$footer.'</footer>' : '')
             .'<script type="application/json" id="h-site-config">'.$this->configJson($context).'</script>'
             .'<script type="module" src="'.self::attr($baseUrl.self::BUNDLE.'heurist-website.js').'"></script>'
@@ -154,8 +164,16 @@ final class PageRenderer
     private function fill(string $html, array $context): string
     {
         $instances = self::instanceList($context['pageConfig']) + self::instanceList($context['siteConfig'] ?? null);
-        return CmsHtml::fill($html, function(string $reference) use ($context): ?string {
-            return $this->content !== null ? $this->content->field($reference, $context) : null;
+        // links of records to a record page of this website (plan 27g §6)
+        $context['recordPageUrl'] = function(int $pageId, int $recordId) use ($context): string {
+            $page = $context['pages'][$pageId] ?? null;
+            return $page !== null && $this->isRecordPage($page) ? $this->url($context, $pageId, $context['language'], $recordId) : '';
+        };
+        $html = $this->linkMedia($html, $context);
+        return CmsHtml::fill($html, function(string $reference, string $link = '') use ($context): ?string {
+            if($this->content === null){ return null; }
+            $value = $this->content->field($reference, $context);
+            return $value !== null && $value !== '' && $link !== '' ? $value.$this->content->fieldLink($reference, $link, $context) : $value;
         }, function(string $id) use ($instances, $context): ?array {
             $instance = is_array($instances[$id] ?? null) ? $instances[$id] : array();
             if(($instance['kind'] ?? '') !== 'widget'){ return null; }
@@ -175,7 +193,7 @@ final class PageRenderer
      */
     private function menuHtml(array $context, array $settings = array()): string
     {
-        $tree = $this->menu($context, $context['menu']);
+        $tree = self::withoutRecordPages($this->menu($context, $context['menu']));
         if(!empty($settings['showHome']) && $context['site'] !== null){
             array_unshift($tree, $this->homeItem($context));
         }
@@ -207,7 +225,7 @@ final class PageRenderer
         $links = '';
         foreach($context['languages'] as $code){
             $lower = strtolower($code);
-            $links .= '<li><a href="'.self::attr($this->url($context, intval($context['page']['rec_ID']), $code)).'" hreflang="'.self::attr($lower).'"'
+            $links .= '<li><a href="'.self::attr($this->selfUrl($context, $code)).'" hreflang="'.self::attr($lower).'"'
                 .($lower === $current ? ' class="is-current" aria-current="true"' : '').'>'
                 .self::text2html(strtoupper($this->languages->code2($code) ?? $lower)).'</a></li>';
         }
@@ -243,6 +261,18 @@ final class PageRenderer
                 $url = trim((string)$target);
                 if(!preg_match('#^(https?://|mailto:|tel:|/|\./|\.\./|\#)#i', $url)){ continue; }
                 $entry['url'] = $url;
+            }elseif($action === 'recordPage'){
+                // a record on a record page of this website (plan 27g): target = the page, `record` = the record
+                $pageId = intval($target);
+                $recordId = intval($item['record'] ?? 0);
+                if($context['site'] === null || $recordId < 1 || !isset($context['pages'][$pageId])
+                    || !$this->isRecordPage($context['pages'][$pageId])){ continue; }
+                $entry['url'] = $this->url($context, $pageId, $context['language'], $recordId);
+                $entry['current'] = $pageId === $current && intval($context['record']['rec_ID'] ?? 0) === $recordId;
+            }elseif($action === 'back'){
+                // the page before (history back in the runtime); without history and JS: the home page
+                $entry['url'] = $context['site'] !== null ? $this->url($context, intval($context['site']['rec_ID']), $context['language']) : '#';
+                $entry['action'] = 'back';
             }elseif($action === 'addRecord'){
                 $entry['action'] = 'addRecord';
                 $entry['target'] = (string)$target;
@@ -284,14 +314,15 @@ final class PageRenderer
 
     /**
      * A list of menu items with all their sub pages (the HTML of HMenu). An item: title, url, current, children,
-     * icon (URL or ''), format name / icon / both.
+     * icon (URL or ''), format name / icon / both, hidden (in the main menu: class is-menu-hidden).
      */
     public static function menuList(array $items, string $class, bool $selectableParent = true): string
     {
         $html = '';
         foreach($items as $item){
             $children = is_array($item['children'] ?? null) ? $item['children'] : array();
-            $classes = 'h-site-menu-item'.(!empty($item['current']) ? ' is-current' : '').(!empty($children) ? ' has-children' : '');
+            $classes = 'h-site-menu-item'.(!empty($item['current']) ? ' is-current' : '').(!empty($children) ? ' has-children' : '')
+                .(!empty($item['hidden']) ? ' is-menu-hidden' : '');
             if(self::hasCurrent($children)){ $classes .= ' is-current-parent'; }
             $label = self::menuLabel($item);
             $entry = !empty($children) && !$selectableParent
@@ -341,13 +372,16 @@ final class PageRenderer
                 'id' => $site !== null ? intval($site['rec_ID']) : null,
                 'pageId' => intval($page['rec_ID']),
                 'home' => $context['home'],
+                // a record page and its record (plan 27g)
+                'recordPage' => !empty($context['recordPage']),
+                'record' => !empty($context['record']) ? intval($context['record']['rec_ID']) : null,
                 'title' => $site !== null ? $this->text($site, $this->codes['name'], $context['language']) : '',
                 'language' => $context['language'] !== null ? strtolower($context['language']) : null,
                 'languages' => array_map(function(string $code) use ($context){
-                    return array('code' => strtolower($code), 'url' => $this->url($context, intval($context['page']['rec_ID']), $code));
+                    return array('code' => strtolower($code), 'url' => $this->selfUrl($context, $code));
                 }, $context['languages']),
                 // the page has the menu as HTML; the designer's draft replaces it and needs the tree
-                'menu' => !empty($context['design']) ? $this->menu($context, $context['menu']) : array(),
+                'menu' => !empty($context['design']) ? self::withoutRecordPages($this->menu($context, $context['menu'])) : array(),
                 'homeItem' => $site !== null && !empty($context['design']) ? $this->homeItem($context) : null,
                 'layout' => $this->layout($context),
                 // pages of the website in menu order, for the navigation modes swap / scroll (plan 27f §2)
@@ -446,7 +480,10 @@ final class PageRenderer
                 $id = intval($item['id']);
                 if(!isset($seen[$id])){
                     $seen[$id] = true;
-                    $list[] = array('id' => $id, 'url' => $item['url'], 'title' => $item['title']);
+                    // hidden in the main menu, record page (plan 27g): the navigator shows them alone in scroll mode
+                    $list[] = array('id' => $id, 'url' => $item['url'], 'title' => $item['title'])
+                        + (!empty($item['hidden']) ? array('hidden' => true) : array())
+                        + (!empty($item['record']) ? array('record' => true) : array());
                 }
                 $walk($item['children']);
             }
@@ -540,6 +577,8 @@ final class PageRenderer
                 'current' => intval($item['id']) === $current,
                 'icon' => $this->menuIcon($page),
                 'format' => $this->menuFormat($page),
+                'hidden' => $this->menuHidden($page),
+                'record' => $this->isRecordPage($page),
                 'children' => $this->menu($context, $item['children'])
             );
         }
@@ -553,6 +592,17 @@ final class PageRenderer
         return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId) : '';
     }
 
+    /**
+     * Whether the menu entry of a page is hidden in the main menu (DT_CMS_MENU_FORMAT = TRM_HIDDEN_ITEM, review
+     * 2026-11-11): the entry is written (class is-menu-hidden) and hidden by CSS in the menu of the header only; the
+     * page stays in other menus and in the page lists of the designer.
+     */
+    private function menuHidden(array $page): bool
+    {
+        $hidden = intval($this->codes['menuHidden'] ?? 0);
+        return $hidden > 0 && intval(WebsiteRepository::value($page, intval($this->codes['menuFormat'] ?? 0))) === $hidden;
+    }
+
     /** What the menu entry of a page shows (DT_CMS_MENU_FORMAT): name (default), icon or both. */
     private function menuFormat(array $page): string
     {
@@ -563,7 +613,7 @@ final class PageRenderer
     }
 
     /** URL of a page of this website (or the standalone page) in a language. */
-    private function url(array $context, int $pageId, ?string $language): string
+    private function url(array $context, int $pageId, ?string $language, int $recordId = 0): string
     {
         $default = $context['languages'][0] ?? null;
         $lang = $language !== null && $language !== $default ? strtolower($language) : '';
@@ -571,7 +621,62 @@ final class PageRenderer
             return $this->environment['urls']->page($pageId, 0, $lang);
         }
         $siteId = intval($context['site']['rec_ID']);
-        return $this->environment['urls']->page($siteId, $pageId === $siteId ? 0 : $pageId, $lang);
+        return $this->environment['urls']->page($siteId, $pageId === $siteId ? 0 : $pageId, $lang, $recordId);
+    }
+
+    /**
+     * Links of media elements of a record (Type Any record, `config.media[id].action` url / recordPage, plan 27g §6):
+     * a stretched link at the end of the figure.
+     */
+    private function linkMedia(string $html, array $context): string
+    {
+        if($this->content === null || strpos($html, 'data-h-media="') === false){ return $html; }
+        $media = (is_array($context['pageConfig']['media'] ?? null) ? $context['pageConfig']['media'] : array())
+            + (is_array($context['siteConfig']['media'] ?? null) ? $context['siteConfig']['media'] : array());
+        return (string)preg_replace_callback('#(<figure\b[^>]*\bdata-h-media="([^"]+)"[^>]*>)(.*?)(</figure>)#s',
+            function(array $match) use ($media, $context): string {
+                $settings = is_array($media[$match[2]] ?? null) ? $media[$match[2]] : array();
+                $record = intval($settings['record'] ?? 0);
+                if(($settings['mode'] ?? '') !== 'record' || $record < 1){ return $match[0]; }
+                return $match[1].$match[3].($this->content->recordLinks(array($record), $settings, $context)[$record] ?? '').$match[4];
+            }, $html);
+    }
+
+    /** URL of this page in a language; a record page keeps its record (plan 27g). */
+    private function selfUrl(array $context, ?string $language): string
+    {
+        $record = $context['record'] ?? null;
+        return $this->url($context, intval($context['page']['rec_ID']), $language, $record !== null ? intval($record['rec_ID']) : 0);
+    }
+
+    /** Whether a page of the website is a record page: a Record cards widget in mode url (plan 27g §2.2). */
+    private function isRecordPage(array $page): bool
+    {
+        $id = intval($page['rec_ID'] ?? 0);
+        if(!array_key_exists($id, $this->recordPages)){
+            $config = CmsValidator::parse(WebsiteRepository::value($page, $this->codes['configuration']))['config'];
+            $this->recordPages[$id] = CmsValidator::recordCards($config) !== null;
+        }
+        return $this->recordPages[$id];
+    }
+
+    /** A menu tree without record pages (they need a record; plan 27g): their sub pages are left out too. */
+    private static function withoutRecordPages(array $tree): array
+    {
+        $result = array();
+        foreach($tree as $item){
+            if(!empty($item['record'])){ continue; }
+            $item['children'] = self::withoutRecordPages(is_array($item['children'] ?? null) ? $item['children'] : array());
+            $result[] = $item;
+        }
+        return $result;
+    }
+
+    /** Plain text of the short summary of a record for meta description (at most 300 characters), or ''. */
+    private function description(array $record, ?string $language): string
+    {
+        $text = trim((string)preg_replace('/\s+/u', ' ', strip_tags($this->text($record, intval($this->codes['shortSummary'] ?? 0), $language))));
+        return mb_strlen($text) > 300 ? rtrim(mb_substr($text, 0, 297)).'...' : $text;
     }
 
     /** <link rel="alternate" hreflang> for the other languages. */
@@ -581,7 +686,7 @@ final class PageRenderer
         $links = '';
         foreach($context['languages'] as $code){
             $links .= '<link rel="alternate" hreflang="'.self::attr($this->languages->code2($code) ?? strtolower($code)).'" href="'
-                .self::attr($this->url($context, intval($context['page']['rec_ID']), $code)).'">';
+                .self::attr($this->selfUrl($context, $code)).'">';
         }
         return $links;
     }

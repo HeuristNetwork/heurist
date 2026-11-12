@@ -2,7 +2,8 @@
 /**
 * PageContent.php - Semi-static content of a website page (plan 27e)
 *
-* Values of the elements with `data-h-field` (`207439.2-1`, `website.2-1`, `page.2-1`) and the HTML of the
+* Values of the elements with `data-h-field` (`207439.2-1`, `website.2-1`, `page.2-1`, `record.2-1` = the record of
+* the URL on a record page, plan 27g) and the HTML of the
 * widgets `report`, `cards` and `gallery`. Used by PageRenderer on a dynamic page (per request, the rights of
 * the visitor) and on a generated page (at build, guest rights): the same classes, no HTTP.
 *
@@ -55,14 +56,14 @@ final class PageContent
     /**
      * The value of a `data-h-field` reference as HTML.
      *
-     * @param string $reference `<record id|website|page>.<field id or concept code>`.
+     * @param string $reference `<record id|website|page|record>.<field id or concept code>`.
      * @param array $context WebsiteService::context.
      * @return string|null HTML; '' for an empty field and for a record the visitor may not see (the snapshot must not show it,
      *         plan 27e §22); null when the reference or field is not valid: the snapshot stays.
      */
     public function field(string $reference, array $context): ?string
     {
-        if(preg_match('/^(website|page|\d+)\.(\d+(?:-\d+)?)$/', $reference, $parts) !== 1){ return null; }
+        if(preg_match('/^(website|page|record|\d+)\.(\d+(?:-\d+)?)$/', $reference, $parts) !== 1){ return null; }
         $record = $this->sourceRecord($parts[1], $context);
         if($record === null){ return ''; }
         $definitions = $this->repository->definitions();
@@ -107,21 +108,36 @@ final class PageContent
                 $html = $this->report($settings, $language, $context);
                 return $html === null ? null : array('html' => $html, 'class' => 'h-site-report');
             case 'cards':
-                return array('html' => $this->cards($settings, $language), 'class' => $list ? 'h-site-cards h-site-widget-list' : 'h-site-cards h-slider-pending');
+                return array('html' => $this->cards($settings, $language, $context), 'class' => $list ? 'h-site-cards h-site-widget-list' : 'h-site-cards h-slider-pending');
             case 'badges':
                 // the hosting organisation (block Hosted at, plan 27f §9.6), written now from the files of the installation
                 if(($settings['source'] ?? '') === 'host'){
                     $html = HostInfo::badgeHtml((string)$this->services['baseUrl'], intval($settings['height'] ?? 48));
                     return array('html' => $html, 'class' => $html === '' ? 'h-site-badges h-site-badges-empty' : 'h-site-badges');
                 }
-                // logos with links (plan 27f §7): HTML made by the designer per language, as a gallery
+                // logos with links (plan 27f §7): HTML made by the designer per language, as a gallery; height, gap and
+                // alignment from the settings on the host (the purifier removes the style of the stored HTML)
                 $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
-                return is_string($html) ? array('html' => $html, 'class' => 'h-site-badges') : null;
+                return is_string($html) ? array('html' => $html) + self::badgesLayout($settings) : null;
             case 'gallery':
                 $html = is_array($settings['html'] ?? null) ? ($settings['html'][$language] ?? $settings['html']['def'] ?? null) : null;
+                if(is_string($html)){ $html = $this->linkRecords($html, $settings, $context); }
                 return is_string($html) ? array('html' => $html, 'class' => $list ? 'h-site-gallery h-site-widget-list' : 'h-site-gallery h-slider-pending') : null;
         }
         return null;
+    }
+
+    /**
+     * Class and style of the host of badges (review 2026-11-11): `h-site-badges-{start|center|end}`, the variables
+     * --h-site-badge-height and --h-site-badge-gap (px); as badgesLayout of siteRuntime.js.
+     */
+    private static function badgesLayout(array $settings): array
+    {
+        $align = in_array($settings['align'] ?? '', array('start', 'center', 'end'), true) ? $settings['align'] : 'center';
+        $height = intval($settings['height'] ?? 48);
+        $gap = intval($settings['gap'] ?? 16);
+        return array('class' => 'h-site-badges h-site-badges-'.$align,
+            'style' => '--h-site-badge-height:'.($height > 0 ? min($height, 400) : 48).'px;--h-site-badge-gap:'.max(0, min($gap, 200)).'px');
     }
 
     /** The record of a reference: the website, the page, or a record the visitor may see. */
@@ -129,6 +145,8 @@ final class PageContent
     {
         if($source === 'website'){ return $context['site'] ?? $context['page']; }
         if($source === 'page'){ return $context['page']; }
+        // the record of the URL of a record page (plan 27g); none: the snapshot of the designer is replaced by ''
+        if($source === 'record'){ return $context['record'] ?? null; }
         $id = intval($source);
         if(!array_key_exists($id, $this->records)){ $this->records[$id] = $this->repository->record($id); }
         return $this->records[$id];
@@ -220,23 +238,100 @@ final class PageContent
         return empty($outputs) ? 0 : (int)reset($outputs);
     }
 
-    /** Cards of the records of the query, each one rendered with the card template. */
-    private function cards(array $settings, string $language): string
+    /**
+     * Cards of the records of the query, each one rendered with the card template. Mode `url` (record page, plan
+     * 27g): the card of the record of the URL; without one (the designer) a note.
+     */
+    private function cards(array $settings, string $language, array $context = array()): string
     {
-        $query = $settings['query'] ?? null;
-        if(!is_array($query) || empty($query) || self::hasParameters($query)){ return ''; }
         $file = $this->repository->reportTemplate($settings['template'] ?? '');
-        if($file === ''){ return ''; }
-        $ids = array_slice(array_map('intval', (array)call_user_func($this->services['search'], $query, self::CARD_LIMIT)), 0, self::CARD_LIMIT);
-        $urls = (string)($settings['action'] ?? '') === 'url' ? $this->repository->recordUrls($ids) : array();
+        if(($settings['mode'] ?? '') === 'url'){
+            $record = $context['record'] ?? null;
+            if($file === ''){ return '<p class="h-site-note">Choose a template of the record page</p>'; }
+            if($record === null){ return !empty($context['design']) ? '<p class="h-site-note">The record of the page URL is shown here</p>' : ''; }
+            $ids = array(intval($record['rec_ID']));
+        }else{
+            $query = $settings['query'] ?? null;
+            if(!is_array($query) || empty($query) || self::hasParameters($query) || $file === ''){ return ''; }
+            $ids = array_slice(array_map('intval', (array)call_user_func($this->services['search'], $query, self::CARD_LIMIT)), 0, self::CARD_LIMIT);
+        }
+        // the link of each card (plan 27g §6): rec_URL or the record page, a stretched link over the card
+        $links = $this->recordLinks($ids, $settings, $context);
         $html = '';
         foreach($ids as $id){
             $card = call_user_func($this->services['render'], $file, $id, $language);
             if(!is_string($card) || $card === ''){ continue; }
-            $url = $urls[$id] ?? '';
-            $html .= '<div class="h-site-card" data-h-rec="'.$id.'"'.($url !== '' ? ' data-h-url="'.self::attribute($url).'"' : '').'>'.$card.'</div>';
+            $html .= '<div class="h-site-card" data-h-rec="'.$id.'">'.$card.($links[$id] ?? '').'</div>';
         }
         return $html;
+    }
+
+    /**
+     * Links of records for an element with an action (plan 27g §6): `url` = rec_URL in a new window, `recordPage` = the
+     * record on the record page `settings.recordPage` (URL from `context.recordPageUrl`). A link is a stretched `<a>`
+     * over its element (CSS .h-site-rec-link) with the title of the record for screen readers and crawlers; a record the
+     * visitor may not see, without rec_URL, or a page that is not a record page any more has none.
+     *
+     * @param int[] $ids
+     * @param array $settings `action`, `recordPage`.
+     * @param array $context WebsiteService::context with `recordPageUrl` (page id, record id) => URL or ''.
+     * @return array<int,string> Record id => HTML of the link.
+     */
+    public function recordLinks(array $ids, array $settings, array $context): array
+    {
+        $action = (string)($settings['action'] ?? 'none');
+        if($action !== 'url' && $action !== 'recordPage'){ return array(); }
+        $pageUrl = $context['recordPageUrl'] ?? null;
+        $pageId = intval($settings['recordPage'] ?? 0);
+        if($action === 'recordPage' && ($pageId < 1 || !is_callable($pageUrl))){ return array(); }
+        $result = array();
+        foreach($this->repository->recordHeads($ids) as $id => $head){
+            if($action === 'url'){
+                $href = preg_match('#^(https?://|mailto:|/)#i', $head['url']) === 1 ? $head['url'] : '';
+            }else{
+                $href = (string)$pageUrl($pageId, $id);
+            }
+            if($href === ''){ continue; }
+            $result[$id] = '<a class="h-site-rec-link" href="'.self::attribute($href).'"'
+                .($action === 'url' ? ' target="_blank" rel="noopener"' : '').'><span class="h-site-visually-hidden">'
+                .self::text($head['title'] !== '' ? $head['title'] : '#'.$id).'</span></a>';
+        }
+        return $result;
+    }
+
+    /**
+     * Stored HTML with links added to the elements of records (`data-h-rec`, the figures of a gallery): the link at the
+     * end of each element.
+     */
+    public function linkRecords(string $html, array $settings, array $context): string
+    {
+        if(strpos($html, 'data-h-rec') === false){ return $html; }
+        preg_match_all('/<figure\b[^>]*\bdata-h-rec="(\d+)"/', $html, $found);
+        $links = $this->recordLinks(array_map('intval', $found[1]), $settings, $context);
+        if(empty($links)){ return $html; }
+        return (string)preg_replace_callback('#(<figure\b[^>]*\bdata-h-rec="(\d+)"[^>]*>)(.*?)(</figure>)#s', static function(array $match) use ($links): string {
+            return $match[1].$match[3].($links[intval($match[2])] ?? '').$match[4];
+        }, $html);
+    }
+
+    /**
+     * The link of a Record field element (`data-h-link`: `url` or `page:<id>`, plan 27g §6): only for a reference
+     * to a record (not website / page / record of the URL). An external link icon follows the value (cosmetics
+     * 2026-11-11), the stretched link covers the element.
+     */
+    public function fieldLink(string $reference, string $link, array $context): string
+    {
+        if(preg_match('/^(\d+)\./', $reference, $source) !== 1){ return ''; }
+        if($link === 'url'){
+            $settings = array('action' => 'url');
+        }elseif(preg_match('/^page:(\d+)$/', $link, $page) === 1){
+            $settings = array('action' => 'recordPage', 'recordPage' => intval($page[1]));
+        }else{
+            return '';
+        }
+        $id = intval($source[1]);
+        $link = $this->recordLinks(array($id), $settings, $context)[$id] ?? '';
+        return $link === '' ? '' : '<i class="h-site-rec-link-icon fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>'.$link;
     }
 
     /** A query with `$NAME$` parameters can not run without a form. */
