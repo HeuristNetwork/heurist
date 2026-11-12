@@ -51,7 +51,7 @@ final class StyleCompiler
         'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'align-content', 'gap', 'flex', 'grid-template-columns',
         'grid-template-rows', 'grid-column', 'grid-row', 'order',
         'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'overflow',
-        'border-radius', 'box-shadow',
+        'border-radius', 'box-shadow', 'text-shadow',
         'color', 'background-color', 'background-image', 'background-position', 'background-repeat', 'background-size', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
     );
 
