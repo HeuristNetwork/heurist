@@ -62,7 +62,8 @@ final class StyleCompiler
         'accordion' => '[data-h-control="accordion"]',
         'text' => '[data-h-text]:not([data-h-media])',
         'media' => '[data-h-media]',
-        'instance' => '[data-h-instance]'
+        // modules and widgets, not the hosts of menus (nav) and the language switch (cmsDocument.js CMS_KINDS, 2026-11-12)
+        'instance' => '[data-h-instance]:where(:not(nav, .h-site-lang-single):not(:has(> .h-site-lang)))'
     );
 
     private const NAME = '/^[A-Za-z][A-Za-z0-9_-]{0,63}$/';
