@@ -36,7 +36,7 @@ use Throwable;
 final class SmartyTemplateRunner
 {
     /** Output modes. */
-    public const MODES = array('html', 'js', 'txt', 'csv', 'xml', 'json');
+    public const MODES = array('html', 'js', 'txt', 'csv', 'xml', 'json', 'css');
 
     private ReportEnvironment $environment;
     private DatabaseInterface $database;
