@@ -619,7 +619,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER' => array(2, 940),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGE' => array(2, 967),
-    'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only, or hiddne
+    'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only, or hidden
     'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu 
     'DT_CMS_ACTION' => array(2, 1148),
     

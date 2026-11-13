@@ -68,8 +68,9 @@ final class WebsiteRepository
         'menuHidden' => 'TRM_HIDDEN_ITEM'
     );
 
-    /** Depth of the menu tree read for a website (top pages = 1). */
-    private const MENU_DEPTH = 3;
+    /** Depth of the menu tree read for a website (top pages = 1); was 3, a fourth level was lost (2026-11-12). A page
+     *  in the tree twice is read once (no endless loop). */
+    private const MENU_DEPTH = 10;
 
     private DatabaseInterface $database;
     private RuntimeContext $runtime;

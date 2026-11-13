@@ -22,6 +22,7 @@ namespace Heurist\Records\Query;
 use Heurist\Database\QueryTrace;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Runtime\RuntimeContext;
+use Heurist\Records\Query\Compiler\FieldPredicateCompiler;
 use Heurist\Records\Query\Compiler\QueryBuilder;
 use Heurist\Records\Query\Compiler\RelationTermResolver;
 
@@ -364,7 +365,7 @@ final class RecordSearchService
                 }
                 if($cache[$cacheKey] !== null){
                     $idsPredicate = array('ids'=>$cache[$cacheKey]);
-                    $result[] = strpos((string)$value, '@-') === 0
+                    $result[] = FieldPredicateCompiler::isAnyFieldExclusion($value)
                         ? array('not'=>array($idsPredicate))
                         : $idsPredicate;
                     continue;

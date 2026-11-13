@@ -47,7 +47,13 @@ final class WebsiteStarter
         'highlighted' => array('label' => 'Highlighted', 'background-color' => 'var(--h-color-primary)', 'color' => '#ffffff',
             'padding' => '16px'),
         'banner' => array('label' => 'Banner', 'width' => '100%', 'padding' => '48px 16px', 'text-align' => 'center'),
-        'narrowColumn' => array('label' => 'Narrow column', 'max-width' => '800px', 'margin' => '0 auto')
+        'narrowColumn' => array('label' => 'Narrow column', 'max-width' => '200px', 'margin' => '0 auto'),
+        // texts over light / dark banners and background images (2026-11-12)
+        'textDarkShadow' => array('label' => 'Dark text with light shadow', 'color' => '#222222',
+            'text-shadow' => '0 0 4px rgba(255, 255, 255, 0.9)'),
+        'textLightShadow' => array('label' => 'Light text with dark shadow', 'color' => '#ffffff',
+            'text-shadow' => '0 1px 3px rgba(0, 0, 0, 0.8)')
+        // no menu presets: a menu takes the colours of its parent (HMenu.css, 2026-11-12)
     );
 
     /**
@@ -71,7 +77,6 @@ final class WebsiteStarter
             return array('kind' => 'widget', 'type' => $type, 'configVersion' => 1,
                 'settings' => empty($settings) ? new \stdClass() : $settings);
         };
-        $column = array('display' => 'flex', 'flex-direction' => 'column');
         // a widget host: not the min-height of the instance kind (meant for modules)
         $host0 = array('min-height' => '0');
         $config = array(
@@ -90,7 +95,10 @@ final class WebsiteStarter
                     // a composed footer (plan 27f §3.2): one group of copyright, powered by Heurist, hosted at (review 2026-11-10)
                     $ids['footer'] => array('display' => 'grid', 'grid-template-columns' => 'repeat(1, minmax(0, 1fr))', 'gap' => '16px',
                         'padding' => '1rem', 'align-items' => 'start', 'narrow' => array('grid-template-columns' => '1fr')),
-                    $ids['credits'] => $column + array('gap' => '0.5rem'),
+                    // copyright, powered by, hosted at in a row of equal columns, one column on narrow screens
+                    // (as cmsEdit.js _footer, 2026-11-12)
+                    $ids['credits'] => array('display' => 'grid', 'grid-template-columns' => 'repeat('.($host !== null ? 3 : 2).', minmax(0, 1fr))',
+                        'gap' => '12px', 'align-items' => 'center', 'text-align' => 'center', 'narrow' => array('grid-template-columns' => '1fr')),
                     $ids['home'] => array('padding' => '1rem')
                 )
             )

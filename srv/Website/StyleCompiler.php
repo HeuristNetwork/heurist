@@ -51,7 +51,7 @@ final class StyleCompiler
         'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'align-content', 'gap', 'flex', 'grid-template-columns',
         'grid-template-rows', 'grid-column', 'grid-row', 'order',
         'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'overflow',
-        'border-radius', 'box-shadow',
+        'border-radius', 'box-shadow', 'text-shadow',
         'color', 'background-color', 'background-image', 'background-position', 'background-repeat', 'background-size', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
     );
 
@@ -62,7 +62,8 @@ final class StyleCompiler
         'accordion' => '[data-h-control="accordion"]',
         'text' => '[data-h-text]:not([data-h-media])',
         'media' => '[data-h-media]',
-        'instance' => '[data-h-instance]'
+        // modules and widgets, not the hosts of menus (nav) and the language switch (cmsDocument.js CMS_KINDS, 2026-11-12)
+        'instance' => '[data-h-instance]:where(:not(nav, .h-site-lang-single):not(:has(> .h-site-lang)))'
     );
 
     private const NAME = '/^[A-Za-z][A-Za-z0-9_-]{0,63}$/';

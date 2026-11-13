@@ -217,6 +217,15 @@ $accessToken_DeepLAPI = 'OBTAIN THIS FROM DEEPL';// To enable DeepL translations
 $serverName_DeepL = "DEPENDS ON WHETHER FREE OR PAID SERVICE";
 
 
+// [MAIL RELAY]
+
+// Optional SMTP relay for e-mails sent by srv (website email forms, srv/ExternalService/Mail/SmtpMailTransport.php).
+// Without a host the server uses PHP mail() (legacy sendPHPMailer). Any provider with SMTP works
+// (Gmail, Office 365, Brevo, Mailjet, SendGrid ...). secure: 'tls' (STARTTLS, port 587), 'ssl' (port 465) or ''.
+// $mailSmtp = array('host' => 'smtp.example.org', 'port' => 587, 'user' => '', 'password' => '',
+//                   'secure' => 'tls', 'from' => 'no-reply@example.org', 'fromName' => 'Heurist');
+
+
 // [DATABASE DUMP CONFIGURATION - TIERED SERVERS]
 
 // Tiered system: Change this if running on a system with MySQL running on a separate server from the web application

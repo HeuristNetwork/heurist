@@ -72,7 +72,7 @@ t 10 f1 Johnson
 t:10 title:"Johnson, John" sortby:title</pre>
 
 <p>A word without a recognised keyword is a title search. Quote values containing spaces.
-A leading <code>-</code> negates many scalar values:</p>
+A leading <code>-</code> negates a word or a value:</p>
 
 <pre>t:10 -Smith
 t:10 title:-Smith</pre>
@@ -85,6 +85,59 @@ t:10 lt240(t:48 lt134(t:12 title:Berlin))</pre>
 <p class="note">Although basic parenthesised links are accepted, use JSON for complex
 nested links, relationship constraints, repeated predicates, or logical combinations.
 Plain text is intended primarily for direct user input.</p>
+
+<h3>Plain-text forms of earlier Heurist versions</h3>
+
+<p>The simple filter format of earlier Heurist versions is still accepted in plain text, so
+existing filters and habits keep working. Each form is converted to the JSON shown in the
+second column before the search runs. The JSON format itself only uses the forms of the
+other sections.</p>
+
+<table class="query-reference">
+<thead><tr><th>Plain text</th><th>Same as (JSON)</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>Johnson OR Berlin</code></td><td><code>{"any":[{"title":"Johnson"},{"title":"Berlin"}]}</code></td><td>Uppercase <code>OR</code>: one of the alternatives must match.</td></tr>
+<tr><td><code>t:10 Johnson OR t:12 Berlin</code></td><td><code>{"any":[{"all":[{"t":10},{"title":"Johnson"}]},<br>{"all":[{"t":12},{"title":"Berlin"}]}]}</code></td><td>Words are combined with AND first, so <code>OR</code> joins all the words on its left with all the words on its right: (Person and Johnson) or (Place and Berlin).</td></tr>
+<tr><td><code>t:12 AND Berlin OR Paris</code></td><td><code>[{"t":12},{"any":[{"title":"Berlin"},{"title":"Paris"}]}]</code></td><td>Uppercase <code>AND</code> (or <code>&amp;&amp;</code>) separates parts that must all match; it is applied before <code>OR</code>: Places titled Berlin or Paris. Lowercase <code>and</code> / <code>or</code> are ordinary words.</td></tr>
+<tr><td><code>-tag:Draft</code></td><td><code>{"not":[{"tag":"Draft"}]}</code></td><td><code>-</code> before a keyword excludes the records that match the whole predicate: records without the tag Draft.</td></tr>
+<tr><td><code>-f:10:</code></td><td><code>{"not":[{"f:10":""}]}</code></td><td>Records without a value in field 10 (also <code>f:10:NULL</code>).</td></tr>
+<tr><td><code>-f:Berlin</code> or <code>f:-Berlin</code></td><td><code>{"not":[{"f":"Berlin"}]}</code></td><td>No field of the record contains Berlin.</td></tr>
+<tr><td><code>t:-Person</code></td><td><code>{"t":"-10"}</code></td><td>Records of any type except Person.</td></tr>
+<tr><td><code>title=Johnson</code></td><td><code>{"title":"=Johnson"}</code></td><td>An operator <code>=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> can be written instead of the colon, after any keyword.</td></tr>
+<tr><td><code>title="Johnson, John"</code></td><td><code>{"title":"=Johnson, John"}</code></td><td>The operator may be followed by a quoted value.</td></tr>
+<tr><td><code>f:1&gt;B f:1&lt;C</code></td><td><code>[{"f:1":"&gt;B"},{"f:1":"&lt;C"}]</code></td><td>Text comparison: field 1 starts with B.</td></tr>
+<tr><td><code>f:1160&gt;5000000</code>, <code>modified&gt;2026-08-01</code>, <code>fc:240=2</code></td><td><code>{"f:1160":"&gt;5000000"}</code> …</td><td>Number, date and value-count comparisons.</td></tr>
+<tr><td><code>tag=Draft</code></td><td><code>{"tag":"Draft"}</code></td><td>Tags are always matched by their whole text.</td></tr>
+<tr><td><code>f:Surname:Johnson</code></td><td><code>{"f:Surname":"Johnson"}</code></td><td>Field given by its name (resolved as described below). An unknown name is an error.</td></tr>
+<tr><td><code>f:"Date of birth"&lt;1900</code></td><td><code>{"f:Date of birth":"&lt;1900"}</code></td><td>A field name containing spaces is quoted.</td></tr>
+<tr><td><code>f:"10:30"</code></td><td><code>{"f":"10:30"}</code></td><td>Because of the two forms above, an any-field value that contains a colon must be quoted.</td></tr>
+<tr><td><code>all:Berlin</code>, <code>any:Berlin</code></td><td><code>{"f":"Berlin"}</code></td><td>With a value, <code>all</code> and <code>any</code> are the any-field search. (In JSON they are logical groups.)</td></tr>
+<tr><td><code>f:134:(t:12 title:Berlin)</code></td><td><code>{"lt:134":{"t":12,"title":"Berlin"}}</code></td><td>Subquery on a pointer field; on a relationship field it means <code>related:134</code>. Other field types give an error.</td></tr>
+<tr><td><code>linkedto:134(t:12)</code>, <code>linked_from:134(…)</code>, <code>relatedto:245(…)</code></td><td><code>{"lt:134":{"t":12}}</code> …</td><td>The long names <code>linked_to</code>, <code>linkedto</code>, <code>linked_from</code>, <code>linkedfrom</code>, <code>related_to</code>, <code>relatedto</code>, <code>related_from</code>, <code>relatedfrom</code> mean <code>lt</code>, <code>lf</code>, <code>rt</code>, <code>rf</code> (also in JSON, for saved filters).</td></tr>
+<tr><td><code>geo:-16,32,40,72</code></td><td><code>{"geo":{"west":-16,"south":32,"east":40,"north":72}}</code></td><td>Area as west, south, east, north.</td></tr>
+</tbody>
+</table>
+
+<p>Keywords of earlier versions that are not supported any more give an error that names
+the form to use instead:</p>
+
+<table class="query-reference">
+<thead><tr><th>Earlier keyword</th><th>Use instead</th></tr></thead>
+<tbody>
+<tr><td><code>linkto</code>, <code>link_to</code>, <code>linkfrom</code>, <code>link_from</code></td><td><code>lt</code> (records that point to) or <code>lf</code> (records pointed to). The earlier meaning of <code>linkto</code> was the opposite of <code>lt</code>.</td></tr>
+<tr><td><code>relationsfor</code></td><td><code>related:&lt;record id&gt;</code></td></tr>
+<tr><td><code>latitude</code>, <code>longitude</code>, <code>lat</code>, <code>long</code>, <code>lng</code></td><td><code>geo:within</code> or <code>geo:intersects</code> with a WKT area (see <a href="#spatial">Spatial and viewport search</a>)</td></tr>
+<tr><td><code>vt</code>, <code>visibility</code></td><td><code>access</code></td></tr>
+<tr><td><code>u</code></td><td><code>url</code></td></tr>
+<tr><td><code>n</code></td><td><code>notes</code></td></tr>
+<tr><td><code>date</code></td><td><code>modified</code></td></tr>
+<tr><td><code>hhash</code></td><td>– (no longer supported)</td></tr>
+</tbody>
+</table>
+
+<p>Sorting with <code>sortby:f:&lt;field&gt;:m</code> (a record once for each value) and the request
+parameters <code>w</code>, <code>s</code>, <code>ver</code> and <code>cf</code> of earlier versions are not
+supported; use <code>sortby</code> and <code>usr:current</code>.</p>
 
 <h3>Name and value resolution</h3>
 
@@ -150,16 +203,16 @@ unique. Use the array form instead.</p>
 <tr><td><code>usr:brandon</code></td><td><code>{"usr":"brandon"}</code></td><td>Records bookmarked by a user ID, exact login name, or <code>current</code>. Alias: <code>user</code>.</td></tr>
 <tr><td><code>ws:current</code></td><td><code>{"ws":"current"}</code></td><td>Working set by user ID, exact login name, or <code>current</code>. Alias: <code>workset</code>.</td></tr>
 <tr><td><code>tag:key1</code></td><td><code>{"tag":"key1"}</code></td><td>Record tag by text or numeric tag ID. Aliases: <code>keyword</code>, <code>kwd</code>.</td></tr>
-<tr><td><code>fSurname:Johnson</code></td><td><code>{"f:Surname":"Johnson"}</code></td><td>Value in a detail field identified by ID, <code>dty_Name</code>, or record-type-specific <code>rst_DisplayName</code>. Names containing spaces require JSON. Aliases: <code>f</code>, <code>field</code>.</td></tr>
-<tr><td><code>f:Berlin</code></td><td><code>{"f":"Berlin"}</code></td><td>Any searchable detail field, enum label/code, or linked-record title. It does not mean the record’s own title; use <code>title</code> for that.</td></tr>
-<tr><td><code>fc240:&gt;2</code></td><td><code>{"fc:240":"&gt;2"}</code></td><td>Number of occurrences of field 240. Aliases: <code>count</code>, <code>cnt</code>.</td></tr>
-<tr><td><code>file39:Cat7.jpg</code></td><td><code>{"file:39":"Cat7.jpg"}</code></td><td>Registered file name, external URL or description in file field 39.</td></tr>
-<tr><td><code>geo:NULL</code></td><td><code>{"geo":"NULL"}</code></td><td>Records without geometry. An empty value means any geometry; WKT can be supplied as a value.</td></tr>
-<tr><td><code>lt134(t:12)</code></td><td><code>{"lt:134":{"t":12}}</code></td><td>Records linked to matching records through resource field 134. Aliases: <code>linked_to</code>, <code>linkedto</code>.</td></tr>
-<tr><td><code>lf134(t:10)</code></td><td><code>{"lf:134":{"t":10}}</code></td><td>Records linked from matching records through field 134. Aliases: <code>linked_from</code>, <code>linkedfrom</code>.</td></tr>
+<tr><td><code>fSurname:Johnson</code></td><td><code>{"f:Surname":"Johnson"}</code></td><td>Value in a detail field identified by ID, <code>dty_Name</code>, or record-type-specific <code>rst_DisplayName</code>. In plain text a name containing spaces is quoted: <code>f:"Date of birth":1900</code>. Aliases: <code>f</code>, <code>field</code>.</td></tr>
+<tr><td><code>f:Berlin</code></td><td><code>{"f":"Berlin"}</code></td><td>Any searchable detail field, enum label/code, or linked-record title. It does not mean the record’s own title; use <code>title</code> for that. <code>f:-Berlin</code> finds records where no field contains Berlin.</td></tr>
+<tr><td><code>fc240:&gt;2</code></td><td><code>{"fc:240":"&gt;2"}</code></td><td>Number of occurrences of field 240; a range is written <code>fc240:1&lt;&gt;3</code>. Aliases: <code>count</code>, <code>cnt</code>.</td></tr>
+<tr><td><code>file39:Cat7.jpg</code></td><td><code>{"file:39":"Cat7.jpg"}</code></td><td>Registered file name, external URL or description in file field 39. <code>f39:</code> on a file field means the same.</td></tr>
+<tr><td><code>geo:NULL</code></td><td><code>{"geo":"NULL"}</code></td><td>Records without geometry. An empty value means any geometry; WKT can be supplied as a value, and an area as <code>geo:west,south,east,north</code>.</td></tr>
+<tr><td><code>lt134(t:12)</code></td><td><code>{"lt:134":{"t":12}}</code></td><td>Records linked to matching records through resource field 134. Older names <code>linked_to</code>, <code>linkedto</code> are still accepted (saved filters).</td></tr>
+<tr><td><code>lf134(t:10)</code></td><td><code>{"lf:134":{"t":10}}</code></td><td>Records linked from matching records through field 134. Older names <code>linked_from</code>, <code>linkedfrom</code> are still accepted (saved filters).</td></tr>
 <tr><td><code>links134(t:12)</code></td><td><code>{"links:134":{"t":12}}</code></td><td>Resource link through field 134 in either direction (<code>lt</code> OR <code>lf</code>).</td></tr>
-<tr><td>Use JSON</td><td><code>{"rt:245":{"t":10,"r":5419}}</code></td><td>Relationship stored with the current record as its source. The optional suffix is a relationship field (relmarker). Aliases: <code>related_to</code>, <code>relatedto</code>.</td></tr>
-<tr><td>Use JSON</td><td><code>{"rf:245":{"t":4}}</code></td><td>Relationship stored with the current record as its target. Aliases: <code>related_from</code>, <code>relatedfrom</code>.</td></tr>
+<tr><td>Use JSON</td><td><code>{"rt:245":{"t":10,"r":5419}}</code></td><td>Relationship stored with the current record as its source. The optional suffix is a relationship field (relmarker). Older names <code>related_to</code>, <code>relatedto</code> are still accepted (saved filters).</td></tr>
+<tr><td>Use JSON</td><td><code>{"rf:245":{"t":4}}</code></td><td>Relationship stored with the current record as its target. Older names <code>related_from</code>, <code>relatedfrom</code> are still accepted (saved filters).</td></tr>
 <tr><td>Use JSON</td><td><code>{"related:245":{"t":4}}</code></td><td>Relationship in either stored direction. The optional suffix is a relationship field, not a relationship type.</td></tr>
 <tr><td>Use JSON</td><td><code>{"connected":{"t":12}}</code></td><td>Any resource link or relationship, in either direction. Takes no suffix.</td></tr>
 <tr><td><code>sortby:-modified</code></td><td><code>{"sortby":"-modified"}</code></td><td>Sort descending by modification date. Aliases: <code>sort</code>, <code>s</code>.</td></tr>
@@ -175,7 +228,7 @@ unique. Use the array form instead.</p>
 <tr><td><code>=value</code></td><td>Exact value using normal database collation.</td><td><code>{"title":"=Johnson, John"}</code></td></tr>
 <tr><td><code>==value</code></td><td>Case-sensitive exact text.</td><td><code>{"f:1":"==Johnson"}</code></td></tr>
 <tr><td><code>-value</code></td><td>Negated text, term, type, tag or ID match where supported.</td><td><code>{"title":"-Draft"}</code></td></tr>
-<tr><td><code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></td><td>Numeric or date comparison.</td><td><code>{"f:1160":"&gt;5000000"}</code></td></tr>
+<tr><td><code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code></td><td>Numeric, date or text comparison (text: alphabetical, also for <code>title</code>, <code>url</code>, <code>notes</code>).</td><td><code>{"f:1160":"&gt;5000000"}</code></td></tr>
 <tr><td><code>NULL</code></td><td>Field/tag/geometry is not defined.</td><td><code>{"f:955":"NULL"}</code></td></tr>
 <tr><td><code>-NULL</code></td><td>Field/tag is present.</td><td><code>{"f:10":"-NULL"}</code></td></tr>
 <tr><td><code>%</code>, <code>_</code></td><td>SQL-style text wildcards. If neither appears, Heurist adds surrounding <code>%</code>.</td><td><code>{"title":"John%"}</code></td></tr>
@@ -431,7 +484,7 @@ or <code>all:</code>:</p>
 {"tag":"NULL"}
 {"tag":"-NULL"}</pre>
 
-<h3>Spatial and viewport search</h3>
+<h3 id="spatial">Spatial and viewport search</h3>
 
 <p>A viewport is expressed in JSON using longitude/latitude bounds:</p>
 
@@ -552,7 +605,7 @@ such as:</p>
 
 <ul>
 <li>Record types may use local IDs, singular names or plural names. Fields may use local IDs or names; enum values may use local term IDs, labels or codes.</li>
-<li>Field names containing spaces require JSON. Plain text supports unspaced field names such as <code>fGender</code>.</li>
+<li>In plain text a field name containing spaces is quoted: <code>f:"Date of birth"&lt;1900</code>; unspaced names may also be written <code>fGender:male</code>.</li>
 <li>Ambiguous partial record-type or field names are rejected and the error lists the matches.</li>
 <li>Do not repeat a key inside one JSON object; use an array of one-key predicates.</li>
 <li>Use JSON for complex nesting and logical groups.</li>

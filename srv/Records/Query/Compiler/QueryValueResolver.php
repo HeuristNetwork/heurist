@@ -71,6 +71,18 @@ final class QueryValueResolver
                     $key = $base.':'.$suffix;
                 }
                 $fieldId = intval($fieldName === (string)intval($fieldName) ? $fieldName : $this->splitFieldSuffix($suffix)[0]);
+                // f:<field>:(subquery) of the old format: a pointer field = lt:<field>,
+                // a relationship marker = related:<field>; other fields have no subquery
+                if(($base === 'f' || $base === 'field') && $fieldId>0 && is_array($value)
+                    && !empty($value) && !$this->isScalarList($value)){
+                    $type = $this->fieldMetadata($fieldId, $types)['type'] ?? '';
+                    if($type !== 'resource' && $type !== 'relmarker'){
+                        throw new QueryValidationException('Field '.$fieldId.' is not a pointer or relationship field:'
+                            .' a subquery needs lt:<field> or related:<field>');
+                    }
+                    $base = $type === 'resource' ? 'lt' : 'related';
+                    $key = $base.':'.$fieldId;
+                }
                 // f:20:code / :term / :desc / :conceptid compare that term column in the compiler
                 if(($base === 'f' || $base === 'field') && $fieldId>0 && $qualifier === ''){
                     $value = $this->resolveEnumValue($fieldId, $value, $types);
@@ -95,6 +107,7 @@ final class QueryValueResolver
             list($base) = $this->parser->predicateParts($key);
             if(in_array($base, array('t','type','typeid','typename'), true)){
                 $resolved = $this->resolveRecordTypes($predicate[$key]);
+                if(is_string($resolved) && strpos($resolved, '-') === 0){ continue; } // excluded types
                 $types = array_merge($types, is_array($resolved) ? $resolved : array($resolved));
             }
         }
@@ -103,6 +116,11 @@ final class QueryValueResolver
 
     private function resolveRecordTypes($value)
     {
+        // t:-10 / t:-Person,Place: resolve the names, keep the negation for the compiler
+        if(!is_array($value) && strpos(trim((string)$value), '-') === 0 && !preg_match('/^\d+-\d+$/', trim((string)$value))){
+            $ids = $this->resolveRecordTypes(substr(trim((string)$value), 1));
+            return '-'.implode(',', is_array($ids) ? $ids : array($ids));
+        }
         $returnArray = is_array($value) || strpos((string)$value, ',') !== false;
         $items = is_array($value) ? $value : preg_split('/\s*,\s*/', trim((string)$value));
         $ids = array();
@@ -250,6 +268,15 @@ final class QueryValueResolver
             $matches[] = $row[$idColumn].' ('.implode(' / ', $names).')';
         }
         throw new QueryValidationException('Ambiguous '.$kind.' "'.$input.'". Matches: '.implode(', ', $matches));
+    }
+
+    /** A list of plain values (term ids, labels), not a query. */
+    private function isScalarList(array $value): bool
+    {
+        foreach($value as $index=>$item){
+            if(!is_int($index) || is_array($item)){ return false; }
+        }
+        return true;
     }
 
     private function splitFieldSuffix(string $suffix): array

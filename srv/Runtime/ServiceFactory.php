@@ -148,6 +148,12 @@ final class ServiceFactory
     private array $fileEnvironment = array();
     /** @var (\Closure(array):void)|null Sends a reminder now with the legacy mailer (plan 20, §10.9). */
     private ?\Closure $reminderSender = null;
+    /** @var array<string,mixed> `$mailSmtp` of heuristConfigIni.php: the SMTP relay (plan 27h); empty = legacy mailer. */
+    private array $mailSmtp = array();
+    /** @var (\Closure(\Heurist\ExternalService\Mail\MailMessage):void)|null The legacy mailer (sendPHPMailer). */
+    private ?\Closure $legacyMailer = null;
+    /** The visitor's session of the email form (plan 27h); null without the legacy System. */
+    private ?\Heurist\ExternalService\EmailForm\EmailFormSession $emailFormSession = null;
 
     /** @var array<string,\Closure> Legacy code of the user and group writes (plan 20, 4d): hash, delete, notify. */
     private array $userGroupLegacy = array();
@@ -223,6 +229,47 @@ final class ServiceFactory
             if($reminders->batch_action() === false){
                 $error = $system->getError();
                 throw new \RuntimeException(is_array($error) ? (string)($error['message'] ?? '') : '');
+            }
+        };
+        // e-mails (plan 27h): the SMTP relay of heuristConfigIni.php, else the legacy mailer (PHP mail())
+        $factory->mailSmtp = is_array($GLOBALS['mailSmtp'] ?? null) ? $GLOBALS['mailSmtp'] : array();
+        $factory->legacyMailer = static function(\Heurist\ExternalService\Mail\MailMessage $message) use ($system): void {
+            $sent = \sendPHPMailer(null, null, array('to' => $message->to), $message->subject, $message->html, null, true,
+                $message->replyTo, $message->replyToName);
+            if(!$sent){
+                $error = $system->getError();
+                throw new \RuntimeException(is_array($error) ? (string)($error['message'] ?? '') : '');
+            }
+        };
+        // the captcha answer (session key captcha_code, as the legacy captcha.php) and the times of sent messages
+        $factory->emailFormSession = new class($system->session()) implements \Heurist\ExternalService\EmailForm\EmailFormSession {
+            private \hserv\session\SessionStore $session;
+
+            public function __construct(\hserv\session\SessionStore $session)
+            {
+                $this->session = $session;
+            }
+
+            public function storeAnswer(string $answer): void
+            {
+                $this->session->set('captcha_code', $answer);
+            }
+
+            public function takeAnswer(): ?string
+            {
+                $value = $this->session->consume('captcha_code');
+                return $value === null ? null : (string)$value;
+            }
+
+            public function sentTimes(): array
+            {
+                $times = $this->session->get('email_form_sent', array());
+                return is_array($times) ? $times : array();
+            }
+
+            public function setSentTimes(array $times): void
+            {
+                $this->session->set('email_form_sent', array_values($times));
             }
         };
         // users and groups (plan 20, 4d): the legacy password hash, delete (with its checks and
@@ -343,12 +390,27 @@ final class ServiceFactory
         return new \Heurist\ExternalService\LookupService();
     }
 
-    /** Create the controller of the external services (POST /external/translate). */
+    /** Create the controller of the external services (POST /external/translate, GET / POST /external/email). */
     public function externalServiceController(): \Heurist\Controller\ExternalServiceController
     {
         return new \Heurist\Controller\ExternalServiceController($this->runtime, function(): \Heurist\ExternalService\TranslationService {
             return $this->translationService();
+        }, null, $this->emailFormSession === null ? null : function(): \Heurist\ExternalService\EmailForm\EmailFormService {
+            return $this->emailFormService();
         });
+    }
+
+    /** The email form of websites (plan 27h): session of the visitor, recipient of the website, mail transport. */
+    public function emailFormService(): \Heurist\ExternalService\EmailForm\EmailFormService
+    {
+        if($this->emailFormSession === null){ throw new \RuntimeException('The email form needs the session of the visitor'); }
+        return new \Heurist\ExternalService\EmailForm\EmailFormService(
+            $this->emailFormSession,
+            new \Heurist\Website\WebsiteContact($this->database),
+            function(): \Heurist\ExternalService\Mail\MailTransport {
+                return \Heurist\ExternalService\Mail\MailService::transport($this->mailSmtp, $this->legacyMailer);
+            }
+        );
     }
 
     /** Create the records query/retrieval controller. */
@@ -434,7 +496,8 @@ final class ServiceFactory
             new RecordDuplicateService($parts['store'], $parts['permissions'], $parts['definitions'], $this->runtime,
                 $parts['title'], $parts['languages'], array(
                     'name' => $this->codes->id('DT_NAME'),
-                    'cmsPage' => $this->codes->id('RT_CMS_PAGE')
+                    'cmsPage' => $this->codes->id('RT_CMS_PAGE'),
+                    'cmsTranslations' => $this->codes->id('DT_CMS_PAGE_TRANSLATIONS')
                 ), $parts['titleMask'], $parts['validator']),
             $this->recordQueryController(),
             $this->runtime,

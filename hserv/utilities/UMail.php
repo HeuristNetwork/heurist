@@ -75,14 +75,14 @@ function endsWith($haystack, $needle) {
  * @param string $email_text The body of the email. If $is_html is true, HTML will be purified.
  * @param string|array|null $email_attachment Optional. Path to a file to attach, or an array of paths. Defaults to null.
  * @param bool $is_html Whether the email body is HTML.
+ * @param string|null $replyTo Optional. Reply-To address (the visitor of a website email form, srv plan 27h).
+ * @param string|null $replyToName Optional. Name of the Reply-To address.
  * @return bool True on success, false on failure.
  */
-function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment, $is_html){
+function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment, $is_html,
+    $replyTo = null, $replyToName = null){
 
     global $system, $mailRelayPwd;
-
-    $replyTo = null;//$email_from;
-    $replyToName = null;//$email_from_name;
 
     if(!$email_from) {$email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);}
     if(!$email_from_name) {$email_from_name = 'Heurist system. ('.HEURIST_SERVER_NAME.')';}

@@ -455,6 +455,26 @@ final class RecordValidator
         }
     }
 
+    /** Fields saved in parts (SplitValues): website page content, page translations. */
+    public function isSplitField(int $rectypeId, int $fieldId): bool
+    {
+        return ($fieldId > 0 && $fieldId === ($this->codes['cmsTranslations'] ?? -1))
+            || ($fieldId > 0 && $fieldId === ($this->codes['extendedDescription'] ?? -1) && $rectypeId === ($this->codes['cmsPage'] ?? -1));
+    }
+
+    /**
+     * Stored parts of one joined value of a field saved in parts: cleaned as a whole and split again
+     * as a save does (RecordDuplicateService; a part cleaned alone is broken HTML and may grow).
+     *
+     * @return array<int,string> Empty when the value is empty or invalid.
+     */
+    public function splitValue(int $rectypeId, int $fieldId, string $value): array
+    {
+        $rows = $this->prepareValue($rectypeId, $fieldId, 'blocktext', (string)$fieldId, $value, 0,
+            array(), false, false, new ValidationResult());
+        return array_map(static function(array $row): string { return (string)$row['value']; }, $rows ?? array());
+    }
+
     /** Also used for calculated and copied text so they cannot bypass the save policy. */
     public function cleanText(int $rectypeId, int $fieldId, string $type, string $value): string
     {

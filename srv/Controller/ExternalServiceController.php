@@ -7,6 +7,10 @@
 * Logged-in users of an association member only; the same-site check of writes applies
 * (the request uses a paid service with the user's cookie).
 *
+* GET  /api/{db}/external/email answers {"question":"4 + 7 + 1 ="} (the answer is kept in the session);
+* POST /api/{db}/external/email {"site","name","email","message","captcha","url"} answers {"sent":true}
+* (EmailFormService, plan 27h): the email form of a website, guests allowed, same site only.
+*
 * @project     Heurist academic knowledge management system
 * @package     Controller
 * @link        https://HeuristNetwork.org
@@ -21,6 +25,7 @@ declare(strict_types=1);
 
 namespace Heurist\Controller;
 
+use Heurist\ExternalService\EmailForm\EmailFormService;
 use Heurist\ExternalService\TranslationService;
 use Heurist\Records\Edit\RecordEditException;
 use Heurist\Runtime\ApiResponse;
@@ -32,14 +37,21 @@ final class ExternalServiceController
     private RuntimeContext $runtime;
     /** @var \Closure():TranslationService Made only when a text is translated. */
     private \Closure $translationService;
+    /** @var (\Closure():EmailFormService)|null Made only for the email form. */
+    private ?\Closure $emailFormService;
     private ApiResponse $response;
 
-    /** @param \Closure():TranslationService $translationService */
-    public function __construct(RuntimeContext $runtime, \Closure $translationService, ?ApiResponse $response = null)
+    /**
+     * @param \Closure():TranslationService $translationService
+     * @param (\Closure():EmailFormService)|null $emailFormService
+     */
+    public function __construct(RuntimeContext $runtime, \Closure $translationService, ?ApiResponse $response = null,
+        ?\Closure $emailFormService = null)
     {
         $this->runtime = $runtime;
         $this->translationService = $translationService;
         $this->response = $response ?? new ApiResponse();
+        $this->emailFormService = $emailFormService;
     }
 
     /**
@@ -53,6 +65,10 @@ final class ExternalServiceController
     public function handleRequest(string $method, array $path, ?array $json, array $request = array()): void
     {
         $service = (string)($path[0] ?? '');
+        if($service === 'email' && count($path) === 1){
+            $this->email($method, $json, $request);
+            return;
+        }
         if($service !== 'translate' || count($path) > 1){
             $this->response->sendError(404, 'not_found', 'Unknown external service: '.$service);
             return;
@@ -69,6 +85,43 @@ final class ExternalServiceController
             return;
         }
         $this->translate($json ?? array());
+    }
+
+    /** The email form of a website: GET a captcha question, POST a message (plan 27h). */
+    private function email(string $method, ?array $json, array $request): void
+    {
+        if($method !== 'GET' && $method !== 'POST'){
+            header('Allow: GET, POST');
+            $this->response->sendError(405, 'method_not_allowed', 'Method not allowed');
+            return;
+        }
+        if($this->emailFormService === null){
+            $this->response->sendError(404, 'not_found', 'Unknown external service: email');
+            return;
+        }
+        try{
+            SameSiteGuard::assertSameSite($request, $method === 'POST');
+        }catch(RecordEditException $e){
+            $this->response->sendError($e->status(), $e->errorCode(), $e->getMessage());
+            return;
+        }
+        // a captcha question and its answer belong to one visitor: never cached
+        header('Cache-Control: no-store');
+        try{
+            $service = ($this->emailFormService)();
+            if($method === 'GET'){
+                $this->response->send(array('question' => $service->question()));
+                return;
+            }
+            $service->send($json ?? array());
+            $this->response->send(array('sent' => true));
+        }catch(\InvalidArgumentException $e){
+            $this->response->sendError(400, 'invalid_request', $e->getMessage());
+        }catch(\RuntimeException $e){
+            $codes = array(403 => 'captcha', 404 => 'not_found', 429 => 'too_many_requests');
+            $status = isset($codes[$e->getCode()]) ? intval($e->getCode()) : 502;
+            $this->response->sendError($status, $codes[$status] ?? 'service_error', $e->getMessage());
+        }
     }
 
     /** Translate the text of the body. */

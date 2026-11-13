@@ -55,9 +55,9 @@ final class RecordPredicateCompiler
                 if(is_array($value) && empty($value)){ return '0=1'; }
                 return $this->recordIdCondition($r.'.rec_ID', $value, $state);
             case '_all': return '1=1';
-            case 'title': return $this->fields->textCondition($r.'.rec_Title', $value, $state);
-            case 'url': return $this->fields->textCondition($r.'.rec_URL', $value, $state);
-            case 'notes': return $this->fields->textCondition($r.'.rec_ScratchPad', $value, $state);
+            case 'title': return $this->fields->headerTextCondition($r.'.rec_Title', $value, $state);
+            case 'url': return $this->fields->headerTextCondition($r.'.rec_URL', $value, $state);
+            case 'notes': return $this->fields->headerTextCondition($r.'.rec_ScratchPad', $value, $state);
             case 'added': return $this->fields->headerDateCondition($r.'.rec_Added', $value, $state);
             case 'modified': return $this->fields->headerDateCondition($r.'.rec_Modified', $value, $state);
             case 'before': return $this->fields->headerDateCondition($r.'.rec_Modified', '<='.(string)$value, $state);

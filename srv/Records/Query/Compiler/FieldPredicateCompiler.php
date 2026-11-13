@@ -51,6 +51,10 @@ final class FieldPredicateCompiler
     ): string
     {
         if($fieldId < 1){ throw new QueryValidationException('Field ID must be positive'); }
+        // a file field holds a registered file, not a value: f:<file field> = file:<field>
+        if($this->fieldType($fieldId) === 'file'){
+            return $this->fileCondition((string)$fieldId, $value, $state, $recordAlias);
+        }
         $nullValue = $value === null ? 'NULL' : strtoupper(trim((string)$value));
         if($nullValue === 'NULL'){
             $state->bind($fieldId, 'i');
@@ -142,19 +146,32 @@ final class FieldPredicateCompiler
     {
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
-        $exclude = strpos($text, '@-') === 0;
         $candidates = $this->anyFieldCandidateSource($text, $state);
-        return $recordAlias.'.rec_ID '.($exclude ? 'NOT IN' : 'IN').' ('.$candidates.')';
+        return $recordAlias.'.rec_ID '.(self::isAnyFieldExclusion($text) ? 'NOT IN' : 'IN').' ('.$candidates.')';
+    }
+
+    /**
+     * Whether an any-field value excludes records: "-x" (no field contains x) or "@-x"
+     * (no field has the words). Both are record level: the positive candidates of
+     * anyFieldCandidateSource() are excluded as a whole, so f:-x is not "some value
+     * does not contain x" (that is every record).
+     */
+    public static function isAnyFieldExclusion($value): bool
+    {
+        if(is_array($value)){ return false; }
+        $text = (string)$value;
+        return strpos($text, '@-') === 0 || (strpos($text, '-') === 0 && strlen($text) > 1);
     }
 
     /**
      * Build the positive, index-driven candidate-ID UNION for an any-field value.
-     * For @- the caller applies negation to this positive result as a whole.
+     * For "-x" and "@-x" the caller applies negation to this positive result as a whole.
      */
     public function anyFieldCandidateSource($value, SqlBuildContext $state): string
     {
         if(is_array($value)){ throw new QueryValidationException('Any-field search requires a scalar value'); }
         $text = (string)$value;
+        if(strpos($text, '-') === 0 && strlen($text) > 1){ $text = substr($text, 1); }
 
         // @+ (all words) across any field is record-level: each word may be in a
         // different field (given and family names live in separate fields), so the
@@ -265,15 +282,24 @@ final class FieldPredicateCompiler
     public function fieldCountCondition(int $fieldId, $value, SqlBuildContext $state, string $recordAlias = 'r'): string
     {
         $state->bind($fieldId, 'i');
+        $countSql = '(SELECT COUNT(*) FROM {details} dc WHERE dc.dtl_RecID='.$recordAlias.'.rec_ID '
+            .'AND dc.dtl_DetailTypeID=?)';
+        // range: 2<>5, <>2/5, ><2/5 (both ends included)
+        $range = $this->numericRange(trim((string)$value));
+        if($range !== null){
+            if(!ctype_digit(ltrim($range[0], '+')) || !ctype_digit(ltrim($range[1], '+'))){
+                throw new QueryValidationException('Field count range requires two whole numbers');
+            }
+            $state->bind(intval($range[0]), 'i'); $state->bind(intval($range[1]), 'i');
+            return $countSql.' BETWEEN ? AND ?';
+        }
         list($operator, $cleanValue) = $this->comparison((string)$value);
         if($operator === 'LIKE'){ $operator = '='; }
         if($operator === 'NOT LIKE'){ $operator = '<>'; }
         if(!is_numeric($cleanValue)){ throw new QueryValidationException('Field count requires a numeric value'); }
         $count = intval($cleanValue);
         $state->bind($count, 'i');
-        return '(SELECT COUNT(*) FROM {details} dc WHERE dc.dtl_RecID='.$recordAlias.'.rec_ID '
-            .'AND dc.dtl_DetailTypeID=?) '
-            .$operator.' ?';
+        return $countSql.' '.$operator.' ?';
     }
     /**
      * Spatial predicate `geo[:<fieldId>][:within|intersects]`.
@@ -303,6 +329,12 @@ final class FieldPredicateCompiler
                 .')';
         }
         $text = is_array($value) ? '' : trim((string)$value);
+        // "west,south,east,north" (four numbers) is the text form of the extent object
+        $parts = $text === '' ? array() : array_map('trim', explode(',', $text));
+        if(count($parts) === 4 && count(array_filter($parts, 'is_numeric')) === 4){
+            $value = array_combine(array('west','south','east','north'), $parts);
+            $text = '';
+        }
         if($text === ''){
             if(is_array($value)){
                 foreach(array('west','south','east','north') as $key){
@@ -362,6 +394,19 @@ final class FieldPredicateCompiler
     {
         return $mode === 'intersects' ? 'ST_Intersects' : 'ST_Contains';
     }
+    /**
+     * Text of a record header column (title, URL, notes): textCondition() plus the text
+     * comparisons of detail text fields: >B, >=B, <C, <=C, B<>C (alphabetical, column collation).
+     */
+    public function headerTextCondition(string $column, $value, SqlBuildContext $state): string
+    {
+        $text = trim((string)$value);
+        if(preg_match('/^(?:>=|<=|>|<)/', $text) || $this->splitRange($text, '<>') !== null){
+            return $this->scalarCondition($column, $text, $state);
+        }
+        return $this->textCondition($column, $value, $state);
+    }
+
     public function textCondition(
         string $column,
         $value,
