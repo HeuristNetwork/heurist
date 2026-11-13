@@ -19,10 +19,11 @@
 class EditorSpreadsheet{
 
     static #dataEvents = new Set([
-        'onafterchanges',
+        'onafterchanges', 'onchangestyle',
         'oninsertrow', 'ondeleterow', 'onmoverow',
         'oninsertcolumn', 'ondeletecolumn', 'onmovecolumn',
-        'onsort', 'onundo', 'onredo'
+        'onsort', 'onundo', 'onredo',
+        'onresizecolumn', 'onresizerow'
     ]);
 
     #DEBUG = false;
@@ -33,11 +34,11 @@ class EditorSpreadsheet{
 
     #editor;
     #editorContainer;
+    #importInput;
 
     #jspreadsheet;
     #defaultConfig = {
         //tabs: false, // worksheets not handled, for now
-        toolbar: true,
         allowExport: true,
         //allowMoveWorksheet: false,
         //allowRenameWorksheet: false,
@@ -54,10 +55,19 @@ class EditorSpreadsheet{
         worksheetName: 'Sheet'
     };
     #configuration = {};
+
     #data = {};
-    #dataType; // [csv, json, table]
     #initialInput;
     #initialTableValue;
+
+    #handledTypes = ['csv', 'json', 'table'];
+    #dataType;
+    #exportOptions = {
+        type: '',
+        headers: true,
+        raw: true,
+        styling: false
+    };
 
     #loadingScripts = false;
 
@@ -84,15 +94,19 @@ class EditorSpreadsheet{
         }
 
         this.#configuration = typeof config === 'object' && config instanceof Object ? config : this.#defaultConfig;
-
-        //this.#loadScripts();
     }
 
     #parseData(){
 
         let data = this.#input.value.trim();
 
-        if(false && /^<table/.test(data)){
+        if(data === ''){
+            this.#dataType = 'csv';
+            this.#exportOptions.type = 'table';
+            return '';
+        }
+
+        if(/^<table/.test(data)){
             this.#dataType = 'table';
             return this.#parseTable(data);
         }
@@ -172,13 +186,14 @@ class EditorSpreadsheet{
 
         for(let i = 0; i < data.length; i ++){
 
+            const prev = i === 0 ? '' : data[i - 1];
             const char = data[i];
             const next = data[i + 1];
 
             // Quote mark
             if(char === '"'){
 
-                if(isQuoted && next === '"'){
+                if(isQuoted && prev === '\\'){
                     field += '"';
                     i ++;
                 }else{
@@ -245,12 +260,27 @@ class EditorSpreadsheet{
             return;
         }
 
+        this.#createEditorContainer();
+
+        /*
         const container = document.createElement('div');
         container.style.display = 'none';
-        const table = document.getElementById('spreadsheet-container');
         container.innerHTML = data;
+        this.#editorContainer.append(container);
+        */
+        this.#editorContainer.innerHTML = data;
 
-        this.#jspreadsheet = jspreadsheet(document.getElementById('my-target-table'));
+        const config = this.#getConfiguration();
+        config['minDimensions'] = [4, 3];
+        config['tableOverview'] = true;
+        config['tableHeight'] = '25em';
+        config['tableWidth'] = '50em';
+        config['worksheetName'] = 'Sheet';
+
+        this.#jspreadsheet = jspreadsheet(this.#editorContainer.querySelector('table'), config);
+        this.#editor = this.#inputDiv.querySelector('.jss_spreadsheet');
+        this.#initialInput = this.#input.value;
+        this.#initialTableValue = this.#serialiseData() ?? '';
     }
 
     #detectDelimiter(data){
@@ -272,7 +302,7 @@ class EditorSpreadsheet{
             this.#loadScripts();
             return;
         }else if(this.#jspreadsheet){
-            return;
+            return this.#jspreadsheet;
         }
 
         this.#inputDisplay = this.#input.style.display;
@@ -286,17 +316,13 @@ class EditorSpreadsheet{
             return;
         }
 
-        if(this.#dataType === 'table' || this.#jspreadsheet){
-            return;
+        this.#exportOptions.type = this.#dataType;
+
+        if(this.#jspreadsheet){
+            return this.#jspreadsheet;
         }
 
-        const config = structuredClone(this.#defaultConfig);
-        config.onbeforecreateworksheet = (config, index) => ({ worksheetName: `Sheet ${index + 1}` });
-        config.onevent = (event) => {
-            if(this.#jspreadsheet && EditorSpreadsheet.#dataEvents.has(event)){
-                this.#updateInput();
-            }
-        };
+        const config = this.#getConfiguration();
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
         worksheetConfig['data'] = this.#data[0].data;
@@ -304,19 +330,115 @@ class EditorSpreadsheet{
 
         config.worksheets.push(worksheetConfig);
 
+        this.#createEditorContainer();
+
+        // Init editor
+        this.#jspreadsheet = new jspreadsheet(this.#editorContainer, config);
+        this.#editor = this.#inputDiv.querySelector('.jss_spreadsheet');
+        this.#initialInput = this.#input.value;
+        this.#initialTableValue = this.#serialiseData() ?? '';
+
+        return this.#jspreadsheet;
+    }
+
+    #getConfiguration(){
+
+        const config = structuredClone(this.#defaultConfig);
+
+        config.onbeforecreateworksheet = (config, index) => ({ worksheetName: `Sheet ${index + 1}` });
+
+        config.onevent = (event, a, b, c, d) => {
+
+            if(event === 'onchangestyle'){
+                this.#exportOptions.styling = true;
+            }
+
+            if(this.#jspreadsheet && EditorSpreadsheet.#dataEvents.has(event)){
+                this.#updateInput();
+            }
+        };
+
+        config.toolbar = (toolbar) => {
+
+            // Replace save with save_alt/export
+            const saveIndex = toolbar.items.findIndex(item => item.content === 'save');
+            const divisor = {
+                type: 'divisor'
+            };
+
+            if(saveIndex >= 0){
+
+                toolbar.items[saveIndex].content = 'save_alt';
+                toolbar.items[saveIndex].tooltip = 'Export table as CSV';
+
+                if(typeof tabularjs === 'function'){
+
+                    toolbar.items.splice(saveIndex, 0, {
+                        type: 'icon',
+                        content: 'upload_file', // file_upload
+                        tooltip: 'Upload file',
+                        class: 'js-upload-file material-icons',
+                        onclick: () => {
+                            if(this.#importInput){
+                                this.#importInput.click();
+                            }
+                        }
+                    });
+
+                    toolbar.items.splice(saveIndex, 0, divisor);
+                }
+            }
+
+            toolbar.items.unshift(divisor);
+
+            toolbar.items.unshift({
+                type: 'icon',
+                content: 'settings',
+                tooltip: 'Edit settings for this spreadsheet',
+                class: 'js-edit-settings material-icons',
+                onclick: () => this.#editExportSettings()
+            });
+
+            return toolbar;
+        };
+
+        return config;
+    }
+
+    #createEditorContainer(){
+
         // Editor container
         this.#editorContainer = document.createElement('div');
         this.#editorContainer.classList.add('heurist-spreadsheet-editor');
         this.#editorContainer.style.display = 'inline-block';
         this.#inputDiv.prepend(this.#editorContainer);
 
-        // Init editor
-        this.#jspreadsheet = new jspreadsheet(this.#editorContainer, config);
-        this.#editor = this.#inputDiv.querySelector('.jss_spreadsheet');
-        this.#initialInput = this.#input.value;
-        this.#initialTableValue = this.#serializeData();
+        if(typeof tabularjs === 'function'){
 
-        return this.#jspreadsheet;
+            this.#importInput = document.createElement('input');
+            this.#importInput.classList.add('heurist-jss-file-upload');
+            this.#importInput.type = 'file';
+            this.#importInput.accept = '.xlsx,.xls,.ods,.xml,.html,.htm,.csv,.tsv,.tab,.txt,.wks,.wk1,.wk3,.wk4,.123,.dif,.slk,.sylk,.dbf';
+
+            this.#importInput.addEventListener('change', async (event) => {
+
+                const file = event.target.files[0];
+                if(!file) { return; }
+
+                const result = await tabularjs(file);
+
+                let idx = 0;
+                for(const worksheet of result.worksheets){
+
+                    const sheetData = worksheet.data;
+                    this.#jspreadsheet[idx].setData(sheetData);
+
+                    idx ++;
+
+                    break; // @todo - remove once worksheet handling has been finalised
+                }
+            });
+        }
     }
 
     hide(){
@@ -328,10 +450,10 @@ class EditorSpreadsheet{
 
     #updateInput(){
 
-        const tableValue = this.#serializeData();
+        const tableValue = this.#serialiseData();
         // Keep the original field text when the grid is unchanged or edits are undone.
         const value = tableValue === this.#initialTableValue ? this.#initialInput : tableValue;
-        if(value === this.#input.value){
+        if(value === this.#input.value || !tableValue){
             return;
         }
 
@@ -339,53 +461,219 @@ class EditorSpreadsheet{
         this.#input.dispatchEvent(new Event('change', {bubbles: false}));
     }
 
-    #serializeData(){
-        switch(this.#dataType){
+    #serialiseData(){
+
+        let type = this.#handledTypes.includes(this.#exportOptions.type) ? this.#exportOptions.type : '';
+        type = type === '' && this.#dataType !== '' ? this.#dataType : type;
+        switch(type){
             case 'json':
                 return this.#toJSON();
             case 'csv':
                 return this.#toCSV();
             case 'table':
                 return this.#toTable();
+            default:
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select an export format...', 3000);
+                this.#editExportSettings();
+                return null;
         }
     }
 
+    #editExportSettings(){
+
+        let modal;
+        let dialog = this.#editorContainer.querySelector('.heurist-jss-export-format');
+
+        if(!dialog){
+
+            dialog = document.createElement('div');
+            dialog.classList.add('heurist-jss-export-format');
+            dialog.style.display = 'none';
+
+            dialog.innerHTML = `Please select an output format below:<br><br>
+            <label><input type="radio" name="export-format" value="table" /> Table</label><br>
+            <label><input type="radio" name="export-format" value="csv" /> CSV</label><br>
+            <label><input type="radio" name="export-format" value="json" /> JSON</label><br>
+            <br><label><input type="checkbox" name="include-styling" /> Include styling</label><br>
+            <label><input type="checkbox" name="include-headers" /> Include column headers</label><br>
+            <label><input type="checkbox" name="raw-output" /> Get data (e.g. formula result, not the formula itself)</label><br>
+            <div style="position: absolute; bottom: 1em; right: 1em;">
+                <button class="ui-button-action ui-button ui-corner-all ui-widget">Save data</button>
+                <button class="ui-button ui-corner-all ui-widget">Cancel</button>
+            </div>`;
+
+            this.#editorContainer.append(dialog);
+
+            let $__performExport = () => {
+
+                this.#exportOptions = {
+                    type: dialog.querySelector('[name="export-format"]:checked').value,
+                    headers: dialog.querySelector('[name="include-headers"]').checked,
+                    raw: dialog.querySelector('[name="raw-output"]').checked,
+                    styling: dialog.querySelector('[name="include-styling"]').checked
+                }
+
+                modal.close();
+
+                this.#updateInput();
+            };
+
+            let $__closeModal = () => {
+                modal.close();
+            };
+
+            dialog.querySelector('button:nth-child(1)').addEventListener('click', $__performExport)
+            dialog.querySelector('button:nth-child(2)').addEventListener('click', $__closeModal);
+        }
+
+        const type = this.#handledTypes.includes(this.#exportOptions.type) ? this.#exportOptions.type : 'csv';
+        dialog.querySelector(`[name="export-format"][value="${type}"]`).checked = true;
+
+        dialog.querySelector(`[name="include-styling"]`).checked = this.#exportOptions.styling;
+        dialog.querySelector(`[name="include-headers"]`).checked = this.#exportOptions.headers;
+        dialog.querySelector(`[name="raw-output"]`).checked = this.#exportOptions.raw;
+
+        modal = jSuites.modal(dialog, {
+            title: window.hWin.HR('Settings'),
+            closed: false,
+            width: '35em',
+            height: '25em',
+            onopen: () => {},
+            onclose: () => {}
+        });
+    }
+
     #toJSON(){
-        return JSON.stringify(this.#jspreadsheet[0].getData());
+
+        let data = this.#getData();
+
+        if(this.#exportOptions.headers){
+
+            const headers = this.#jspreadsheet[0].getHeaders().split(',');
+
+            data.map(row => {
+
+                let rowData = {};
+                for(let i = 0; i < headers.length; i++){
+                    rowData[headers[i]] = row[i] ?? '';
+                }
+
+                return rowData;
+            });
+        }
+
+        return JSON.stringify(data);
     }
 
     #toCSV(){
 
-        const data = this.#jspreadsheet[0].getData();
+        let data = this.#getData();
 
-        return data.map(row => 
+        data = data.map(row => 
             row.map(value => {
                 const text = String(value ?? '');
-                return `"${text.replace(/"/g, '""')}"`;
+                return `"${text.replace(/"/g, '\\"')}"`;
             }).join(',') // "\t"
-        ).join("\n");
+        );
+
+        if(this.#exportOptions.headers){
+            const headers = this.#jspreadsheet[0].getHeaders().join(',');
+            data.unshift(headers);
+        }
+
+        return data.join("\n");
     }
 
     #toTable(){
 
-        const headers = this.#jspreadsheet[0].getHeaders().join(',');
-        const data = this.#jspreadsheet[0].getData();
+        const headers = this.#jspreadsheet[0].getHeaders().split(',');
+        const data = this.#jspreadsheet[0].getData(false, this.#exportOptions.raw);
 
         let table = `<table>`;
 
-        table += `<thead><tr>`;
-        headers.forEach(header => table += `<th>${header}</th>`);
-        table += `</tr></thead>`;
+        table += '<colgroup>';
+        let headerHTML = '<thead><tr>';
+        headers.forEach((header, index) => {
+            const col = this.#jspreadsheet[0].cols[index].colElement;
+            table += `<col width="${col.getAttribute('width')}">`;
+            headerHTML += `<th>${header}</th>`
+        });
+        table += '</colgroup>';
+        headerHTML += `</tr></thead>`;
 
+        if(this.#exportOptions.headers){
+            table += headerHTML;
+        }
+
+        let y = -1;
         table += '<tbody>';
         data.forEach(row => {
-            table += '<tr>';
-            row.forEach(value => table += `<td>${value ?? ''}</td>`)
+
+            ++ y;
+            const rowElement = this.#jspreadsheet[0].rows[y].element;
+            table += `<tr${rowElement.style.cssText !== '' ? ` style="${rowElement.style.cssText}"` : ''}>`;
+
+            let x = 0;
+
+            row.forEach(cell => {
+
+                const attributes = this.#exportOptions.styling ? this.#getCellAttributes(x, y) : '';
+
+                cell.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                table += `<td${attributes !== '' ? ` ${attributes}` : ''}>${cell ?? ''}</td>`
+            });
             table += '</tr>';
-        })
-        table += '</tbody>';
+        });
+        table += '</tbody></table>';
 
         return table;
+    }
+
+    #getData(){
+
+        const data = this.#jspreadsheet[0].getData(false, this.#exportOptions.raw);
+
+        let y = -1;
+        return data.map(row => {
+
+            ++ y;
+            let x = 0;
+
+            return row.map(cell => {
+
+                const attributes = this.#exportOptions.styling ? this.#getCellAttributes(x, y) : '';
+                x ++;
+
+                cell.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                return attributes.length > 0 ? `<span ${attributes}>${cell}</span>` : cell;
+            });
+        });
+    }
+
+    #getCellAttributes(x, y){
+
+        const td = this.#jspreadsheet[0].getCellFromCoords(x, y);
+        if(!td){
+            return '';
+        }
+
+        let attributes = '';
+        for(const attr of td.attributes){
+
+            if((!attr.name.startsWith('data-') && attr.name !== 'style') || attr.name === 'data-x' || attr.name === 'data-y'){
+                continue;
+            }
+
+            attributes += `${attr.name}="${attr.value}"`;
+        }
+
+        return attributes;
     }
 
     #loadScripts(){
@@ -397,20 +685,25 @@ class EditorSpreadsheet{
         this.#loadingScripts = true;
 
         // CSS styles
-        $.getStyles('https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css');
         $.getStyles('https://cdn.jsdelivr.net/npm/jsuites@6/dist/jsuites.min.css');
-        $.getStyles('https://fonts.googleapis.com/css?family=Material+Icons'); // for toolbar
+        $.getStyles('https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/jspreadsheet.min.css');
+        $.getStyles('https://fonts.googleapis.com/css?family=Material+Icons'); // for toolbar icons
 
-        $.getMultiScriptsSequental(['https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js','https://cdn.jsdelivr.net/npm/jsuites@6/dist/jsuites.min.js'])
-            .then(() => {
-                this.show();
-            })
-            .catch(() => {
-                window.hWin.HEURIST4.msg.showMsg_ScriptFail();
-            })
-            .finally(() => {
-                this.#loadingScripts = false;
-            });
+        $.getMultiScriptsSequental([
+            'https://cdn.jsdelivr.net/npm/jsuites@6/dist/jsuites.min.js', // Required, jSuites
+            'https://cdn.jsdelivr.net/npm/jspreadsheet-ce@5/dist/index.min.js', // Core, jSpreadsheet
+            'https://cdn.jsdelivr.net/npm/tabularjs@2/dist/index.min.js' // for file upload, TabularJS
+        ])
+        .then(() => {
+            this.show();
+        })
+        .catch(() => {
+            window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+            this.#switchToText();
+        })
+        .finally(() => {
+            this.#loadingScripts = false;
+        });
     }
 
     destroy(){
@@ -428,6 +721,12 @@ class EditorSpreadsheet{
             this.#editor = null;
             this.#editorContainer = null;
         }
+
+        // Reset class variables
+        this.#data = {};
+        this.#initialInput = null;
+        this.#initialTableValue = null;
+        this.#dataType = '';
     }
 
     #switchToText(){
