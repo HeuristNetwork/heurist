@@ -230,6 +230,7 @@ tests/
 descriptors/
 *.lock
 !composer.lock
+!srv/Website/Build/
 
 #PHPStorm
 .idea/*

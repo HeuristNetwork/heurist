@@ -35,6 +35,8 @@ final class CmsValidator
         'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email')
     );
     public const CONFIG_VERSION = 1;
+    /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
+    public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page');
 
     /** Website layout (`layout`, plan 27f §2-3): allowed values of each setting; the first is the default (CMS_LAYOUT). */
     public const LAYOUT = array(
@@ -54,6 +56,9 @@ final class CmsValidator
     public const LAYOUT_SIZES = array('header' => array('height', 'width'), 'footer' => array('height'));
     /** Pages kept by the navigation mode swap (`layout.cache`). */
     public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
+
+    /** An image of assets/cms of the website bundle: placeholders of media elements (plan 27i §9, CMS_ASSET_NAME). */
+    public const ASSET_NAME = '/^cms\/(?:[A-Za-z0-9_-]+\/)?[A-Za-z0-9_-]+\.(?:png|jpe?g)$/';
 
     /**
      * Parse the configuration JSON (2-1187). An empty value is an empty configuration.
@@ -174,7 +179,8 @@ final class CmsValidator
         $compiler->compile(is_array($styles['base'] ?? null) ? $styles['base'] : array(),
             array(is_array($styles['nodes'] ?? null) ? $styles['nodes'] : array()),
             array(is_array($styles['kinds'] ?? null) ? $styles['kinds'] : array()),
-            array(is_array($styles['presets'] ?? null) ? $styles['presets'] : array()));
+            array(is_array($styles['presets'] ?? null) ? $styles['presets'] : array()), '',
+            is_array($styles['page'] ?? null) ? $styles['page'] : array());
         $issues = array_merge($issues, $compiler->issues());
         foreach($translations as $language => $blocks){
             foreach(array_keys(is_array($blocks) ? $blocks : array()) as $id){
@@ -251,7 +257,8 @@ final class CmsValidator
 
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
-     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false.
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false; `startPage` the id of
+     * the page shown by the website URL without a page (2026-11-14; not given: the home page).
      *
      * @return array<int,string>
      */
@@ -268,6 +275,8 @@ final class CmsValidator
                 if(!is_int($value) || $value < self::LAYOUT_CACHE['min'] || $value > self::LAYOUT_CACHE['max']){
                     $problems[] = 'cache must be a number from '.self::LAYOUT_CACHE['min'].' to '.self::LAYOUT_CACHE['max'];
                 }
+            }elseif($key === 'startPage'){
+                if(!is_int($value) || $value < 1){ $problems[] = 'startPage must be a page id'; }
             }elseif($key === 'hideHeader' || $key === 'hideFooter'){
                 if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
             }elseif($key === 'header' || $key === 'footer'){
@@ -299,13 +308,19 @@ final class CmsValidator
     }
 
     /**
-     * Why the settings of a media element are not valid, or null: `file` the key of a registered file,
+     * Why the settings of a media element are not valid, or null: `file` the key of a registered file (or `placeholder`,
+     * an image of assets/cms of the website bundle),
      * `width` / `height` 'auto', px or %, `action` none or viewer; `playerWidth` / `playerHeight` / `player` of older pages
      * (as cmsMediaProblem of cmsDocument.js).
      */
     public static function mediaProblem(array $settings): ?string
     {
-        if(!preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? ''))){ return 'the file is missing'; }
+        // a placeholder image of the website bundle stands in for the file until one is chosen (plan 27i §9)
+        $placeholder = $settings['placeholder'] ?? null;
+        if($placeholder !== null && (!is_string($placeholder) || !preg_match(self::ASSET_NAME, $placeholder))){
+            return 'placeholder is not an image of assets/cms';
+        }
+        if(!preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? '')) && empty($placeholder)){ return 'the file is missing'; }
         foreach(array('width', 'height', 'playerWidth', 'playerHeight') as $name){
             $value = (string)($settings[$name] ?? 'auto');
             if($value !== 'auto' && !preg_match('/^(?:\d+\.?\d*|\.\d+)(?:px|%)$/', $value)){
@@ -313,7 +328,14 @@ final class CmsValidator
             }
         }
         if(isset($settings['player']) && !is_bool($settings['player'])){ return 'player must be true or false'; }
-        if(isset($settings['action']) && !in_array($settings['action'], array('none', 'viewer'), true)){ return 'action must be none or viewer'; }
+        // the links of a record (plan 27g §6) and Go to a page (2026-11-14)
+        if(isset($settings['action']) && !in_array($settings['action'], self::MEDIA_ACTIONS, true)){
+            return 'action must be '.implode(', ', self::MEDIA_ACTIONS);
+        }
+        if(($settings['action'] ?? '') === 'page' && intval($settings['page'] ?? 0) < 1){ return 'page must be a page id'; }
+        if(isset($settings['align']) && !in_array($settings['align'], array('left', 'center', 'right'), true)){
+            return 'align must be left, center or right';
+        }
         return null;
     }
 

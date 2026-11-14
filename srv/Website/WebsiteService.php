@@ -53,12 +53,12 @@ final class WebsiteService
      * The page context of a request.
      *
      * @param int $id Website or standalone page.
-     * @param int $pageId Page of the website (0: home content).
+     * @param int $pageId Page of the website (0: the Startup page, else the home content; the website id: home).
      * @param string $language Requested language (?lang=, 2 or 3 letters).
      * @param int $recordId The record shown by a record page (plan 27g); 0: none.
      * @return array{site:?array,page:array,home:bool,menu:array,pages:array,language:?string,requestedLanguage:?string,
      *         languages:array<int,string>,siteConfig:array,pageConfig:array,siteTexts:array,
-     *         pageTexts:array,issues:array,recordPage:bool,record:?array}
+     *         pageTexts:array,issues:array,recordPage:bool,record:?array,startPage:int}
      * @throws WebsiteException 404 also for a record the visitor may not see, or a record id on another page.
      */
     public function context(int $id, int $pageId = 0, string $language = '', int $recordId = 0): array
@@ -84,9 +84,16 @@ final class WebsiteService
         $site = null;
         $page = $record;
         $menu = array('tree' => array(), 'pages' => array());
+        $startPage = 0;
         if($type === $codes['home']){
             $site = $record;
             $menu = $this->repository->menu($site);
+            // Startup page (layout.startPage, 2026-11-14): shown by the URL without a page; the home page then has its
+            // own id in the URL. A page that is no longer in the menu is ignored.
+            $layout = CmsValidator::parse(WebsiteRepository::value($site, $codes['configuration']))['config']['layout'] ?? null;
+            $start = is_array($layout) ? intval($layout['startPage'] ?? 0) : 0;
+            if($start > 0 && $start !== $id && isset($menu['pages'][$start])){ $startPage = $start; }
+            if($pageId === 0 && $startPage > 0){ $pageId = $startPage; }
             if($pageId > 0 && $pageId !== $id){
                 if(!isset($menu['pages'][$pageId])){
                     throw new WebsiteException(404, 'Page '.$pageId.' is not a page of website '.$id);
@@ -150,7 +157,8 @@ final class WebsiteService
             'pageTexts' => $pageTexts,
             'issues' => $issues,
             'recordPage' => $recordPage,
-            'record' => $shown
+            'record' => $shown,
+            'startPage' => $startPage
         );
     }
 
