@@ -77,11 +77,13 @@ final class PageRenderer
         // the home page and a standalone page have one set (the website record / the page)
         $withSite = $site !== null && !$context['home'];
         $own = $withSite ? $siteConfig : $pageConfig;
+        // the own style of the page (plan 27i §9): its section, from the page record (the website record on the home page)
+        $pageStyle = self::part($pageConfig, 'page');
         $styles = (new StyleCompiler($baseUrl))->compile(self::part($own, 'base'), array(self::part($own, 'nodes')),
-            array(self::part($own, 'kinds')), array(self::part($own, 'presets')));
+            array(self::part($own, 'kinds')), array(self::part($own, 'presets')), '', $withSite ? array() : $pageStyle, $pageId);
         $pageStyles = $withSite ? (new StyleCompiler($baseUrl))->compile(self::part($pageConfig, 'base'),
             array(self::part($pageConfig, 'nodes')), array(self::part($pageConfig, 'kinds')), array(self::part($pageConfig, 'presets')),
-            self::pageScope($pageId)) : '';
+            self::pageScope($pageId), $pageStyle, $pageId) : '';
 
         $content = CmsHtml::translate(WebsiteRepository::value($page, $this->codes['content']), $pageTexts);
         $header = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['header']), $siteTexts) : '';
@@ -169,6 +171,14 @@ final class PageRenderer
             $page = $context['pages'][$pageId] ?? null;
             return $page !== null && $this->isRecordPage($page) ? $this->url($context, $pageId, $context['language'], $recordId) : '';
         };
+        // Go to a page (2026-11-14): the home page or a menu page of this website, not a record page; [url, title]
+        $context['pageLink'] = function(int $pageId) use ($context): ?array {
+            if($context['site'] === null){ return null; }
+            $siteId = intval($context['site']['rec_ID']);
+            $page = $pageId === $siteId ? $context['site'] : ($context['pages'][$pageId] ?? null);
+            if($page === null || ($pageId !== $siteId && $this->isRecordPage($page))){ return null; }
+            return array($this->url($context, $pageId, $context['language']), $this->text($page, $this->codes['name'], $context['language']));
+        };
         $html = $this->linkMedia($html, $context);
         return CmsHtml::fill($html, function(string $reference, string $link = '') use ($context): ?string {
             if($this->content === null){ return null; }
@@ -199,7 +209,9 @@ final class PageRenderer
         }
         $selectable = ($settings['selectableParent'] ?? true) !== false;
         return '<nav class="'.self::attr(self::menuClass($settings)).'" aria-label="Site menu">'
-            .'<button type="button" class="h-site-menu-toggle" aria-expanded="false">Menu</button>'
+            // the collapsed menu: the "3 bars" icon (2026-11-14)
+            .'<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="Menu" aria-label="Menu">'
+            .'<i class="fa-solid fa-bars" aria-hidden="true"></i></button>'
             .self::menuList($tree, 'h-site-menu-list', $selectable).'</nav>';
     }
 
@@ -328,7 +340,7 @@ final class PageRenderer
             $entry = !empty($children) && !$selectableParent
                 ? '<span class="h-site-menu-label" tabindex="0">'.$label.'</span>'
                 : '<a href="'.self::attr((string)$item['url']).'"'.(!empty($item['current']) ? ' aria-current="page"' : '')
-                    .(($item['format'] ?? 'name') === 'icon' ? ' title="'.self::attr((string)$item['title']).'"' : '')
+                    .self::menuRollover($item)
                     .(!empty($item['newTab']) ? ' target="_blank" rel="noopener"' : '')
                     .(!empty($item['action']) ? ' data-h-action="'.self::attr((string)$item['action']).'" data-h-target="'
                         .self::attr((string)($item['target'] ?? '')).'"' : '')
@@ -337,6 +349,17 @@ final class PageRenderer
                 .(!empty($children) ? self::menuList($children, 'h-site-menu-sub', $selectableParent) : '').'</li>';
         }
         return '<ul class="'.$class.'">'.$html.'</ul>';
+    }
+
+    /**
+     * The rollover of a menu entry (review 2026-11-14): the description of the page in every mode, else the title of
+     * an entry that shows its icon only.
+     */
+    private static function menuRollover(array $item): string
+    {
+        $text = trim((string)($item['description'] ?? ''));
+        if($text === '' && ($item['format'] ?? 'name') === 'icon'){ $text = (string)$item['title']; }
+        return $text !== '' ? ' title="'.self::attr($text).'"' : '';
     }
 
     /** Icon and / or title of a menu entry. */
@@ -577,6 +600,8 @@ final class PageRenderer
                 'current' => intval($item['id']) === $current,
                 'icon' => $this->menuIcon($page),
                 'format' => $this->menuFormat($page),
+                // the rollover of the entry (DT_SHORT_SUMMARY, review 2026-11-14)
+                'description' => $this->description($page, $context['language']),
                 'hidden' => $this->menuHidden($page),
                 'record' => $this->isRecordPage($page),
                 'children' => $this->menu($context, $item['children'])
@@ -621,12 +646,14 @@ final class PageRenderer
             return $this->environment['urls']->page($pageId, 0, $lang);
         }
         $siteId = intval($context['site']['rec_ID']);
-        return $this->environment['urls']->page($siteId, $pageId === $siteId ? 0 : $pageId, $lang, $recordId);
+        // with a Startup page the URL without a page shows it: the home page keeps its id in the URL
+        $home = $pageId === $siteId && empty($context['startPage']);
+        return $this->environment['urls']->page($siteId, $home ? 0 : $pageId, $lang, $recordId);
     }
 
     /**
-     * Links of media elements of a record (Type Any record, `config.media[id].action` url / recordPage, plan 27g §6):
-     * a stretched link at the end of the figure.
+     * Links of media elements of a record (Type Any record, `config.media[id].action` url / recordPage, plan 27g §6),
+     * and Go to a page of every Type (`action: page`, `page`, 2026-11-14): a stretched link at the end of the figure.
      */
     private function linkMedia(string $html, array $context): string
     {
@@ -636,6 +663,9 @@ final class PageRenderer
         return (string)preg_replace_callback('#(<figure\b[^>]*\bdata-h-media="([^"]+)"[^>]*>)(.*?)(</figure>)#s',
             function(array $match) use ($media, $context): string {
                 $settings = is_array($media[$match[2]] ?? null) ? $media[$match[2]] : array();
+                if(($settings['action'] ?? '') === 'page'){
+                    return $match[1].$match[3].$this->content->pageLink(intval($settings['page'] ?? 0), $context).$match[4];
+                }
                 $record = intval($settings['record'] ?? 0);
                 if(($settings['mode'] ?? '') !== 'record' || $record < 1){ return $match[0]; }
                 return $match[1].$match[3].($this->content->recordLinks(array($record), $settings, $context)[$record] ?? '').$match[4];

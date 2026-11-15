@@ -82,16 +82,16 @@ final class StoredText
             $allowed .= ',p[style],div[style],span[style],br,hr,h1[style],h2[style],h3[style],h4[style],h5[style],h6[style],'
                 .'blockquote,pre,code,s,sup,sub,small,'
                 .'ul,ol[start|type],li[value],dl,dt,dd,a[href|title|target|rel|data-ref],'
-                .'img[src|alt|title|width|height|data-id|loading],'
+                .'img[src|alt|title|width|height|data-id|loading|style],'
                 .'table[width|border|cellpadding|cellspacing|summary],caption,colgroup,col[span|width],'
                 .'thead,tbody,tfoot,tr,th[colspan|rowspan|scope|abbr|width|height],td[colspan|rowspan|width|height],'
-                .'figure[data-h-view|data-h-full|data-h-rec],figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id],'
+                .'figure[data-h-view|data-h-full|data-h-rec|data-h-align],figcaption,audio[src|controls|preload|data-id],video[src|controls|preload|poster|width|height|data-id|autoplay|muted|loop|playsinline],'
                 .'source[src|type],iframe[src|width|height|title|frameborder|allowfullscreen|allow|loading],'
                 // website format v4 (plan 27a): page structure, tabs and accordions, nodes and hosts
                 // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-bg-video]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -100,7 +100,9 @@ final class StoredText
             $def->addElement('figcaption', 'Block', 'Flow', 'Common');
             $media = array('src'=>'URI', 'controls'=>'Bool', 'preload'=>'Enum#auto,metadata,none', 'data-id'=>'Number');
             $def->addElement('audio', 'Block', 'Flow', 'Common', $media);
-            $def->addElement('video', 'Block', 'Flow', 'Common', $media + array('poster'=>'URI', 'width'=>'Length', 'height'=>'Length'));
+            // a muted video in a loop, started at once (written by the site runtime for data-h-bg-video, plan 27i §9 D)
+            $def->addElement('video', 'Block', 'Flow', 'Common', $media + array('poster'=>'URI', 'width'=>'Length', 'height'=>'Length',
+                'autoplay'=>'Bool', 'muted'=>'Bool', 'loop'=>'Bool', 'playsinline'=>'Bool'));
             $def->addElement('source', 'Inline', 'Empty', 'Common', array('src'=>'URI', 'type'=>'Text'));
             // HTML5 sections of a v4 page (HTMLPurifier knows HTML 4 only)
             foreach(array('section', 'article', 'aside', 'nav', 'header', 'footer', 'main') as $element){
@@ -124,14 +126,19 @@ final class StoredText
             $def->addAttribute('figure', 'data-h-full', 'URI');
             // the record of a gallery figure (plan 27g §6): the server adds its link to the record page or rec_URL
             $def->addAttribute('figure', 'data-h-rec', 'Number');
+            // the alignment of a media element (2026-11-14): its media and caption centred or right
+            $def->addAttribute('figure', 'data-h-align', 'Enum#left,center,right');
             // a Record field element (plan 27e §22): a checked reference to a field of a record
             $reference = self::fieldReference();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-field', $reference); }
-            // the action of a Record field element (plan 27g §6): `url` or `page:<id>`
+            // the action of a Record field element (plan 27g §6): `url`, `page:<id>` or `goto:<id>` (Go to a page, 2026-11-14)
             $link = self::fieldLink();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-link', $link); }
             // a text block: a flag without a value (data-h-text="" after purifying)
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-text', 'Text'); }
+            // the background video of a group (plan 27i §9 D): the key of a registered file; the site runtime adds the video
+            $fileKey = self::fileKey();
+            foreach($blocks as $element){ $def->addAttribute($element, 'data-h-bg-video', $fileKey); }
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
             $def->addAttribute('iframe', 'allowfullscreen', 'Bool');
@@ -143,6 +150,8 @@ final class StoredText
             foreach(array('p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6') as $element){
                 $def->addAttribute($element, 'style', $align);
             }
+            // the alignment of an image of the text editor (TinyMCE align buttons, 2026-11-14)
+            $def->addAttribute('img', 'style', self::imageAlign());
         }else{
             $config->set('CSS.AllowedProperties', array());
             $config->set('HTML.ForbiddenAttributes', array('style'));
@@ -166,6 +175,18 @@ final class StoredText
         };
     }
 
+    /** `data-h-bg-video` of a group (plan 27i §9 D): the key of a registered file (letters and digits). */
+    private static function fileKey(): \HTMLPurifier_AttrDef
+    {
+        return new class extends \HTMLPurifier_AttrDef {
+            public function validate($string, $config, $context)
+            {
+                $string = trim((string)$string);
+                return preg_match('/^[A-Za-z0-9]{1,64}$/', $string) === 1 ? $string : false;
+            }
+        };
+    }
+
     /** `data-h-link` of a Record field element (plan 27g §6): `url` or `page:<page id>`. */
     private static function fieldLink(): \HTMLPurifier_AttrDef
     {
@@ -173,7 +194,36 @@ final class StoredText
             public function validate($string, $config, $context)
             {
                 $string = trim((string)$string);
-                return preg_match('/^(url|page:\d+)$/', $string) === 1 ? $string : false;
+                return preg_match('/^(url|page:\d+|goto:\d+)$/', $string) === 1 ? $string : false;
+            }
+        };
+    }
+
+    /**
+     * The style of an image (2026-11-14): only what the align buttons of TinyMCE write: `float` left / right / none,
+     * `display: block` with `margin-left` / `margin-right` auto (centred), `vertical-align` (inline images).
+     */
+    private static function imageAlign(): \HTMLPurifier_AttrDef
+    {
+        return new class extends \HTMLPurifier_AttrDef {
+            public function validate($string, $config, $context)
+            {
+                $allowed = array(
+                    'float' => array('left', 'right', 'none'),
+                    'display' => array('block', 'inline', 'inline-block'),
+                    'margin-left' => array('auto', '0', '0px'),
+                    'margin-right' => array('auto', '0', '0px'),
+                    'vertical-align' => array('top', 'middle', 'bottom', 'baseline', 'text-top', 'text-bottom')
+                );
+                $kept = array();
+                foreach(explode(';', (string)$string) as $declaration){
+                    $parts = explode(':', $declaration, 2);
+                    if(count($parts) !== 2){ continue; }
+                    $name = strtolower(trim($parts[0]));
+                    $value = strtolower(trim($parts[1]));
+                    if(isset($allowed[$name]) && in_array($value, $allowed[$name], true)){ $kept[$name] = $name.': '.$value.';'; }
+                }
+                return empty($kept) ? false : implode(' ', $kept);
             }
         };
     }

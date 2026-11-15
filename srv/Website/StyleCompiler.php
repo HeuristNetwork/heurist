@@ -48,7 +48,7 @@ final class StyleCompiler
 
     /** Node style properties (plan 27a §4); margin, padding and border by pattern. */
     private const PROPERTIES = array(
-        'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items', 'align-content', 'gap', 'flex', 'grid-template-columns',
+        'display', 'flex-direction', 'flex-wrap', 'justify-content', 'justify-items', 'align-items', 'align-content', 'gap', 'flex', 'grid-template-columns',
         'grid-template-rows', 'grid-column', 'grid-row', 'order',
         'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'overflow',
         'border-radius', 'box-shadow', 'text-shadow',
@@ -57,7 +57,8 @@ final class StyleCompiler
 
     /** Kinds of `styles.kinds` and their selectors. */
     public const KINDS = array(
-        'group' => '[data-h-control="group"]',
+        // not the header default set (2026-11-14): its layout is the website CSS; :where keeps the specificity
+        'group' => '[data-h-control="group"]:where(:not(.h-site-hset))',
         'tabs' => '[data-h-control="tabs"]',
         'accordion' => '[data-h-control="accordion"]',
         'text' => '[data-h-text]:not([data-h-media])',
@@ -95,9 +96,11 @@ final class StyleCompiler
      * @param array<int,array> $kindSets Kind defaults (`styles.kinds`), website first, then the page.
      * @param array<int,array> $presetSets Presets (`styles.presets`), website first, then the page.
      * @param string $scope Selector every rule is written below (plan 27f), e.g. `[data-h-page="5"]`; '' = none.
+     * @param array $pageStyle Own style of the page (`styles.page`, plan 27i §9): written for its section, without the scope.
+     * @param int $pageId The page of $pageStyle; 0 = any page (checks).
      */
     public function compile(array $base, array $nodeSets, array $kindSets = array(), array $presetSets = array(),
-        string $scope = ''): string
+        string $scope = '', array $pageStyle = array(), int $pageId = 0): string
     {
         $this->issues = array();
         $this->scope = $scope !== '' ? $scope.' ' : '';
@@ -130,6 +133,14 @@ final class StyleCompiler
             }
         }
         $this->flushScreens($css, $screens);
+        if(!empty($pageStyle)){
+            // the section is the scope itself
+            $prefix = $this->scope;
+            $this->scope = '';
+            $this->rule(self::pageSelector($pageId), self::pageHeightAsMinimum($pageStyle), null, $css, $screens);
+            $this->scope = $prefix;
+            $this->flushScreens($css, $screens);
+        }
         foreach($nodeSets as $nodes){
             if(!is_array($nodes)){ continue; }
             foreach($nodes as $id => $style){
@@ -143,6 +154,32 @@ final class StyleCompiler
         }
         $this->flushScreens($css, $screens);
         return $css;
+    }
+
+    /**
+     * The height of a page is its minimum height (2026-11-14): the page grows with its content, which would otherwise
+     * run over the footer. Also on the medium and narrow screens.
+     */
+    private static function pageHeightAsMinimum(array $style): array
+    {
+        if(isset($style['height'])){
+            if(!isset($style['min-height'])){
+                $style['min-height'] = $style['height'];
+            }
+            unset($style['height']);
+        }
+        foreach($style as $key => $value){
+            if(is_array($value)){
+                $style[$key] = self::pageHeightAsMinimum($value);
+            }
+        }
+        return $style;
+    }
+
+    /** Selector of the section of a page (PageRenderer), for its own style; 0 = any page. */
+    public static function pageSelector(int $pageId = 0): string
+    {
+        return $pageId > 0 ? '.h-site-page[data-h-page="'.$pageId.'"]' : '.h-site-page';
     }
 
     /**

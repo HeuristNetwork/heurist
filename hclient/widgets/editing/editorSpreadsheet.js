@@ -59,6 +59,7 @@ class EditorSpreadsheet{
     #data = {};
     #initialInput;
     #initialTableValue;
+    #initialStyling = [];
 
     #handledTypes = ['csv', 'json', 'table'];
     #dataType;
@@ -67,6 +68,10 @@ class EditorSpreadsheet{
         headers: true,
         raw: true,
         styling: false
+    };
+    #CSVParsingOptions = {
+        delimiter: null,
+        firstRowHeader: null
     };
 
     #loadingScripts = false;
@@ -135,6 +140,11 @@ class EditorSpreadsheet{
             this.#dataType = 'csv';
             return this.#parseCSV(data);
         }catch(error){
+
+            if(error.message === 'waiting'){
+                return null;
+            }
+
             this.#logError(error);
             throw new Error('Unknown data provided.');
         }
@@ -176,7 +186,10 @@ class EditorSpreadsheet{
 
     #parseCSV(data){
 
-        const delimiter = this.#detectDelimiter(data);
+        if(this.#CSVParsingOptions.firstRowHeader === null){
+            this.#getParseCSVSettings();
+            throw new Error('waiting');
+        }
 
         const rows = [];
 
@@ -194,8 +207,8 @@ class EditorSpreadsheet{
             if(char === '"'){
 
                 if(isQuoted && prev === '\\'){
+                    field.slice(0, -1); // remove slash
                     field += '"';
-                    i ++;
                 }else{
                     isQuoted = !isQuoted;
                 }
@@ -204,7 +217,7 @@ class EditorSpreadsheet{
             }
 
             // Special characters outside of quotes
-            if(char === delimiter && !isQuoted){ // Delimiter outside of quotes
+            if(char === this.#CSVParsingOptions.delimiter && !isQuoted){ // Delimiter outside of quotes
 
                 row.push(field);
                 field = '';
@@ -244,11 +257,21 @@ class EditorSpreadsheet{
             return [{data: [], columns: []}];
         }
 
-        //const columns = this.#settings.firstRowHeader ? rows.shift() : ;
+        const columns = rows[0].map((column, index) => (
+            {
+                title: this.#CSVParsingOptions.firstRowHeader ? column : `Column ${index + 1}`,
+                type: 'text',
+                name: `column${index}`
+            }
+        ));
+
+        if(this.#CSVParsingOptions.firstRowHeader){
+            rows.shift();
+        }
 
         return [{
             data: rows,
-            columns: rows[0].map((_, index) => ({title: `Column ${index + 1}`, type: 'text'}))
+            columns: columns
         }];
     }
 
@@ -262,12 +285,6 @@ class EditorSpreadsheet{
 
         this.#createEditorContainer();
 
-        /*
-        const container = document.createElement('div');
-        container.style.display = 'none';
-        container.innerHTML = data;
-        this.#editorContainer.append(container);
-        */
         this.#editorContainer.innerHTML = data;
 
         const config = this.#getConfiguration();
@@ -281,6 +298,75 @@ class EditorSpreadsheet{
         this.#editor = this.#inputDiv.querySelector('.jss_spreadsheet');
         this.#initialInput = this.#input.value;
         this.#initialTableValue = this.#serialiseData() ?? '';
+    }
+
+    #getParseCSVSettings(){
+
+        this.#CSVParsingOptions.delimiter = this.#CSVParsingOptions.delimiter !== '' ? this.#CSVParsingOptions.delimiter : this.#detectDelimiter(data);
+
+        let modal;
+        let dialog = this.#inputDiv.querySelector('.heurist-jss-parse-csv');
+
+        if(!dialog){
+
+            dialog = document.createElement('div');
+            dialog.classList.add('heurist-jss-parse-csv');
+            dialog.style.display = 'none';
+
+            dialog.innerHTML = `Delimiter: <select name="csv-delimiter">
+                <option value=",">, (Comma)</option>
+                <option value="\t">\\t (Tab)</option>
+                <option value="|">| (Pipe)</option>
+                <option value="semicolon">\; (Semicolon)</option>
+            </select><br><br>
+            <label><input type="checkbox" name="columns-first-row" checked="checked" /> Treat first row as columns</label>
+            <div style="position: absolute; bottom: 1em; right: 1em;">
+                <button class="ui-button-action ui-button ui-corner-all ui-widget">Proceed</button>
+                <button class="ui-button ui-corner-all ui-widget" style="margin-left: 1em;">Cancel</button>
+            </div>`;
+
+            this.#inputDiv.append(dialog);
+
+            let $__continueParse = () => {
+
+                modal.close();
+                let delimiter = dialog.querySelector('[name="csv-delimiter"]').value;
+                delimiter = delimiter === 'semicolon' ? ';' : delimiter;
+                if(!delimiter || delimiter === ''){
+                    return;
+                }
+                this.#CSVParsingOptions.delimiter = delimiter;
+
+                this.#CSVParsingOptions.firstRowHeader = dialog.querySelector('[name="columns-first-row"]').checked;
+
+                this.show();
+            };
+
+            let $__closeModal = () => {
+                modal.close();
+                this.#switchToText();
+            };
+
+            dialog.querySelector('button:nth-child(1)').addEventListener('click', $__continueParse);
+            dialog.querySelector('button:nth-child(2)').addEventListener('click', $__closeModal);
+
+            jSuites.dropdown(dialog.querySelector('[name="csv-delimiter"]'), {
+                width: '12.5em',
+                placeholder: 'Select a delimiter...'
+            });
+        }
+
+        let delimiter = this.#CSVParsingOptions.delimiter !== '' ? this.#CSVParsingOptions.delimiter : '\t';
+        delimiter = delimiter === ';' ? 'semicolon' : delimiter;
+        dialog.querySelector('[name="csv-delimiter"]').value = delimiter;
+        dialog.querySelector('[name="csv-delimiter"]').dispatchEvent(new Event('change', {bubbles: false}));
+
+        modal = jSuites.modal(dialog, {
+            title: window.hWin.HR('CSV Parsing'),
+            closed: false,
+            width: '22.5em',
+            height: '17.5em'
+        });
     }
 
     #detectDelimiter(data){
@@ -316,6 +402,10 @@ class EditorSpreadsheet{
             return;
         }
 
+        if(this.#data === null){
+            return;
+        }
+
         this.#exportOptions.type = this.#dataType;
 
         if(this.#jspreadsheet){
@@ -325,8 +415,10 @@ class EditorSpreadsheet{
         const config = this.#getConfiguration();
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
-        worksheetConfig['data'] = this.#data[0].data;
-        worksheetConfig['columns'] = this.#data[0].columns;
+        if(this.#data?.[0]){            
+            worksheetConfig['data'] = this.#data[0].data;
+            worksheetConfig['columns'] = this.#data[0].columns;
+        }
 
         config.worksheets.push(worksheetConfig);
 
@@ -490,16 +582,17 @@ class EditorSpreadsheet{
             dialog.classList.add('heurist-jss-export-format');
             dialog.style.display = 'none';
 
-            dialog.innerHTML = `Please select an output format below:<br><br>
+            dialog.innerHTML = `Select an output format below:<br><br>
             <label><input type="radio" name="export-format" value="table" /> Table</label><br>
             <label><input type="radio" name="export-format" value="csv" /> CSV</label><br>
             <label><input type="radio" name="export-format" value="json" /> JSON</label><br>
-            <br><label><input type="checkbox" name="include-styling" /> Include styling</label><br>
+            <br>Additional settings:<br>
+            <label><input type="checkbox" name="include-styling" /> Include styling (recommended for table mode only)</label><br>
             <label><input type="checkbox" name="include-headers" /> Include column headers</label><br>
-            <label><input type="checkbox" name="raw-output" /> Get data (e.g. formula result, not the formula itself)</label><br>
+            <label><input type="checkbox" name="raw-output" /> Get data (e.g. formula result not the formula itself)</label><br>
             <div style="position: absolute; bottom: 1em; right: 1em;">
-                <button class="ui-button-action ui-button ui-corner-all ui-widget">Save data</button>
-                <button class="ui-button ui-corner-all ui-widget">Cancel</button>
+                <button class="ui-button-action ui-button ui-corner-all ui-widget">Save settings</button>
+                <button class="ui-button ui-corner-all ui-widget" style="margin-left: 1em;">Cancel</button>
             </div>`;
 
             this.#editorContainer.append(dialog);
@@ -522,7 +615,7 @@ class EditorSpreadsheet{
                 modal.close();
             };
 
-            dialog.querySelector('button:nth-child(1)').addEventListener('click', $__performExport)
+            dialog.querySelector('button:nth-child(1)').addEventListener('click', $__performExport);
             dialog.querySelector('button:nth-child(2)').addEventListener('click', $__closeModal);
         }
 
@@ -577,7 +670,7 @@ class EditorSpreadsheet{
         );
 
         if(this.#exportOptions.headers){
-            const headers = this.#jspreadsheet[0].getHeaders().join(',');
+            const headers = this.#jspreadsheet[0].getHeaders().split(',');
             data.unshift(headers);
         }
 
@@ -644,14 +737,14 @@ class EditorSpreadsheet{
 
             return row.map(cell => {
 
-                const attributes = this.#exportOptions.styling ? this.#getCellAttributes(x, y) : '';
+                const attributes = this.#exportOptions.styling ? ` ${this.#getCellAttributes(x, y)}` : '';
                 x ++;
 
                 cell.replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
 
-                return attributes.length > 0 ? `<span ${attributes}>${cell}</span>` : cell;
+                return attributes !== '' ? `<jss-cell${attributes}>${cell}</jss-cell>` : cell;
             });
         });
     }
@@ -697,7 +790,8 @@ class EditorSpreadsheet{
         .then(() => {
             this.show();
         })
-        .catch(() => {
+        .catch((error) => {
+            this.#logError(error);
             window.hWin.HEURIST4.msg.showMsg_ScriptFail();
             this.#switchToText();
         })
@@ -727,6 +821,11 @@ class EditorSpreadsheet{
         this.#initialInput = null;
         this.#initialTableValue = null;
         this.#dataType = '';
+
+        this.#CSVParsingOptions = {
+            firstRowHeader: null,
+            delimiter: null
+        };
     }
 
     #switchToText(){

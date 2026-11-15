@@ -319,12 +319,29 @@ final class PageContent
     }
 
     /**
+     * Go to a page (2026-11-14): a stretched link over the element to a page of this website (`context.pageLink`), with
+     * the name of the page for screen readers; '' for a page that is not in the website (or a record page).
+     */
+    public function pageLink(int $pageId, array $context): string
+    {
+        $pageLink = $context['pageLink'] ?? null;
+        $found = $pageId > 0 && is_callable($pageLink) ? $pageLink($pageId) : null;
+        if(!is_array($found) || $found[0] === ''){ return ''; }
+        return '<a class="h-site-rec-link" href="'.self::attribute($found[0]).'"><span class="h-site-visually-hidden">'
+            .self::text($found[1] !== '' ? $found[1] : '#'.$pageId).'</span></a>';
+    }
+
+    /**
      * The link of a Record field element (`data-h-link`: `url` or `page:<id>`, plan 27g §6): only for a reference
      * to a record (not website / page / record of the URL). An external link icon follows the value (cosmetics
-     * 2026-11-11), the stretched link covers the element.
+     * 2026-11-11), the stretched link covers the element. `goto:<id>` (Go to a page, 2026-11-14): a record or the
+     * website, no icon.
      */
     public function fieldLink(string $reference, string $link, array $context): string
     {
+        if(preg_match('/^goto:(\d+)$/', $link, $goto) === 1){
+            return preg_match('/^(\d+|website)\./', $reference) === 1 ? $this->pageLink(intval($goto[1]), $context) : '';
+        }
         if(preg_match('/^(\d+)\./', $reference, $source) !== 1){ return ''; }
         if($link === 'url'){
             $settings = array('action' => 'url');
