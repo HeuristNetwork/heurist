@@ -37,6 +37,15 @@ final class PageRenderer
     private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 
+    /** Presentations of a menu (plan 27k §1, MENU_PRESENTATIONS of HMenu.js); `menu` = the website menu. */
+    private const MENU_PRESENTATIONS = array('menu', 'row', 'links', 'buttons', 'icons', 'dropdown', 'expand');
+
+    /** Styles of the items of a menu (plan 27k §1, MENU_STYLES of HMenu.js). */
+    private const MENU_STYLES = array('plain', 'links', 'underline', 'pills', 'buttons', 'outline');
+
+    /** The button of an expanding action menu without its own icon (plan 27k §2, MENU_EXPAND_ICON of HMenu.js). */
+    private const MENU_EXPAND_ICON = 'fa-solid fa-share-nodes';
+
     private array $codes;
     private LanguageCodes $languages;
     /** @var array{database:string,baseUrl:string,javaScriptAllowed:bool,urls:SiteUrls} */
@@ -197,7 +206,7 @@ final class PageRenderer
 
     /**
      * The website menu as links (for crawlers and visitors without JS); HMenu activates it. Settings (plan 27f §4):
-     * `orientation` horizontal / vertical / auto (follows the header), `showHome` a Home entry first,
+     * `orientation` horizontal / vertical / auto (follows the header), `style` of the items (plan 27k §1), `showHome` a Home entry first,
      * `selectableParent` (default true) a page with sub pages opens; else its title only opens the sub menu.
      * The languages are a widget of their own (HLangSwitch).
      */
@@ -248,8 +257,8 @@ final class PageRenderer
 
     /**
      * An action menu (plan 27f §6): items of its settings as links (a page of this website, an external URL) or
-     * actions done in the page (Add record: through the Explorer of the page). `presentation` links, buttons, icons
-     * or dropdown (`label` on its button).
+     * actions done in the page (Add record: through the Explorer of the page). `presentation` row, icons, dropdown
+     * (`label` on its button) or expand (`icon` and `label` of its button), `style` and `orientation` (menuLook).
      */
     private function actionMenuHtml(array $context, array $settings): string
     {
@@ -308,11 +317,20 @@ final class PageRenderer
             $items[] = $entry;
         }
         $label = trim((string)($settings['labels'][$language] ?? $settings['label'] ?? ''));
-        $presentation = self::menuPresentation($settings);
+        $presentation = self::menuLook($settings)['presentation'];
+        $toggle = '';
+        if($presentation === 'dropdown'){
+            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
+                .self::text2html($label !== '' ? $label : 'Menu').'</button>';
+        }elseif($presentation === 'expand'){
+            // the icons behind a button (plan 27k §2): its icon, its name as the rollover
+            $name = self::attr($label !== '' ? $label : 'Actions');
+            $icon = self::faClass((string)($settings['icon'] ?? ''));
+            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="'.$name.'" aria-label="'.$name.'">'
+                .'<i class="'.self::attr($icon !== '' ? $icon : self::MENU_EXPAND_ICON).'" aria-hidden="true"></i></button>';
+        }
         return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
-            .($presentation === 'dropdown' ? '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
-                .self::text2html($label !== '' ? $label : 'Menu').'</button>' : '')
-            .self::menuList($items, 'h-site-menu-list').'</div>';
+            .$toggle.self::menuList($items, 'h-site-menu-list').'</div>';
     }
 
     /** Font Awesome classes of an icon (letters, digits, dashes and spaces only), or ''. */
@@ -322,20 +340,36 @@ final class PageRenderer
         return preg_match('/^[a-z0-9 -]{1,80}$/', $icon) === 1 && strpos($icon, 'fa-') !== false ? $icon : '';
     }
 
-    /** Presentation of an action menu: links, buttons, icons, dropdown; `menu` for the website menu. */
-    private static function menuPresentation(array $settings): string
+    /**
+     * Presentation, style and orientation of a menu (plan 27f §6, 27k §1; menuLook of HMenu.js): presentation `menu`
+     * (the website menu), row, icons, dropdown or expand; a stored `links` / `buttons` presentation is a row with that
+     * style; style plain, links, underline, pills, buttons or outline; orientation horizontal, vertical or auto.
+     *
+     * @return array{presentation: string, style: string, orientation: string}
+     */
+    public static function menuLook(array $settings): array
     {
         $presentation = (string)($settings['presentation'] ?? 'menu');
-        return in_array($presentation, array('links', 'buttons', 'icons', 'dropdown'), true) ? $presentation : 'menu';
+        if(!in_array($presentation, self::MENU_PRESENTATIONS, true)){ $presentation = 'menu'; }
+        $style = (string)($settings['style'] ?? '');
+        $styled = in_array($style, self::MENU_STYLES, true);
+        if($presentation === 'links' || $presentation === 'buttons'){
+            if(!$styled){ $style = $presentation; $styled = true; }
+            $presentation = 'row';
+        }
+        $orientation = (string)($settings['orientation'] ?? '');
+        return array('presentation' => $presentation, 'style' => $styled ? $style : 'plain',
+            'orientation' => in_array($orientation, array('vertical', 'auto'), true) ? $orientation : 'horizontal');
     }
 
-    /** Classes of a menu: orientation (plan 27f §4) and the presentation of an action menu (§6); menuClass of HMenu.js. */
+    /** Classes of a menu: orientation, presentation, item style (none for a drop-down); menuClass of HMenu.js. */
     public static function menuClass(array $settings): string
     {
-        $orientation = (string)($settings['orientation'] ?? 'horizontal');
-        $presentation = self::menuPresentation($settings);
-        return 'h-site-menu'.(in_array($orientation, array('vertical', 'auto'), true) ? ' h-site-menu-'.$orientation : '')
-            .($presentation !== 'menu' ? ' h-site-menu-'.$presentation : '');
+        $look = self::menuLook($settings);
+        $classes = array('icons' => 'h-site-menu-icons', 'dropdown' => 'h-site-menu-dropdown', 'expand' => 'h-site-menu-expanding');
+        return 'h-site-menu'.($look['orientation'] !== 'horizontal' ? ' h-site-menu-'.$look['orientation'] : '')
+            .(isset($classes[$look['presentation']]) ? ' '.$classes[$look['presentation']] : '')
+            .($look['style'] !== 'plain' && $look['presentation'] !== 'dropdown' ? ' h-site-menu-style-'.$look['style'] : '');
     }
 
     /**
