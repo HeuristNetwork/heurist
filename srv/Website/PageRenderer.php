@@ -180,10 +180,10 @@ final class PageRenderer
             return array($this->url($context, $pageId, $context['language']), $this->text($page, $this->codes['name'], $context['language']));
         };
         $html = $this->linkMedia($html, $context);
-        return CmsHtml::fill($html, function(string $reference, string $link = '') use ($context): ?string {
+        return CmsHtml::fill($html, function(string $reference, string $link = '', string $linkValues = '') use ($context): ?string {
             if($this->content === null){ return null; }
             $value = $this->content->field($reference, $context);
-            return $value !== null && $value !== '' && $link !== '' ? $value.$this->content->fieldLink($reference, $link, $context) : $value;
+            return $value !== null && $value !== '' && $link !== '' ? $value.$this->content->fieldLink($reference, $link, $context, $linkValues) : $value;
         }, function(string $id) use ($instances, $context): ?array {
             $instance = is_array($instances[$id] ?? null) ? $instances[$id] : array();
             if(($instance['kind'] ?? '') !== 'widget'){ return null; }
@@ -282,6 +282,15 @@ final class PageRenderer
                     || !$this->isRecordPage($context['pages'][$pageId])){ continue; }
                 $entry['url'] = $this->url($context, $pageId, $context['language'], $recordId);
                 $entry['current'] = $pageId === $current && intval($context['record']['rec_ID'] ?? 0) === $recordId;
+            }elseif($action === 'savedFilter'){
+                // Saved filter (plan 27j): target = the page, `source` = the query source, `values`
+                $pageId = intval($target);
+                $siteId = $context['site'] !== null ? intval($context['site']['rec_ID']) : 0;
+                if(SavedFilterLink::problem($item) !== null || ($pageId !== $siteId && (!isset($context['pages'][$pageId])
+                    || $this->isRecordPage($context['pages'][$pageId])))){ continue; }
+                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']),
+                    SavedFilterLink::id($item['source']), $item['values'] ?? null);
+                if($entry['url'] === ''){ continue; }
             }elseif($action === 'back'){
                 // the page before (history back in the runtime); without history and JS: the home page
                 $entry['url'] = $context['site'] !== null ? $this->url($context, intval($context['site']['rec_ID']), $context['language']) : '#';
@@ -665,6 +674,10 @@ final class PageRenderer
                 $settings = is_array($media[$match[2]] ?? null) ? $media[$match[2]] : array();
                 if(($settings['action'] ?? '') === 'page'){
                     return $match[1].$match[3].$this->content->pageLink(intval($settings['page'] ?? 0), $context).$match[4];
+                }
+                // Saved filter (plan 27j): the target page with the query source and its values
+                if(($settings['action'] ?? '') === 'savedFilter'){
+                    return $match[1].$match[3].$this->content->filterLink($settings, $context).$match[4];
                 }
                 $record = intval($settings['record'] ?? 0);
                 if(($settings['mode'] ?? '') !== 'record' || $record < 1){ return $match[0]; }

@@ -284,6 +284,11 @@ final class PageContent
     public function recordLinks(array $ids, array $settings, array $context): array
     {
         $action = (string)($settings['action'] ?? 'none');
+        // Saved filter (plan 27j, phase A: constant values): the same link for every record
+        if($action === 'savedFilter'){
+            $link = $this->filterLink($settings, $context);
+            return $link === '' ? array() : array_fill_keys(array_map('intval', $ids), $link);
+        }
         if($action !== 'url' && $action !== 'recordPage'){ return array(); }
         $pageUrl = $context['recordPageUrl'] ?? null;
         $pageId = intval($settings['recordPage'] ?? 0);
@@ -332,13 +337,39 @@ final class PageContent
     }
 
     /**
+     * Saved filter (plan 27j): a stretched link over the element to the target page of this website (`context.pageLink`)
+     * with the query source and its values (`?source=<id>&v.<NAME>=`, SavedFilterLink); '' for a page that is not in the
+     * website, a record page, or values over the limits.
+     *
+     * @param array $settings `source`, `page` (or `target`), `values`.
+     */
+    public function filterLink(array $settings, array $context): string
+    {
+        if(SavedFilterLink::problem($settings) !== null){ return ''; }
+        $pageId = SavedFilterLink::id($settings['page'] ?? $settings['target'] ?? null);
+        $pageLink = $context['pageLink'] ?? null;
+        $found = is_callable($pageLink) ? $pageLink($pageId) : null;
+        if(!is_array($found) || $found[0] === ''){ return ''; }
+        $href = SavedFilterLink::href($found[0], SavedFilterLink::id($settings['source']), $settings['values'] ?? null);
+        if($href === ''){ return ''; }
+        return '<a class="h-site-rec-link" href="'.self::attribute($href).'"><span class="h-site-visually-hidden">'
+            .self::text($found[1] !== '' ? $found[1] : '#'.$pageId).'</span></a>';
+    }
+
+    /**
      * The link of a Record field element (`data-h-link`: `url` or `page:<id>`, plan 27g §6): only for a reference
      * to a record (not website / page / record of the URL). An external link icon follows the value (cosmetics
      * 2026-11-11), the stretched link covers the element. `goto:<id>` (Go to a page, 2026-11-14): a record or the
      * website, no icon.
      */
-    public function fieldLink(string $reference, string $link, array $context): string
+    public function fieldLink(string $reference, string $link, array $context, string $linkValues = ''): string
     {
+        // Saved filter (plan 27j): `filter:<page>:<source>`, the values in data-h-link-values; any reference
+        if(preg_match('/^filter:(\d+):(\d+)$/', $link, $filter) === 1){
+            $values = $linkValues !== '' ? json_decode($linkValues, true) : null;
+            return $this->filterLink(array('page' => intval($filter[1]), 'source' => intval($filter[2]),
+                'values' => is_array($values) ? $values : null), $context);
+        }
         if(preg_match('/^goto:(\d+|home)$/', $link, $goto) === 1){
             // home: the website (the logo of the header set, written before the website has an id)
             $page = $goto[1] === 'home' ? intval($context['site']['rec_ID'] ?? 0) : intval($goto[1]);

@@ -47,6 +47,8 @@ final class CmsHtml
                 'media' => $element->hasAttribute('data-h-media') ? $element->getAttribute('data-h-media') : null,
                 'text' => $element->hasAttribute('data-h-text'),
                 'field' => $element->hasAttribute('data-h-field') ? $element->getAttribute('data-h-field') : null,
+                // the action of a Record field (plan 27g; Saved filter `filter:<page>:<source>`, plan 27j)
+                'link' => $element->hasAttribute('data-h-link') ? $element->getAttribute('data-h-link') : null,
                 'control' => $element->hasAttribute('data-h-control') ? $element->getAttribute('data-h-control') : null,
                 'tag' => strtolower($element->tagName)
             );
@@ -112,7 +114,9 @@ final class CmsHtml
                     $element->setAttribute('style', trim(rtrim($element->getAttribute('style'), '; ').';'.$content['style'], '; '));
                 }
             }else{
-                $value = $field($element->getAttribute('data-h-field'), $element->getAttribute('data-h-link'));
+                // the values of a Saved filter link (plan 27j) after the link
+                $value = $field($element->getAttribute('data-h-field'), $element->getAttribute('data-h-link'),
+                    $element->getAttribute('data-h-link-values'));
                 if($value === null){ continue; }
             }
             while($element->firstChild){ $element->removeChild($element->firstChild); }

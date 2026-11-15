@@ -9,6 +9,8 @@
 *   report    Generated report widget, `settings.files{language: output id}`
 *   cards     Record cards widget with manual records, `settings.query[0].ids`
 *   gallery   Media gallery widget, `settings.ids`
+*   filter    the query source of a Saved filter (plan 27j): a Record field link `filter:<page>:<source>`, a media element,
+*             Record cards / Media gallery with the action, an action menu item; visitors must be able to read it
 * The card template (a report record) is not listed: it is read without the visitor's rights.
 *
 * @project     Heurist academic knowledge management system
@@ -57,6 +59,11 @@ final class CmsRecordReferences
                 if($node['media'] !== null && is_array($media[$node['media']] ?? null)){
                     $record = intval($media[$node['media']]['settings']['record'] ?? 0);
                     if($record > 0){ $result[] = array('id' => $record, 'node' => $name, 'kind' => 'media'); }
+                    $source = self::filterSource($media[$node['media']]['settings'] ?? null);
+                    if($source > 0){ $result[] = array('id' => $source, 'node' => $name, 'kind' => 'filter'); }
+                }
+                if(($node['link'] ?? null) !== null && preg_match('/^filter:\d+:(\d+)$/', (string)$node['link'], $filter) === 1){
+                    $result[] = array('id' => intval($filter[1]), 'node' => $name, 'kind' => 'filter');
                 }
                 if($node['instance'] !== null && is_array($instances[$node['instance']] ?? null)){
                     foreach(self::instanceIds($instances[$node['instance']]) as $kind => $ids){
@@ -68,11 +75,33 @@ final class CmsRecordReferences
         return $result;
     }
 
+    /** The query source of settings with the action Saved filter (plan 27j), or 0. */
+    private static function filterSource($settings): int
+    {
+        return is_array($settings) && ($settings['action'] ?? '') === 'savedFilter' ? SavedFilterLink::id($settings['source'] ?? null) : 0;
+    }
+
     /** @return array<string,array<int,int>> kind => record ids of one widget. */
     private static function instanceIds(array $instance): array
     {
         $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
-        switch((string)($instance['type'] ?? '')){
+        $type = (string)($instance['type'] ?? '');
+        // Saved filter (plan 27j): of Record cards, a Media gallery, the items of an action menu
+        $sources = array();
+        if($type === 'actionmenu'){
+            foreach(is_array($settings['items'] ?? null) ? $settings['items'] : array() as $item){ $sources[] = self::filterSource($item); }
+        }else{
+            $sources[] = self::filterSource($settings);
+        }
+        $filters = self::ids($sources);
+        $ids = self::widgetIds($type, $settings);
+        return empty($filters) ? $ids : $ids + array('filter' => $filters);
+    }
+
+    /** @return array<string,array<int,int>> kind => record ids picked in a widget. */
+    private static function widgetIds(string $type, array $settings): array
+    {
+        switch($type){
             case 'report':
                 return array('report' => self::ids(is_array($settings['files'] ?? null) ? array_values($settings['files']) : array()));
             case 'cards':

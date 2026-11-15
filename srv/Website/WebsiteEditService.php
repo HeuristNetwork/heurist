@@ -141,6 +141,9 @@ final class WebsiteEditService
             'url' => $url,
             'canEdit' => $this->canEdit($id),
             'pages' => $pages,
+            // the module types of the home page (plan 27j)
+            'modules' => $kind === 'website'
+                ? self::moduleTypes(CmsValidator::parse(WebsiteRepository::value($record, $codes['configuration']))['config']) : array(),
             // the host organisation (logo and URL) for the hosted at line of the footer composer (review 2026-11-10)
             'host' => HostInfo::read($this->urls->baseUrl())
         );
@@ -549,14 +552,28 @@ final class WebsiteEditService
         foreach($tree as $item){
             $page = $pages[$item['id']] ?? null;
             if($page === null){ continue; }
-            $cards = CmsValidator::recordCards(CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config']);
+            $config = CmsValidator::parse(WebsiteRepository::value($page, $codes['configuration']))['config'];
+            $cards = CmsValidator::recordCards($config);
             $result[] = array(
                 'id' => intval($item['id']),
                 'title' => $this->name($page),
+                // the module types of the page: targets of a Saved filter (plan 27j)
+                'modules' => self::moduleTypes($config),
                 'children' => $this->pageTree($item['children'], $pages)
             ) + ($cards !== null ? array('record' => true, 'template' => is_scalar($cards['template'] ?? null) ? $cards['template'] : '') : array());
         }
         return $result;
+    }
+
+    /** The module types of a parsed configuration (its instances of kind `module`), each once. */
+    private static function moduleTypes($config): array
+    {
+        $types = array();
+        foreach(is_array($config['instances'] ?? null) ? $config['instances'] : array() as $instance){
+            $type = is_array($instance) && ($instance['kind'] ?? '') === 'module' ? (string)($instance['type'] ?? '') : '';
+            if($type !== '' && !in_array($type, $types, true)){ $types[] = $type; }
+        }
+        return $types;
     }
 
     /** Ids of the sub pages (all levels) of a page in a menu tree. */
