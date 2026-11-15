@@ -131,7 +131,8 @@ final class StoredText
             // a Record field element (plan 27e §22): a checked reference to a field of a record
             $reference = self::fieldReference();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-field', $reference); }
-            // the action of a Record field element (plan 27g §6): `url`, `page:<id>` or `goto:<id>` (Go to a page, 2026-11-14)
+            // the action of a Record field element (plan 27g §6): `url`, `page:<id>` or `goto:<id>` (Go to a page, 2026-11-14;
+            // `goto:home` the home page)
             $link = self::fieldLink();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-link', $link); }
             // a text block: a flag without a value (data-h-text="" after purifying)
@@ -194,7 +195,7 @@ final class StoredText
             public function validate($string, $config, $context)
             {
                 $string = trim((string)$string);
-                return preg_match('/^(url|page:\d+|goto:\d+)$/', $string) === 1 ? $string : false;
+                return preg_match('/^(url|page:\d+|goto:(\d+|home))$/', $string) === 1 ? $string : false;
             }
         };
     }

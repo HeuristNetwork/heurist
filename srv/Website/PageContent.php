@@ -339,8 +339,10 @@ final class PageContent
      */
     public function fieldLink(string $reference, string $link, array $context): string
     {
-        if(preg_match('/^goto:(\d+)$/', $link, $goto) === 1){
-            return preg_match('/^(\d+|website)\./', $reference) === 1 ? $this->pageLink(intval($goto[1]), $context) : '';
+        if(preg_match('/^goto:(\d+|home)$/', $link, $goto) === 1){
+            // home: the website (the logo of the header set, written before the website has an id)
+            $page = $goto[1] === 'home' ? intval($context['site']['rec_ID'] ?? 0) : intval($goto[1]);
+            return preg_match('/^(\d+|website)\./', $reference) === 1 ? $this->pageLink($page, $context) : '';
         }
         if(preg_match('/^(\d+)\./', $reference, $source) !== 1){ return ''; }
         if($link === 'url'){

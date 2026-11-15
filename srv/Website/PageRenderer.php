@@ -208,11 +208,12 @@ final class PageRenderer
             array_unshift($tree, $this->homeItem($context));
         }
         $selectable = ($settings['selectableParent'] ?? true) !== false;
-        return '<nav class="'.self::attr(self::menuClass($settings)).'" aria-label="Site menu">'
+        // a div in the <nav> host (review 2026-11-15: one nav; the host is the navigation, data-h-label its name)
+        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="Site menu">'
             // the collapsed menu: the "3 bars" icon (2026-11-14)
             .'<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="Menu" aria-label="Menu">'
             .'<i class="fa-solid fa-bars" aria-hidden="true"></i></button>'
-            .self::menuList($tree, 'h-site-menu-list', $selectable).'</nav>';
+            .self::menuList($tree, 'h-site-menu-list', $selectable).'</div>';
     }
 
     /** The home page as a menu item. */
@@ -295,10 +296,10 @@ final class PageRenderer
         }
         $label = trim((string)($settings['labels'][$language] ?? $settings['label'] ?? ''));
         $presentation = self::menuPresentation($settings);
-        return '<nav class="'.self::attr(self::menuClass($settings)).'" aria-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
+        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
             .($presentation === 'dropdown' ? '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
                 .self::text2html($label !== '' ? $label : 'Menu').'</button>' : '')
-            .self::menuList($items, 'h-site-menu-list').'</nav>';
+            .self::menuList($items, 'h-site-menu-list').'</div>';
     }
 
     /** Font Awesome classes of an icon (letters, digits, dashes and spaces only), or ''. */
@@ -525,7 +526,6 @@ final class PageRenderer
         $position = (string)($header['position'] ?? CmsValidator::LAYOUT['header']['position'][0]);
         if(in_array($position, array('fixed', 'slide'), true)){ $classes[] = 'h-site-header-'.$position; }
         if(($header['orientation'] ?? '') === 'vertical'){ $classes[] = 'h-site-header-vertical'; }
-        if(($header['rows'] ?? '') === 'two'){ $classes[] = 'h-site-header-rows2'; }
         if((($footer['position'] ?? '') === 'fixed')){ $classes[] = 'h-site-footer-fixed'; }
         foreach(array('header' => $header, 'footer' => $footer) as $part => $settings){
             $theme = (string)($settings['theme'] ?? 'default');
