@@ -11,6 +11,9 @@
 * Limits (short URLs, LIMITS = CMS_FILTER_LIMITS): 8 values, 200 characters a value, 10 items an array, 2000 characters
 * the query string.
 *
+* Values from the record (phase B): `{record: 'id'}` or `{field: '<concept code or id>'}`, filled in by PageContent for
+* each record (reference(), resolve()); the query string leaves them out until then.
+*
 * @project     Heurist academic knowledge management system
 * @package     Website
 * @link        https://HeuristNetwork.org
@@ -33,6 +36,60 @@ final class SavedFilterLink
 
     /** Name of a parameter (`$NAME$` of the query). */
     private const NAME = '/^[A-Za-z][A-Za-z0-9_]*$/';
+
+    /** A field of a value from the record: concept code or local id. */
+    private const FIELD_CODE = '/^\d+(?:-\d+)?$/';
+
+    /** The reference of a value from the record (cmsFilterReference): 'id', the field code, or null. */
+    public static function reference($value): ?string
+    {
+        if(!is_array($value) || count($value) !== 1){ return null; }
+        if(($value['record'] ?? null) === 'id'){ return 'id'; }
+        $field = $value['field'] ?? null;
+        return is_string($field) && preg_match(self::FIELD_CODE, $field) === 1 ? $field : null;
+    }
+
+    /** Whether the values have a value from the record. */
+    public static function hasReferences($values): bool
+    {
+        foreach(is_array($values) ? $values : array() as $value){
+            if(self::reference($value) !== null){ return true; }
+        }
+        return false;
+    }
+
+    /**
+     * The values with the values from the record filled in: `id` the record id, a field its values (one: a string, more:
+     * a list); without a record, or an empty field, the value is left out.
+     *
+     * @param mixed $values Stored values.
+     * @param array|null $record A record with `details` (WebsiteRepository::records).
+     * @param callable $fieldId Field code => local id.
+     */
+    public static function resolve($values, ?array $record, callable $fieldId): array
+    {
+        $result = array();
+        foreach(self::values($values)[0] as $name => $value){
+            $reference = self::reference($value);
+            if($reference === null){
+                $result[$name] = $value;
+                continue;
+            }
+            if($record === null){ continue; }
+            if($reference === 'id'){
+                $result[$name] = (string)intval($record['rec_ID']);
+                continue;
+            }
+            $list = array();
+            foreach(WebsiteRepository::values($record, intval($fieldId($reference))) as $item){
+                $text = is_scalar($item) ? trim((string)$item) : '';
+                if($text !== '' && mb_strlen($text) <= self::LIMITS['length']){ $list[] = $text; }
+            }
+            if(empty($list)){ continue; }
+            $result[$name] = count($list) === 1 ? $list[0] : array_slice($list, 0, self::LIMITS['items']);
+        }
+        return $result;
+    }
 
     /**
      * The values within the limits (normalizeCmsFilterValues): names of parameters, trimmed strings, arrays of strings;
@@ -58,7 +115,17 @@ final class SavedFilterLink
                 $dropped = true;
                 continue;
             }
-            // an object is not a value (only a list of strings)
+            // a value from the record (phase B)
+            $reference = self::reference($value);
+            if($reference !== null){
+                if(count($result) >= self::LIMITS['values']){
+                    $dropped = true;
+                    continue;
+                }
+                $result[$name] = $reference === 'id' ? array('record' => 'id') : array('field' => $reference);
+                continue;
+            }
+            // another object is not a value (only a list of strings)
             if(is_array($value) && !empty($value) && array_keys($value) !== range(0, count($value) - 1)){
                 $dropped = true;
                 continue;
@@ -99,6 +166,8 @@ final class SavedFilterLink
         if($source < 1){ return ''; }
         $parts = array('source='.$source);
         foreach(self::values($values)[0] as $name => $value){
+            // a value from the record is filled in first (resolve)
+            if(self::reference($value) !== null){ continue; }
             foreach(is_array($value) ? $value : array($value) as $item){
                 $parts[] = 'v.'.$name.'='.rawurlencode($item);
             }

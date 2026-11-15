@@ -288,8 +288,12 @@ final class PageRenderer
                 $siteId = $context['site'] !== null ? intval($context['site']['rec_ID']) : 0;
                 if(SavedFilterLink::problem($item) !== null || ($pageId !== $siteId && (!isset($context['pages'][$pageId])
                     || $this->isRecordPage($context['pages'][$pageId])))){ continue; }
+                // values from the record (plan 27j phase B): the record of a record page
+                $values = $this->content !== null ? $this->content->filterValues($item['values'] ?? null, $context['record'] ?? null)
+                    : (SavedFilterLink::hasReferences($item['values'] ?? null) ? null : ($item['values'] ?? null));
+                if($values === null){ continue; }
                 $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']),
-                    SavedFilterLink::id($item['source']), $item['values'] ?? null);
+                    SavedFilterLink::id($item['source']), $values);
                 if($entry['url'] === ''){ continue; }
             }elseif($action === 'back'){
                 // the page before (history back in the runtime); without history and JS: the home page
@@ -677,7 +681,9 @@ final class PageRenderer
                 }
                 // Saved filter (plan 27j): the target page with the query source and its values
                 if(($settings['action'] ?? '') === 'savedFilter'){
-                    return $match[1].$match[3].$this->content->filterLink($settings, $context).$match[4];
+                    // values from the record (plan 27j phase B): the record of the media element
+                    $recordId = ($settings['mode'] ?? '') === 'record' ? intval($settings['record'] ?? 0) : 0;
+                    return $match[1].$match[3].$this->content->recordFilterLink($settings, $context, $recordId).$match[4];
                 }
                 $record = intval($settings['record'] ?? 0);
                 if(($settings['mode'] ?? '') !== 'record' || $record < 1){ return $match[0]; }
