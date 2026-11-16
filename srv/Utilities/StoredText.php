@@ -91,7 +91,7 @@ final class StoredText
                 // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-bg-video]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-link-values|data-h-bg-video]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -131,9 +131,13 @@ final class StoredText
             // a Record field element (plan 27e §22): a checked reference to a field of a record
             $reference = self::fieldReference();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-field', $reference); }
-            // the action of a Record field element (plan 27g §6): `url`, `page:<id>` or `goto:<id>` (Go to a page, 2026-11-14)
+            // the action of a Record field element (plan 27g §6): `url`, `page:<id>` or `goto:<id>` (Go to a page, 2026-11-14;
+            // `goto:home` the home page)
             $link = self::fieldLink();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-link', $link); }
+            // the values of a Saved filter link (`filter:<page>:<source>`, plan 27j): a JSON object within the limits
+            $linkValues = self::linkValues();
+            foreach($blocks as $element){ $def->addAttribute($element, 'data-h-link-values', $linkValues); }
             // a text block: a flag without a value (data-h-text="" after purifying)
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-text', 'Text'); }
             // the background video of a group (plan 27i §9 D): the key of a registered file; the site runtime adds the video
@@ -187,14 +191,35 @@ final class StoredText
         };
     }
 
-    /** `data-h-link` of a Record field element (plan 27g §6): `url` or `page:<page id>`. */
+    /**
+     * `data-h-link` of a Record field element (plan 27g §6): `url` or `page:<page id>`; `goto:<id>|goto:home` (Go to a
+     * page); `filter:<page id>:<query source id>` (Saved filter, plan 27j).
+     */
     private static function fieldLink(): \HTMLPurifier_AttrDef
     {
         return new class extends \HTMLPurifier_AttrDef {
             public function validate($string, $config, $context)
             {
                 $string = trim((string)$string);
-                return preg_match('/^(url|page:\d+|goto:\d+)$/', $string) === 1 ? $string : false;
+                return preg_match('/^(url|page:\d+|goto:(\d+|home)|filter:\d+:\d+)$/', $string) === 1 ? $string : false;
+            }
+        };
+    }
+
+    /**
+     * `data-h-link-values` of a Saved filter link (plan 27j): a JSON object of the values within the limits
+     * (SavedFilterLink::values), written again as JSON; anything else is removed.
+     */
+    private static function linkValues(): \HTMLPurifier_AttrDef
+    {
+        return new class extends \HTMLPurifier_AttrDef {
+            public function validate($string, $config, $context)
+            {
+                $decoded = json_decode(html_entity_decode(trim((string)$string), ENT_QUOTES | ENT_HTML5, 'UTF-8'), true);
+                if(!is_array($decoded)){ return false; }
+                [$values, $dropped] = \Heurist\Website\SavedFilterLink::values($decoded);
+                if($dropped || empty($values)){ return false; }
+                return (string)json_encode($values, JSON_UNESCAPED_UNICODE);
             }
         };
     }

@@ -36,7 +36,7 @@ final class CmsValidator
     );
     public const CONFIG_VERSION = 1;
     /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
-    public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page');
+    public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page', 'savedFilter');
 
     /** Website layout (`layout`, plan 27f §2-3): allowed values of each setting; the first is the default (CMS_LAYOUT). */
     public const LAYOUT = array(
@@ -333,6 +333,11 @@ final class CmsValidator
             return 'action must be '.implode(', ', self::MEDIA_ACTIONS);
         }
         if(($settings['action'] ?? '') === 'page' && intval($settings['page'] ?? 0) < 1){ return 'page must be a page id'; }
+        // Saved filter (plan 27j): a query source, the target page, the values within the limits
+        if(($settings['action'] ?? '') === 'savedFilter'){
+            $problem = SavedFilterLink::problem($settings);
+            if($problem !== null){ return $problem; }
+        }
         if(isset($settings['align']) && !in_array($settings['align'], array('left', 'center', 'right'), true)){
             return 'align must be left, center or right';
         }

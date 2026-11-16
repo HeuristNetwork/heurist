@@ -37,6 +37,15 @@ final class PageRenderer
     private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 
+    /** Presentations of a menu (plan 27k §1, MENU_PRESENTATIONS of HMenu.js); `menu` = the website menu. */
+    private const MENU_PRESENTATIONS = array('menu', 'row', 'links', 'buttons', 'icons', 'dropdown', 'expand');
+
+    /** Styles of the items of a menu (plan 27k §1, MENU_STYLES of HMenu.js). */
+    private const MENU_STYLES = array('plain', 'links', 'underline', 'pills', 'buttons', 'outline');
+
+    /** The button of an expanding action menu without its own icon (plan 27k §2, MENU_EXPAND_ICON of HMenu.js). */
+    private const MENU_EXPAND_ICON = 'fa-solid fa-share-nodes';
+
     private array $codes;
     private LanguageCodes $languages;
     /** @var array{database:string,baseUrl:string,javaScriptAllowed:bool,urls:SiteUrls} */
@@ -180,10 +189,10 @@ final class PageRenderer
             return array($this->url($context, $pageId, $context['language']), $this->text($page, $this->codes['name'], $context['language']));
         };
         $html = $this->linkMedia($html, $context);
-        return CmsHtml::fill($html, function(string $reference, string $link = '') use ($context): ?string {
+        return CmsHtml::fill($html, function(string $reference, string $link = '', string $linkValues = '') use ($context): ?string {
             if($this->content === null){ return null; }
             $value = $this->content->field($reference, $context);
-            return $value !== null && $value !== '' && $link !== '' ? $value.$this->content->fieldLink($reference, $link, $context) : $value;
+            return $value !== null && $value !== '' && $link !== '' ? $value.$this->content->fieldLink($reference, $link, $context, $linkValues) : $value;
         }, function(string $id) use ($instances, $context): ?array {
             $instance = is_array($instances[$id] ?? null) ? $instances[$id] : array();
             if(($instance['kind'] ?? '') !== 'widget'){ return null; }
@@ -197,7 +206,7 @@ final class PageRenderer
 
     /**
      * The website menu as links (for crawlers and visitors without JS); HMenu activates it. Settings (plan 27f §4):
-     * `orientation` horizontal / vertical / auto (follows the header), `showHome` a Home entry first,
+     * `orientation` horizontal / vertical / auto (follows the header), `style` of the items (plan 27k §1), `showHome` a Home entry first,
      * `selectableParent` (default true) a page with sub pages opens; else its title only opens the sub menu.
      * The languages are a widget of their own (HLangSwitch).
      */
@@ -208,11 +217,12 @@ final class PageRenderer
             array_unshift($tree, $this->homeItem($context));
         }
         $selectable = ($settings['selectableParent'] ?? true) !== false;
-        return '<nav class="'.self::attr(self::menuClass($settings)).'" aria-label="Site menu">'
+        // a div in the <nav> host (review 2026-11-15: one nav; the host is the navigation, data-h-label its name)
+        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="Site menu">'
             // the collapsed menu: the "3 bars" icon (2026-11-14)
             .'<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="Menu" aria-label="Menu">'
             .'<i class="fa-solid fa-bars" aria-hidden="true"></i></button>'
-            .self::menuList($tree, 'h-site-menu-list', $selectable).'</nav>';
+            .self::menuList($tree, 'h-site-menu-list', $selectable).'</div>';
     }
 
     /** The home page as a menu item. */
@@ -247,8 +257,8 @@ final class PageRenderer
 
     /**
      * An action menu (plan 27f §6): items of its settings as links (a page of this website, an external URL) or
-     * actions done in the page (Add record: through the Explorer of the page). `presentation` links, buttons, icons
-     * or dropdown (`label` on its button).
+     * actions done in the page (Add record: through the Explorer of the page). `presentation` row, icons, dropdown
+     * (`label` on its button) or expand (`icon` and `label` of its button), `style` and `orientation` (menuLook).
      */
     private function actionMenuHtml(array $context, array $settings): string
     {
@@ -281,6 +291,19 @@ final class PageRenderer
                     || !$this->isRecordPage($context['pages'][$pageId])){ continue; }
                 $entry['url'] = $this->url($context, $pageId, $context['language'], $recordId);
                 $entry['current'] = $pageId === $current && intval($context['record']['rec_ID'] ?? 0) === $recordId;
+            }elseif($action === 'savedFilter'){
+                // Saved filter (plan 27j): target = the page, `source` = the query source, `values`
+                $pageId = intval($target);
+                $siteId = $context['site'] !== null ? intval($context['site']['rec_ID']) : 0;
+                if(SavedFilterLink::problem($item) !== null || ($pageId !== $siteId && (!isset($context['pages'][$pageId])
+                    || $this->isRecordPage($context['pages'][$pageId])))){ continue; }
+                // values from the record (plan 27j phase B): the record of a record page
+                $values = $this->content !== null ? $this->content->filterValues($item['values'] ?? null, $context['record'] ?? null)
+                    : (SavedFilterLink::hasReferences($item['values'] ?? null) ? null : ($item['values'] ?? null));
+                if($values === null){ continue; }
+                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']),
+                    SavedFilterLink::id($item['source']), $values);
+                if($entry['url'] === ''){ continue; }
             }elseif($action === 'back'){
                 // the page before (history back in the runtime); without history and JS: the home page
                 $entry['url'] = $context['site'] !== null ? $this->url($context, intval($context['site']['rec_ID']), $context['language']) : '#';
@@ -294,11 +317,20 @@ final class PageRenderer
             $items[] = $entry;
         }
         $label = trim((string)($settings['labels'][$language] ?? $settings['label'] ?? ''));
-        $presentation = self::menuPresentation($settings);
-        return '<nav class="'.self::attr(self::menuClass($settings)).'" aria-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
-            .($presentation === 'dropdown' ? '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
-                .self::text2html($label !== '' ? $label : 'Menu').'</button>' : '')
-            .self::menuList($items, 'h-site-menu-list').'</nav>';
+        $presentation = self::menuLook($settings)['presentation'];
+        $toggle = '';
+        if($presentation === 'dropdown'){
+            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
+                .self::text2html($label !== '' ? $label : 'Menu').'</button>';
+        }elseif($presentation === 'expand'){
+            // the icons behind a button (plan 27k §2): its icon, its name as the rollover
+            $name = self::attr($label !== '' ? $label : 'Actions');
+            $icon = self::faClass((string)($settings['icon'] ?? ''));
+            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="'.$name.'" aria-label="'.$name.'">'
+                .'<i class="'.self::attr($icon !== '' ? $icon : self::MENU_EXPAND_ICON).'" aria-hidden="true"></i></button>';
+        }
+        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
+            .$toggle.self::menuList($items, 'h-site-menu-list').'</div>';
     }
 
     /** Font Awesome classes of an icon (letters, digits, dashes and spaces only), or ''. */
@@ -308,20 +340,36 @@ final class PageRenderer
         return preg_match('/^[a-z0-9 -]{1,80}$/', $icon) === 1 && strpos($icon, 'fa-') !== false ? $icon : '';
     }
 
-    /** Presentation of an action menu: links, buttons, icons, dropdown; `menu` for the website menu. */
-    private static function menuPresentation(array $settings): string
+    /**
+     * Presentation, style and orientation of a menu (plan 27f §6, 27k §1; menuLook of HMenu.js): presentation `menu`
+     * (the website menu), row, icons, dropdown or expand; a stored `links` / `buttons` presentation is a row with that
+     * style; style plain, links, underline, pills, buttons or outline; orientation horizontal, vertical or auto.
+     *
+     * @return array{presentation: string, style: string, orientation: string}
+     */
+    public static function menuLook(array $settings): array
     {
         $presentation = (string)($settings['presentation'] ?? 'menu');
-        return in_array($presentation, array('links', 'buttons', 'icons', 'dropdown'), true) ? $presentation : 'menu';
+        if(!in_array($presentation, self::MENU_PRESENTATIONS, true)){ $presentation = 'menu'; }
+        $style = (string)($settings['style'] ?? '');
+        $styled = in_array($style, self::MENU_STYLES, true);
+        if($presentation === 'links' || $presentation === 'buttons'){
+            if(!$styled){ $style = $presentation; $styled = true; }
+            $presentation = 'row';
+        }
+        $orientation = (string)($settings['orientation'] ?? '');
+        return array('presentation' => $presentation, 'style' => $styled ? $style : 'plain',
+            'orientation' => in_array($orientation, array('vertical', 'auto'), true) ? $orientation : 'horizontal');
     }
 
-    /** Classes of a menu: orientation (plan 27f §4) and the presentation of an action menu (§6); menuClass of HMenu.js. */
+    /** Classes of a menu: orientation, presentation, item style (none for a drop-down); menuClass of HMenu.js. */
     public static function menuClass(array $settings): string
     {
-        $orientation = (string)($settings['orientation'] ?? 'horizontal');
-        $presentation = self::menuPresentation($settings);
-        return 'h-site-menu'.(in_array($orientation, array('vertical', 'auto'), true) ? ' h-site-menu-'.$orientation : '')
-            .($presentation !== 'menu' ? ' h-site-menu-'.$presentation : '');
+        $look = self::menuLook($settings);
+        $classes = array('icons' => 'h-site-menu-icons', 'dropdown' => 'h-site-menu-dropdown', 'expand' => 'h-site-menu-expanding');
+        return 'h-site-menu'.($look['orientation'] !== 'horizontal' ? ' h-site-menu-'.$look['orientation'] : '')
+            .(isset($classes[$look['presentation']]) ? ' '.$classes[$look['presentation']] : '')
+            .($look['style'] !== 'plain' && $look['presentation'] !== 'dropdown' ? ' h-site-menu-style-'.$look['style'] : '');
     }
 
     /**
@@ -525,7 +573,6 @@ final class PageRenderer
         $position = (string)($header['position'] ?? CmsValidator::LAYOUT['header']['position'][0]);
         if(in_array($position, array('fixed', 'slide'), true)){ $classes[] = 'h-site-header-'.$position; }
         if(($header['orientation'] ?? '') === 'vertical'){ $classes[] = 'h-site-header-vertical'; }
-        if(($header['rows'] ?? '') === 'two'){ $classes[] = 'h-site-header-rows2'; }
         if((($footer['position'] ?? '') === 'fixed')){ $classes[] = 'h-site-footer-fixed'; }
         foreach(array('header' => $header, 'footer' => $footer) as $part => $settings){
             $theme = (string)($settings['theme'] ?? 'default');
@@ -665,6 +712,12 @@ final class PageRenderer
                 $settings = is_array($media[$match[2]] ?? null) ? $media[$match[2]] : array();
                 if(($settings['action'] ?? '') === 'page'){
                     return $match[1].$match[3].$this->content->pageLink(intval($settings['page'] ?? 0), $context).$match[4];
+                }
+                // Saved filter (plan 27j): the target page with the query source and its values
+                if(($settings['action'] ?? '') === 'savedFilter'){
+                    // values from the record (plan 27j phase B): the record of the media element
+                    $recordId = ($settings['mode'] ?? '') === 'record' ? intval($settings['record'] ?? 0) : 0;
+                    return $match[1].$match[3].$this->content->recordFilterLink($settings, $context, $recordId).$match[4];
                 }
                 $record = intval($settings['record'] ?? 0);
                 if(($settings['mode'] ?? '') !== 'record' || $record < 1){ return $match[0]; }

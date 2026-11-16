@@ -284,6 +284,20 @@ final class PageContent
     public function recordLinks(array $ids, array $settings, array $context): array
     {
         $action = (string)($settings['action'] ?? 'none');
+        // Saved filter (plan 27j): constant values = the same link for every record; values from the record (phase B):
+        // the link of each record
+        if($action === 'savedFilter'){
+            if(!SavedFilterLink::hasReferences($settings['values'] ?? null)){
+                $link = $this->filterLink($settings, $context);
+                return $link === '' ? array() : array_fill_keys(array_map('intval', $ids), $link);
+            }
+            $result = array();
+            foreach($this->repository->records($ids) as $id => $record){
+                $link = $this->filterLink($settings, $context, $record);
+                if($link !== ''){ $result[intval($id)] = $link; }
+            }
+            return $result;
+        }
         if($action !== 'url' && $action !== 'recordPage'){ return array(); }
         $pageUrl = $context['recordPageUrl'] ?? null;
         $pageId = intval($settings['recordPage'] ?? 0);
@@ -332,15 +346,81 @@ final class PageContent
     }
 
     /**
+     * Saved filter (plan 27j): a stretched link over the element to the target page of this website (`context.pageLink`)
+     * with the query source and its values (`?source=<id>&v.<NAME>=`, SavedFilterLink); '' for a page that is not in the
+     * website, a record page, or values over the limits.
+     *
+     * Values from the record (phase B) are filled in from $record; when none of them has a value there is no link (it
+     * would show every record).
+     *
+     * @param array $settings `source`, `page` (or `target`), `values`.
+     * @param array|null $record The record of the element (with its details), for values from the record.
+     */
+    public function filterLink(array $settings, array $context, ?array $record = null): string
+    {
+        if(SavedFilterLink::problem($settings) !== null){ return ''; }
+        $values = $this->filterValues($settings['values'] ?? null, $record);
+        if($values === null){ return ''; }
+        $pageId = SavedFilterLink::id($settings['page'] ?? $settings['target'] ?? null);
+        $pageLink = $context['pageLink'] ?? null;
+        $found = is_callable($pageLink) ? $pageLink($pageId) : null;
+        if(!is_array($found) || $found[0] === ''){ return ''; }
+        $href = SavedFilterLink::href($found[0], SavedFilterLink::id($settings['source']), $values);
+        if($href === ''){ return ''; }
+        return '<a class="h-site-rec-link" href="'.self::attribute($href).'"><span class="h-site-visually-hidden">'
+            .self::text($found[1] !== '' ? $found[1] : '#'.$pageId).'</span></a>';
+    }
+
+    /**
+     * The values of a Saved filter with the values from the record filled in (plan 27j phase B); null when it has values
+     * from the record and none of them has a value.
+     *
+     * @param mixed $values Stored values.
+     * @param array|null $record A record with its details.
+     */
+    public function filterValues($values, ?array $record): ?array
+    {
+        if(!SavedFilterLink::hasReferences($values)){ return is_array($values) ? $values : array(); }
+        $definitions = $this->repository->definitions();
+        $resolved = SavedFilterLink::resolve($values, $record, static function(string $code) use ($definitions): int {
+            return $definitions->localId('dty', $code);
+        });
+        foreach(SavedFilterLink::values($values)[0] as $name => $value){
+            if(SavedFilterLink::reference($value) !== null && isset($resolved[$name])){ return $resolved; }
+        }
+        return null;
+    }
+
+    /** filterLink for the record of an element by its id (a media element of a record). */
+    public function recordFilterLink(array $settings, array $context, int $recordId): string
+    {
+        $record = $recordId > 0 && SavedFilterLink::hasReferences($settings['values'] ?? null) ? $this->repository->record($recordId) : null;
+        return $this->filterLink($settings, $context, $record);
+    }
+
+    /**
      * The link of a Record field element (`data-h-link`: `url` or `page:<id>`, plan 27g §6): only for a reference
      * to a record (not website / page / record of the URL). An external link icon follows the value (cosmetics
      * 2026-11-11), the stretched link covers the element. `goto:<id>` (Go to a page, 2026-11-14): a record or the
      * website, no icon.
      */
-    public function fieldLink(string $reference, string $link, array $context): string
+    public function fieldLink(string $reference, string $link, array $context, string $linkValues = ''): string
     {
-        if(preg_match('/^goto:(\d+)$/', $link, $goto) === 1){
-            return preg_match('/^(\d+|website)\./', $reference) === 1 ? $this->pageLink(intval($goto[1]), $context) : '';
+        // Saved filter (plan 27j): `filter:<page>:<source>`, the values in data-h-link-values; any reference; values from the
+        // record (phase B) from the record of the reference
+        if(preg_match('/^filter:(\d+):(\d+)$/', $link, $filter) === 1){
+            $values = $linkValues !== '' ? json_decode($linkValues, true) : null;
+            $record = null;
+            if(SavedFilterLink::hasReferences($values) && preg_match('/^(website|page|record|\d+)\./', $reference, $prefix) === 1){
+                $record = $this->sourceRecord($prefix[1], $context);
+            }
+            return $this->filterLink(array('page' => intval($filter[1]), 'source' => intval($filter[2]),
+                'values' => is_array($values) ? $values : null), $context, $record);
+        }
+        if(preg_match('/^goto:(\d+|home)$/', $link, $goto) === 1){
+            // home: the website (the logo of the header set, written before the website has an id)
+            $page = $goto[1] === 'home' ? intval($context['site']['rec_ID'] ?? 0) : intval($goto[1]);
+            return preg_match('/^(\d+|website)\./', $reference) === 1 ? $this->pageLink($page, $context) : '';
         }
         if(preg_match('/^(\d+)\./', $reference, $source) !== 1){ return ''; }
         if($link === 'url'){
