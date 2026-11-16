@@ -27,10 +27,6 @@ jobs:
       with:
         php_version: "8.5"
         php_extensions: pdo_mysql
-    - name: Download external dependencies
-      run: |
-         curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 --retry-delay 3 -o ext.tar.bz2 https://heuristref.net/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
-         tar -xjf ext.tar.bz2 && rm -f ext.tar.bz2
-         mv external_h5 external
+    - uses: ./.github/actions/download-external-dependencies
     - name: PHPStan
       run: vendor/bin/phpstan analyse
