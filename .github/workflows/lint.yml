@@ -1,19 +1,26 @@
 name: Lint - Easy Coding Standard and PHPStan
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 permissions:
   contents: read
 
 jobs:
+  php_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: ./.github/actions/setup-php-composer
+    - name: PHP lint
+      run: php -l ./**/*.php
+
   ecs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # 6.1.2
-      with:
-        php_version: "8.5"
-        php_extensions: pdo_mysql
+    - uses: ./.github/actions/setup-php-composer
     - name: Easy Coding Standard
       run: vendor/bin/ecs
 
@@ -21,9 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
-    - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # 6.1.2
-      with:
-        php_version: "8.5"
-        php_extensions: pdo_mysql
+    - uses: ./.github/actions/setup-php-composer
+    - uses: ./.github/actions/download-external-dependencies
     - name: PHPStan
       run: vendor/bin/phpstan analyse

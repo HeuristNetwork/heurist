@@ -599,11 +599,11 @@
     "packages-dev": [
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.5",
+            "version": "2.3.6",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/645a1bd6bead15fc1b8474137467961d0fa30a79",
-                "reference": "645a1bd6bead15fc1b8474137467961d0fa30a79",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/00cedebb76cc82c1592414fa4f616cefdccda16f",
+                "reference": "00cedebb76cc82c1592414fa4f616cefdccda16f",
                 "shasum": ""
             },
             "require": {
@@ -659,21 +659,21 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-11-03T12:14:22+00:00",
-            "published-time": "2026-11-03T12:14:36+00:00"
+            "time": "2026-11-15T19:58:26+00:00",
+            "published-time": "2026-11-15T19:58:39+00:00"
         },
         {
             "name": "symplify/easy-coding-standard",
-            "version": "13.3.15",
+            "version": "13.3.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ecsphp/ecs.git",
-                "reference": "4a975bfa3cee8b4ddb3b1fae9934e8ffde155271"
+                "reference": "d40557d3d0992de7b4e50625989478900ab282d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ecsphp/ecs/zipball/4a975bfa3cee8b4ddb3b1fae9934e8ffde155271",
-                "reference": "4a975bfa3cee8b4ddb3b1fae9934e8ffde155271",
+                "url": "https://api.github.com/repos/ecsphp/ecs/zipball/d40557d3d0992de7b4e50625989478900ab282d3",
+                "reference": "d40557d3d0992de7b4e50625989478900ab282d3",
                 "shasum": ""
             },
             "require": {
@@ -706,10 +706,10 @@
             ],
             "support": {
                 "issues": "https://github.com/ecsphp/ecs/issues",
-                "source": "https://github.com/ecsphp/ecs/tree/13.3.15"
+                "source": "https://github.com/ecsphp/ecs/tree/13.3.17"
             },
-            "time": "2026-11-07T20:02:40+00:00",
-            "published-time": "2026-11-07T20:03:48+00:00"
+            "time": "2026-11-12T18:43:17+00:00",
+            "published-time": "2026-11-12T18:43:25+00:00"
         }
     ],
     "aliases": [],
