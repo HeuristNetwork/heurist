@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace Heurist\Website;
 
+use Heurist\Files\FileUrls;
 use Heurist\Utilities\LanguageCodes;
 
 /** HTML of a page context (WebsiteService::context). */
@@ -108,9 +109,11 @@ final class PageRenderer
         $content = CmsHtml::translate(WebsiteRepository::value($page, $this->codes['content']), $pageTexts);
         $header = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['header']), $siteTexts) : '';
         $footer = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['footer']), $siteTexts) : '';
-        $content = $this->fill($content, $context);
-        $header = $this->fill($header, $context);
-        $footer = $this->fill($footer, $context);
+        // file URLs (stored ./api/… and legacy ?file=) as absolute file endpoints (plan 34), also in the filled
+        // instances (galleries, badges, cards)
+        $content = $this->fileUrls($this->fill($content, $context));
+        $header = $this->fileUrls($this->fill($header, $context));
+        $footer = $this->fileUrls($this->fill($footer, $context));
         // plan 27f §3: no header / footer at all, or classes of their position (the hide flags of a page are
         // classes too: the navigation modes keep one header and footer for all pages)
         $layout = $this->layout($context);
@@ -806,6 +809,12 @@ final class PageRenderer
             $css .= '.h-site-footer{min-height:'.trim($footer['height']).';'.$middle."}\n";
         }
         return $css;
+    }
+
+    /** File URLs of HTML (stored `./api/…`, legacy `?file=`) as the absolute file endpoints (plan 34). */
+    private function fileUrls(string $html): string
+    {
+        return FileUrls::resolveHtml($html, (string)($this->environment['database'] ?? ''), (string)$this->environment['baseUrl']);
     }
 
     /** URL of the file in a file field of a record (`$kind`: web | asset, PageContent::fileUrl), or ''. */

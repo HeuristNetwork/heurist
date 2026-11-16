@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 namespace Heurist\Reports\Smarty;
 
+use Heurist\Files\FileUrls;
+
 /** Installation values of one report run. */
 final class ReportEnvironment
 {
@@ -92,16 +94,20 @@ final class ReportEnvironment
         return $this->baseUrl.'?recID='.intval($reference).'&fmt=html&db='.rawurlencode($this->databaseName);
     }
 
-    /** Download URL of an uploaded file. */
-    public function fileUrl(string $obfuscatedId, bool $pro = false): string
+    /**
+     * URL of an uploaded file on the file endpoints (plan 34). `web` by default: the reduced copy of a large image,
+     * the file itself otherwise (what legacy `?file=` gave, so `<img src="{$file.URL}">` of templates stays light);
+     * `asset`: always the file itself.
+     */
+    public function fileUrl(string $obfuscatedId, bool $pro = false, string $kind = 'web'): string
     {
-        return ($pro ? $this->baseUrlPro : $this->baseUrl).'?db='.$this->databaseName.'&file='.$obfuscatedId;
+        return FileUrls::url($obfuscatedId, $kind, $this->databaseName, $pro ? $this->baseUrlPro : $this->baseUrl);
     }
 
-    /** Thumbnail URL of an uploaded file. */
+    /** Thumbnail URL of an uploaded file (`/files/{key}/thumbnail`, plan 34). */
     public function thumbnailUrl(string $obfuscatedId, bool $pro = false): string
     {
-        return ($pro ? $this->baseUrlPro : $this->baseUrl).'?db='.$this->databaseName.'&thumb='.$obfuscatedId;
+        return FileUrls::url($obfuscatedId, 'thumbnail', $this->databaseName, $pro ? $this->baseUrlPro : $this->baseUrl);
     }
 
     private static function slash(string $path): string

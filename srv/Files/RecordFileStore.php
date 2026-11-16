@@ -106,7 +106,7 @@ final class RecordFileStore implements FileStoreInterface
             if(array_key_exists('rec_ThumbnailURL', $record)){
                 $key = preg_replace('/[^a-z0-9]/i', '', (string)($record['rec_Hash'] ?? ''));
                 $record['rec_ThumbnailURL'] = $key === '' || !defined('HEURIST_BASE_URL') ? null
-                    : HEURIST_BASE_URL.'?db='.rawurlencode($this->runtime->databaseName).'&thumb='.$key;
+                    : FileUrls::url($key, 'thumbnail', $this->runtime->databaseName, HEURIST_BASE_URL);
             }
             if($addedHash){ unset($record['rec_Hash']); }
             if(isset($record['details']) && is_array($record['details'])){

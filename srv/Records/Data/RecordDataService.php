@@ -19,6 +19,7 @@
 
 namespace Heurist\Records\Data;
 
+use Heurist\Files\FileUrls;
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Records\Files\FileRepository;
@@ -198,7 +199,7 @@ final class RecordDataService
             if(isset($wanted['rec_ThumbnailURL'])){
                 $fileId = preg_replace('/[^a-z0-9]/i', '', (string)($thumbnails[$id] ?? ''));
                 $records[$key]['rec_ThumbnailURL'] = $fileId === '' ? null
-                    : HEURIST_BASE_URL.'?db='.rawurlencode($this->runtime->databaseName).'&thumb='.$fileId;
+                    : FileUrls::url($fileId, 'thumbnail', $this->runtime->databaseName, HEURIST_BASE_URL);
             }
         }
     }

@@ -16,6 +16,7 @@
 */
 namespace Heurist\Records\Presentation;
 
+use Heurist\Files\FileUrls;
 use Heurist\Definitions\DefinitionLookup;
 use Heurist\Runtime\RuntimeContext;
 
@@ -305,8 +306,8 @@ class MapPresentationService
                 $url = @$fileinfo['ulf_ExternalFileReference'];    
                 if(!$url){
                     $fileIdObfuscated = @$fileinfo['ulf_ObfuscatedFileID'];
-                    $url = $this->runtime->baseUrl.'?fullres=1&db='.
-                        rawurlencode($this->runtime->databaseName).'&file='.$fileIdObfuscated;
+                    // the file itself (plan 34; tiled images are redirected to legacy by the endpoint)
+                    $url = FileUrls::url((string)$fileIdObfuscated, 'asset', $this->runtime->databaseName, $this->runtime->baseUrl);
                 }
             }
             $source['bounds'] = $this->normaliseGeo($this->layers->value($record, 'DT_GEO_OBJECT'));

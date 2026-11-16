@@ -6,8 +6,8 @@
 * {wrap var= dt=url|file|geo|date mode= lbl= style= width= height= limit= fancybox=
 *       calendar= info= auto_play= show_artwork=}: links, media players/images,
 *       map links, dates and CMS content (ReportExecute::printProcessedValue,
-*       processFieldFile, prepareCMScontent; recordFile.php fileGetPlayerTag,
-*       getPlayerURL, detect3D_byExt).
+*       processFieldFile, prepareCMScontent). The player of a file: Files\FilePlayerHtml
+*       (recordFile.php fileGetPlayerTag; file endpoints since plan 34).
 *
 * Difference from the legacy engine: a numeric width/height gets "px" (the
 * legacy test `is_numeric($width)<0` was always false).
@@ -26,20 +26,17 @@ declare(strict_types=1);
 
 namespace Heurist\Reports\Smarty;
 
+use Heurist\Files\FilePlayerHtml;
+use Heurist\Files\FileUrls;
 use Heurist\Utilities\GeoText;
 use Heurist\Utilities\Temporal;
 
 /** Formats values for {wrap} and {out}. */
 final class ValueFormatter
 {
-    private const MT_YOUTUBE = 'video/youtube';
-    private const MT_VIMEO = 'video/vimeo';
-    private const MT_SOUNDCLOUD = 'audio/soundcloud';
     private const ULF_IIIF = '_iiif';
     private const ULF_REMOTE = '_remote';
     private const FILE_INFO_TYPES = array('caption', 'copyright', 'copyowner', 'description');
-    private const VIEWERS_3D = array('obj', '3ds', 'stl', 'ply', 'gltf', 'glb', 'off', '3dm', 'fbx', 'dae',
-        'wrl', '3mf', 'ifc', 'brep', 'step', 'iges', 'fcstd', 'bim');
 
     private ReportEnvironment $environment;
 
@@ -176,8 +173,9 @@ final class ValueFormatter
             $nonce = (string)($file['ulf_ObfuscatedFileID'] ?? '');
             $description = htmlspecialchars(strip_tags((string)($file['ulf_Description'] ?? '')));
             $mimeType = (string)($file['fxm_MimeType'] ?? '');
+            // the file endpoints (plan 34): a link opens the file itself
             $thumbUrl = $this->environment->thumbnailUrl($nonce);
-            $fileUrl = $this->environment->fileUrl($nonce);
+            $fileUrl = $this->environment->fileUrl($nonce, false, 'asset');
             $fancybox = !empty($params['fancybox']);
 
             if($mode === 'link'){
@@ -190,7 +188,7 @@ final class ValueFormatter
                     ? "<img class=\"fancybox-thumb\" data-id=\"$nonce\" src=\"".$thumbUrl."\" title=\"".$description."\" $size $style/></a>"
                     : "<a href='$fileUrl' target=_blank rel=noopener><img class=\"\" src=\"".$thumbUrl."\" title=\"".$description."\" $size $style/></a>";
             }else{
-                $result .= $this->playerTag($nonce, $mimeType, $params, $external, $size, $style);
+                $result .= $this->player()->tag($nonce, $mimeType, $params, $external, $size, $style);
                 if(is_array($info)){
                     foreach($info as $type){
                         if(in_array($type, self::FILE_INFO_TYPES, true)){
@@ -216,109 +214,17 @@ final class ValueFormatter
         return $result;
     }
 
-    /** Player, image or link of one file (recordFile.php fileGetPlayerTag). */
-    private function playerTag(string $nonce, string $mimeType, array $params, string $external, string $size, string $style): string
-    {
-        $first = is_array($params['var'] ?? null) && isset($params['var'][0]) && is_array($params['var'][0])
-            ? $params['var'][0] : (is_array($params['var'] ?? null) ? $params['var'] : array());
-        $isVideo = strpos($mimeType, 'video/') === 0;
-        $isAudio = strpos($mimeType, 'audio/') === 0;
-        $isImage = strpos($mimeType, 'image/') === 0;
-        $isIiif = strpos((string)($first['ulf_OrigFileName'] ?? ''), self::ULF_IIIF) === 0
-            || strpos((string)($first['ulf_PreferredSource'] ?? ''), 'iiif') === 0;
-        $db = $this->environment->databaseName;
-
-        $filePath = $external !== '' && strpos($external, 'http://') !== 0
-            ? $external
-            : $this->environment->fileUrl($nonce, true).'&fancybox=1';
-        $thumbUrl = $this->environment->thumbnailUrl($nonce, true);
-        $viewer3d = self::viewer3d((string)($first['ulf_MimeExt'] ?? ''));
-
-        if($viewer3d !== ''){
-            $playerUrl = $this->environment->baseUrl.'hclient/widgets/viewers/'.$viewer3d.'Viewer.php?db='.$db.'&file='.$nonce;
-            $result = '<a href="'.$playerUrl.'" target="_blank"><img src="'.$thumbUrl.'" '.$style.'/></a>';
-        }elseif($isVideo){
-            if($size === '' && $style === ''){ $size = 'width="640px" height="480px"'; }
-            if($mimeType === self::MT_YOUTUBE || $mimeType === self::MT_VIMEO
-                || strpos($external, 'vimeo.com') > 0 || strpos($external, 'youtu.be') > 0 || strpos($external, 'youtube.com') > 0){
-                $playerUrl = $this->playerUrl($mimeType, $external, $params);
-                $result = "<iframe $size $style src=\"$playerUrl\" "
-                    .' frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
-            }else{
-                $autoplay = !empty($params['auto_play']) ? ' autoplay="autoplay"  loop="" muted="" ' : '';
-                $fileId = $external !== '' ? '' : $nonce;
-                $result = "<video $autoplay $size $style controls=\"controls\">\n"
-                    ."    <source type=\"$mimeType\" src=\"$filePath\" data-id=\"$fileId\"/>\n"
-                    ."    <img src=\"$thumbUrl\" width=\"320\" height=\"240\" title=\"No video playback capabilities\" />\n"
-                    .'</video>';
-            }
-        }elseif($isAudio){
-            if($mimeType === self::MT_SOUNDCLOUD || strpos($external, 'soundcloud.com') > 0){
-                $playerUrl = $this->playerUrl($mimeType, $external, $params);
-                $result = "<iframe $size $style src=\"$playerUrl\" frameborder=\"0\"></iframe>";
-            }else{
-                $autoplay = !empty($params['auto_play']) ? ' autoplay="autoplay"' : '';
-                $fileId = $external !== '' ? '' : $nonce;
-                $result = "<audio controls=\"controls\" $autoplay>\n"
-                    ."    <source type=\"$mimeType\" src=\"$filePath\" data-id=\"$fileId\"/>\n"
-                    ."    Your browser does not support the audio element\n"
-                    .'</audio>';
-            }
-        }elseif($isIiif){
-            if($size === '' && $style === ''){ $size = ' height="640" width="800" '; }
-            $recordId = intval($first['rec_ID'] ?? 0);
-            $viewer = $this->environment->baseUrl.'hclient/widgets/viewers/miradorViewer.php?db='.$db
-                .'&id='.($recordId > 0 ? $recordId : $nonce);
-            $result = "<iframe $size $style src=\"$viewer\" frameborder=\"0\"></iframe>";
-        }elseif($isImage){
-            if($size === '' && $style === ''){ $size = 'width="300"'; }
-            $fancybox = !empty($params['fancybox'])
-                ? ' class="fancybox-thumb" data-id="'.$nonce.'" '
-                : ($external === '' ? ' data-id="'.$nonce.'" ' : '');
-            $result = '<img '.$size.$style.' src="'.$filePath.'"'.$fancybox.'/>';
-        }elseif($mimeType === 'application/pdf'){
-            $fileId = $external !== '' ? '' : $nonce;
-            $result = '<embed width="100%" height="100%" name="plugin" src="'.$filePath.'&embedplayer=1" data-id="'.$fileId
-                .'" type="application/pdf" internalinstanceid="9">';
-        }else{
-            $result = '<a href="'.$filePath.'" target="_blank"><img src="'.$thumbUrl.'" '.$style.'/></a>';
-        }
-
-        if(!empty($params['fancybox'])){
-            $result = '<div style="width:80%;height:90%">'.$result.'</div>';
-        }
-        return $result;
-    }
-
-    /** Embed URL of YouTube, Vimeo and SoundCloud (recordFile.php getPlayerURL). */
-    private function playerUrl(string $mimeType, string $url, array $params): string
-    {
-        if($mimeType === self::MT_YOUTUBE || strpos($url, 'youtu.be') > 0 || strpos($url, 'youtube.com') > 0){
-            preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
-            return 'https://www.youtube.com/embed/'.($matches[1] ?? '');
-        }
-        if($mimeType === self::MT_VIMEO || strpos($url, 'viemo.com') > 0){
-            $context = stream_context_create(array('http' => array('timeout' => 5)));
-            $json = @file_get_contents('https://vimeo.com/api/oembed.json?url='.rawurlencode($url), false, $context);
-            $hash = is_string($json) ? json_decode($json, true) : null;
-            $videoId = intval($hash['video_id'] ?? 0);
-            return $videoId > 0 ? 'https://player.vimeo.com/video/'.$videoId : $url;
-        }
-        if($mimeType === self::MT_SOUNDCLOUD || strpos($url, 'soundcloud.com') > 0){
-            $autoplay = '&amp;auto_play='.(!empty($params['auto_play']) ? 'true' : 'false');
-            $artwork = '&amp;show_artwork='.(isset($params['show_artwork']) && $params['show_artwork'] == 0 ? 'false' : 'true');
-            return 'https://w.soundcloud.com/player/?url='.$url.$autoplay
-                .'&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
-                .'show_reposts=false&amp;show_teaser=false&amp;visual=true'.$artwork;
-        }
-        return $url;
-    }
-
     /** 3D viewer of a file extension: '3dhop', '3d' or ''. */
     public static function viewer3d(string $extension): string
     {
-        if($extension === 'nxz' || $extension === 'nxs'){ return '3dhop'; }
-        return in_array($extension, self::VIEWERS_3D, true) ? '3d' : '';
+        return FilePlayerHtml::viewer3d($extension);
+    }
+
+    /** The server player of files (plan 34): the file endpoints of the production URL, the viewers of Heurist. */
+    private function player(): FilePlayerHtml
+    {
+        return new FilePlayerHtml($this->environment->databaseName, $this->environment->baseUrlPro ?: $this->environment->baseUrl,
+            $this->environment->baseUrl);
     }
 
     /** HTML of CMS content (a JSON text element or group) with absolute links. */
@@ -340,6 +246,8 @@ final class ValueFormatter
             $text = $content;
         }
         if($convertLinks && $text !== null && is_string($text)){
+            // file URLs as the absolute file endpoints (plan 34), other relative Heurist links absolute
+            $text = FileUrls::resolveHtml($text, $this->environment->databaseName, $this->environment->baseUrl);
             $text = str_replace('./?db=', $this->environment->baseUrl.'?db=', $text);
         }
         return $text;

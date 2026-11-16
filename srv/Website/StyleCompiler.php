@@ -31,6 +31,7 @@ declare(strict_types=1);
 
 namespace Heurist\Website;
 
+use Heurist\Files\FileUrls;
 use Heurist\Utilities\StoredCss;
 
 /** Compiles base settings and node styles into one stylesheet. */
@@ -269,7 +270,8 @@ final class StyleCompiler
                 $this->issue('style_value', 'Value of style property "'.$property.'" is not allowed', $id);
                 continue;
             }
-            $css .= $property.':'.$value.';';
+            // file URLs of background images (stored ./api/… or legacy ?file=): the absolute file endpoints (plan 34)
+            $css .= $property.':'.($property === 'background-image' ? FileUrls::resolveCss($value, '', $this->baseUrl) : $value).';';
             // a colour of an element is the colour of its headings too (they take --h-site-heading-color, 2026-11-14)
             if($property === 'color'){ $css .= '--h-site-heading-color:'.$value.';'; }
         }
