@@ -67,9 +67,27 @@ user; change and delete: the uploader or the database owner (legacy rule).
   stored file name without extension, so files of the same name shared one copy; such an old copy is taken (renamed to
   the key) only when no other file has that name (`FileRowsInterface::storedNameUnique`). Removed by key and old name
   when a file is deleted or gets new content.
+- `FileUrls` — URLs of files on the file endpoints (plan 34): stored form `./api/{db}/files/{key}/{kind}`, absolute
+  for pages (`resolveHtml`, `resolveCss`), legacy `?file=` / `&fullres=1` / `&thumb=` / `&download=1` upgraded
+  (`upgrade`). Same rules as heurist-explorer `shared/src/data/fileUrls.js` (fixture `file-urls.json`,
+  tests/FileUrlsTest.php). Used by the website renderer, the style compiler, JSON thumbnails, map layers, Smarty.
+- `FilePlayerHtml` — the server player of a file (Smarty `{wrap dt="file" mode="player"}`, port of legacy
+  `fileGetPlayerTag`): image `web`; video, audio, PDF, links `asset`; services external; 3D / Mirador legacy viewer
+  pages. Same choice as the client builders (fixture `file-players.json`, tests/FilePlayerHtmlTest.php).
+- `StaticFileSender` — `GET /files/{key}/thumbnail` (when `$allowWebAccessThumbnails`) and `/web` (when
+  `$allowWebAccessUploadedFiles`) of a file already on disk are sent by `hserv/controller/api.php` before the system
+  is initialised: no database, no session (pages ask for many images; the full request for each overloaded the
+  server). ETag / Last-Modified (304), a day of cache. Anything else (setting off, not made yet) = the normal request.
+- Guests (no Bearer token) get `/asset|web|thumbnail` through `ServiceFactory::guestFileContent` +
+  `FileContent::trySendPublic`, called by `api.php` before the legacy system: one connection, no session, no settings.
+  A file that needs a login (403) goes on to the full request with the session. The redirect of a public file to the
+  file store (`$allowWebAccessUploadedFiles`) is cached a day by the browser.
 - `FileContent` — content with ranges; external resources, tiled stacks and old absolute
   paths redirect (to the URL or the legacy `?file=`); a missing thumbnail redirects to
   the legacy `?thumb=`. Login-required files are refused to guests (every type).
+  As legacy (plan 34): a public file is redirected to the file store of the web server when the installation
+  sets `$allowWebAccessUploadedFiles` (not a download); a file of a repository with credentials (Nakala) goes to
+  legacy `?file=` (sent with the API key).
 - The row is written in a transaction that is rolled back when the file cannot be
   placed; the files of a deleted row are removed after the commit.
 - The file pair has its own permissions table (`filePermissions`): file ids and record

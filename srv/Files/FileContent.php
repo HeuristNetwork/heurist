@@ -11,6 +11,9 @@
 * Files that require login are refused to guests (all types; legacy only images).
 * GET /files/{key}/web (2026-11-16): the reduced copy of a large local image (WebImageCache), as
 * legacy ?file= without fullres; the file itself otherwise.
+* As legacy (plan 34): a public file is redirected to the file store of the web server when the
+* installation allows web access to uploaded files ($allowWebAccessUploadedFiles); a file of a
+* repository with credentials (Nakala) is redirected to legacy ?file= (sent with the API key).
 *
 * @project     Heurist academic knowledge management system
 * @package     Files
@@ -38,11 +41,16 @@ final class FileContent
     private FileStorage $storage;
     private RuntimeContext $runtime;
 
-    public function __construct(FileRowsInterface $rows, FileStorage $storage, RuntimeContext $runtime)
+    /** URL of the file store root when the web server may send uploaded files itself (legacy
+     *  $allowWebAccessUploadedFiles), else null. */
+    private ?string $staticRootUrl;
+
+    public function __construct(FileRowsInterface $rows, FileStorage $storage, RuntimeContext $runtime, ?string $staticRootUrl = null)
     {
         $this->rows = $rows;
         $this->storage = $storage;
         $this->runtime = $runtime;
+        $this->staticRootUrl = $staticRootUrl !== null && $staticRootUrl !== '' ? rtrim($staticRootUrl, '/').'/' : null;
     }
 
     /**
@@ -72,6 +80,8 @@ final class FileContent
         $external = trim((string)($row['ulf_ExternalFileReference'] ?? ''));
         $source = strtolower((string)($row['ulf_PreferredSource'] ?? ''));
         if($source === 'tiled'){ return $this->redirect($this->legacyUrl('file', $key)); }
+        // a file of a repository with credentials (Nakala): legacy sends it with the API key (plan 34)
+        if(self::repositoryFile($row)){ return $this->redirect($this->legacyUrl('file', $key)); }
         $path = $this->storage->localPath($row);
         if($path === null || !is_file($path)){
             if($external !== '' && trim((string)($row['ulf_FileName'] ?? '')) === ''){ return $this->redirect($external); }
@@ -85,6 +95,16 @@ final class FileContent
                     'Content-Length' => (string)filesize($cached), 'Cache-Control' => $this->cache($loginRequired)),
                     'path' => $cached, 'offset' => 0, 'length' => intval(filesize($cached)));
             }
+        }
+        // the web server sends public files itself when the installation allows it (legacy
+        // $allowWebAccessUploadedFiles; ranges by the web server), not a download (plan 34)
+        $static = !$download && !$loginRequired ? $this->staticUrl($path) : null;
+        if($static !== null){
+            // the redirect of a public file is cached by the browser: pages that show the same file (a banner on every
+            // page) do not ask the server again (2026-11-16); the static file itself is revalidated by the web server
+            $plan = $this->redirect($static);
+            $plan['headers']['Cache-Control'] = $this->cache(false);
+            return $plan;
         }
         $size = intval(filesize($path));
         $headers = array(
@@ -108,6 +128,26 @@ final class FileContent
         return array('status' => 206, 'headers' => $headers + array(
             'Content-Range' => 'bytes '.$start.'-'.$end.'/'.$size, 'Content-Length' => (string)($end - $start + 1)),
             'path' => $path, 'offset' => $start, 'length' => $end - $start + 1);
+    }
+
+    /**
+     * The answer for a guest (plan 34: the request without the legacy system and session): sent unless the file
+     * needs a login (403), then the caller runs the request again with the session of the user.
+     *
+     * @return bool Whether the answer was sent.
+     */
+    public function trySendPublic(string $method, string $key, string $kind, string $range = '', bool $download = false): bool
+    {
+        $method = strtoupper($method);
+        if(!in_array($method, array('GET', 'HEAD'), true) || !in_array($kind, array('asset', 'web', 'thumbnail'), true)
+            || $this->runtime->userId > 0){
+            return false;
+        }
+        $plan = $this->plan($key, $kind, $range, $download);
+        if(intval($plan['status']) === 403){ return false; }
+        if($method === 'HEAD'){ unset($plan['path']); }
+        self::send($plan);
+        return true;
     }
 
     /** Send a plan: headers and the file part, or the redirect, or the error. */
@@ -154,6 +194,24 @@ final class FileContent
         $start = intval($match[1]);
         $end = $match[2] === '' ? $size - 1 : min($size - 1, intval($match[2]));
         return $start > $end || $start >= $size ? null : array($start, $end);
+    }
+
+    /** Whether a file is read through a repository with stored credentials (ulf_Parameters `repository`). */
+    private static function repositoryFile(array $row): bool
+    {
+        $parameters = json_decode((string)($row['ulf_Parameters'] ?? ''), true);
+        return is_array($parameters) && !empty($parameters['repository']);
+    }
+
+    /** URL of a file below the file store root for the web server, or null (not allowed or outside the store). */
+    private function staticUrl(string $path): ?string
+    {
+        if($this->staticRootUrl === null){ return null; }
+        $root = rtrim(str_replace('\\', '/', $this->storage->paths()->root), '/').'/';
+        $path = str_replace('\\', '/', $path);
+        if(strpos($path, $root) !== 0){ return null; }
+        $relative = substr($path, strlen($root));
+        return $this->staticRootUrl.implode('/', array_map('rawurlencode', explode('/', $relative)));
     }
 
     private function legacyUrl(string $parameter, string $key): string
