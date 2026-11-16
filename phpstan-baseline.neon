@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \$set of function ensureUniqueConceptNameForInsert\(\) has invalid type SourceDataset\.$#'
-			identifier: class.notFound
-			count: 1
-			path: admin/harvest/HarvestHelpers.php
-
-		-
 			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -41,24 +35,6 @@ parameters:
 			identifier: arguments.count
 			count: 3
 			path: admin/harvest/SemanticTermLinksImporter.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 4
-			path: admin/harvest/harvest_semantics_global.php
-
-		-
-			message: '#^Function main invoked with 0 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: admin/harvest/harvest_semantics_global.php
-
-		-
-			message: '#^Class BulkEmailSystem referenced with incorrect case\: bulkEmailSystem\.$#'
-			identifier: class.nameCase
-			count: 1
-			path: admin/utilities/bulkEmailCron.php
 
 		-
 			message: '#^Access to an undefined property BulkEmailSystem\:\:\$rec_lastmod\.$#'
@@ -415,12 +391,6 @@ parameters:
 			path: hserv/utilities/DbExecuteScript.php
 
 		-
-			message: '#^Instantiated class Mysqldump not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: hserv/utilities/DbUtils.php
-
-		-
 			message: '#^Call to an undefined static method geoPHP\:\:getAdapter\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 2
@@ -467,12 +437,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: hserv/utilities/UImage.php
-
-		-
-			message: '#^Instantiated class SimpleSAML\\Auth\\Simple not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: hserv/utilities/USaml.php
 
 		-
 			message: '#^Method hserv\\web\\WebSite\:\:execute\(\) should return bool but return statement is missing\.$#'
