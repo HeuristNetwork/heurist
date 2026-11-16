@@ -301,7 +301,7 @@ $.widget('heurist.recordFieldSetEditor', $.heurist.recordAction, {
             const item = {
                 field:String(row.attr('data-field')),
                 visible:row.find('.field-visible').is(':checked'),
-                title:$.trim(row.find('.field-title').val() || '')
+                title: String(row.find('.field-title').val() || '').trim()
             };
             const width = row.find('.field-width').val();
             const ext = row.find('.field-ext').val();
@@ -352,7 +352,7 @@ $.widget('heurist.recordFieldSetEditor', $.heurist.recordAction, {
     },
 
     _normaliseFieldCode: function(code){
-        code = $.trim(String(code || ''));
+        code = String(code || '').trim();
         if(!code){ return ''; }
         const parts = code.split(':');
         const terminal = parts[parts.length-1].toLowerCase();

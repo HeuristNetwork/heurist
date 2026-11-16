@@ -5648,7 +5648,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
 
             currentId = response.data;
-            _updatePreviewValue();
         });
     }
     

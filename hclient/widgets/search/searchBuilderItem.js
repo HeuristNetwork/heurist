@@ -387,8 +387,9 @@ $.widget( "heurist.searchBuilderItem", {
             if(window.hWin.HEURIST4.util.isPositiveInt(this.options.dty_ID)){
                 lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
             }else{
-                let res = $Db.parseHierarchyCode(`any:${this.options.dty_ID}`);
-                lbl_text = res !== false ? res['harchy_fields'][0] : `${this.options.dty_ID.charAt(0).toUpperCase()}${str.slice(1)}`;
+                let fieldLabel = this.options.dty_ID;
+                let res = $Db.parseHierarchyCode(`any:${fieldLabel}`);
+                lbl_text = res !== false ? res['harchy_fields'][0] : `${fieldLabel.charAt(0).toUpperCase()}${fieldLabel.slice(1)}`;
             }
 
             if(this.options.enum_field!=null){

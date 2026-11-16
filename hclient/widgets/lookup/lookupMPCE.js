@@ -467,7 +467,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         let items = this.getAllChecked(list);
 
         if(items == null || items.length == 0){
-            that.$Hmsg.showMsgDlg('There are No Recent Keywords Selected to Assign', null, 'No recent keywords');     
+            this.$Hmsg.showMsgDlg('There are No Recent Keywords Selected to Assign', null, 'No recent keywords');
             return;
         }
 
@@ -503,7 +503,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         }
 
         if(items == null || items.length == 0){
-            that.$Hmsg.showMsgDlg('There are No Associated Keywords Selected to Assign', null, 'No associated keywords');     
+            this.$Hmsg.showMsgDlg('There are No Associated Keywords Selected to Assign', null, 'No associated keywords');
             return;
         }
 

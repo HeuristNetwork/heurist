@@ -135,7 +135,7 @@ content += ''
         this._on(this.$abort, {
             click: function(){
                 const o = this.options;
-                if ($.isFunction(o.onAbort)) {
+                if (typeof o.onAbort === 'function') {
                     o.onAbort(this);
                 } else if (o.endpoint) {
                     
@@ -216,7 +216,7 @@ content += ''
                     try {
                         state = JSON.parse(text);
                     } catch (e) {
-                        if ($.isFunction(o.onError)) o.onError(e);
+                        if (typeof o.onError === 'function') o.onError(e);
                         return;
                     }
 
@@ -236,10 +236,6 @@ content += ''
 
                 this.setProgress(done, total, note);
         },'text');
-
-        //    }, 'txt').fail((xhr)=>{
-        //        if ($.isFunction(o.onError)) o.onError(xhr);
-        //});
 
         this._elapsed += t_interval;
     },
@@ -272,7 +268,7 @@ content += ''
 
     _complete: function(result){
         this.stop();
-        if ($.isFunction(this.options.onComplete)) {
+        if (typeof this.options.onComplete === 'function') {
             this.options.onComplete(result);
         }
         // default close

@@ -266,7 +266,7 @@ class HeuristModuleRecordset extends HeuristModuleViewer {
 
     _normalizeQuery(query) {
         if (query == null) return null;
-        if (typeof query === 'string') return $.trim(query) || null;
+        if (typeof query === 'string') return query.trim() || null;
         if ($.isPlainObject(query)) return $.extend(true, {}, query);
         return query;
     }

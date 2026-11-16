@@ -139,7 +139,7 @@ class HeuristModuleTimeline extends HeuristModuleRecordset {
     }
 
     _normalizeFields(fields) {
-        if (!fields) return []; if(Array.isArray(fields)) return fields.slice(); if(typeof fields==='string') return fields.split(',').map(function(v){return $.trim(v);}).filter(Boolean); return [];
+        if (!fields) return []; if(Array.isArray(fields)) return fields.slice(); if(typeof fields==='string') return fields.split(',').map(function(v){return v.trim();}).filter(Boolean); return [];
     }
     _normalizeContexts(contexts) {
         var that=this;

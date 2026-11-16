@@ -3842,7 +3842,7 @@ window.hWin.HEURIST4.ui = {
 
     popupSortableList: function(itemMap, dialogSettings, callback){
 
-        if(!itemMap instanceof Map){
+        if(!(itemMap instanceof Map)){
             //console.error(`Items map is invalid, got ${itemsMap.constructor.name} expected a Map`);
             throw new Error(`Items map is invalid, got ${itemMap.constructor.name} expected a Map`);
         }else if(window.hWin.HEURIST4.util.isempty(callback) || typeof callback !== 'function'){
@@ -4253,8 +4253,8 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
         const addSpace = event.key === " " || keyCode === 32 || (enterPressed && (shiftPressed || CTRLPressed));
 
-        const autoSelectResult = enterPressed && $menu.find('.ui-menu-item:visible').length === 1;
-        const focusResults = tabPressed && $menu.find('.ui-menu-item:visible').length > 0;
+        const autoSelectResult = enterPressed && this.menu.find('.ui-menu-item:visible').length === 1;
+        const focusResults = tabPressed && this.menu.find('.ui-menu-item:visible').length > 0;
         const highlightAllText = (event.key === "A" || keyCode === 13 || keyCode === 65) && CTRLPressed;
         const moveCursor = leftArrow || rightArrow;
 
@@ -4275,10 +4275,10 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
             this._searchInput[0].setSelectionRange(this._searchStartPosition, this._searchStartPosition);
         }else if(autoSelectResult){ // auto select only result
 
-            $menu.find('.ui-menu-item:visible').trigger('mouseover').trigger('click'); // trigger selection, needs focus first
+            this.menu.find('.ui-menu-item:visible').trigger('mouseover').trigger('click'); // trigger selection, needs focus first
         }else if(focusResults){ // focus first item
 
-            $($menu.find('.ui-menu-item:visible')[0]).trigger('mouseover'); // change focus to options
+            this.menu.find('.ui-menu-item:visible').first().trigger('mouseover'); // change focus to options
         }else if(highlightAllText){
 
             // Highlight input text
