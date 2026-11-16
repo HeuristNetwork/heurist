@@ -505,28 +505,10 @@ parameters:
 			path: import/biblio/syncZotero.php
 
 		-
-			message: '#^Path in include_once\(\) "external/php/tileserver\.php" is not a file or it does not exist\.$#'
-			identifier: includeOnce.fileNotFound
-			count: 1
-			path: mbtiles.php
-
-		-
 			message: '#^Instantiated class GeoJSON not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: srv/Records/Map/GeoJsonGeometryConverter.php
-
-		-
-			message: '#^Instantiated class Heurist\\Website\\Build\\WebsiteBuildJob not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: srv/Runtime/ServiceFactory.php
-
-		-
-			message: '#^Instantiated class Heurist\\Website\\Build\\WebsiteBuilder not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: srv/Runtime/ServiceFactory.php
 
 		-
 			message: '#^Instantiated class DbRecUploadedFiles not found\.$#'
