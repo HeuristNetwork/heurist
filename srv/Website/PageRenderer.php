@@ -119,7 +119,7 @@ final class PageRenderer
         $bodyClass = self::bodyClasses($layout);
         // the banner image of the website and own colours of header / footer (plan 27f §13): a block of its own, the
         // preview of the designer replaces h-site-styles with the draft styles and keeps this one
-        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
+        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0), 'asset') : '');
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -808,11 +808,11 @@ final class PageRenderer
         return $css;
     }
 
-    /** URL of the file in a file field of a record, or ''. */
-    private function fileUrlOf(array $record, int $fieldId): string
+    /** URL of the file in a file field of a record (`$kind`: web | asset, PageContent::fileUrl), or ''. */
+    private function fileUrlOf(array $record, int $fieldId, string $kind = 'web'): string
     {
         $fileId = $fieldId > 0 ? intval(WebsiteRepository::value($record, $fieldId)) : 0;
-        return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId) : '';
+        return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId, $kind) : '';
     }
 
     /** Scope of the page styles: its section (plan 27f §2.2). */

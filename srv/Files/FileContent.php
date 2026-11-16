@@ -2,13 +2,15 @@
 /**
 * FileContent.php - Content and thumbnail of a registered file
 *
-* GET /files/{key}/content and /files/{key}/thumbnail (plan 20, §8.3), by the
+* GET /files/{key}/asset (was content, 2026-11-16) and /files/{key}/thumbnail (plan 20, §8.3), by the
 * obfuscated key (rec_Hash), so file ids cannot be enumerated. Local files are
 * sent with range support (206, Content-Range, Accept-Ranges) for audio and
 * video; external resources are redirected to; files the legacy code keeps
 * elsewhere (tile stacks, old absolute paths) and missing thumbnails are
 * redirected to the legacy ?file= / ?thumb= links, which stay.
 * Files that require login are refused to guests (all types; legacy only images).
+* GET /files/{key}/web (2026-11-16): the reduced copy of a large local image (WebImageCache), as
+* legacy ?file= without fullres; the file itself otherwise.
 *
 * @project     Heurist academic knowledge management system
 * @package     Files
@@ -46,7 +48,7 @@ final class FileContent
     /**
      * What to answer (tests check the plan without sending).
      *
-     * @param string $kind content or thumbnail
+     * @param string $kind asset (the file), thumbnail or web
      * @param string $range Range header ("bytes=a-b", "bytes=a-", "bytes=-n" or '').
      * @param bool $download Attachment instead of inline.
      * @return array{status:int,headers:array<string,string>,path?:string,offset?:int,length?:int,error?:string}
@@ -74,6 +76,15 @@ final class FileContent
         if($path === null || !is_file($path)){
             if($external !== '' && trim((string)($row['ulf_FileName'] ?? '')) === ''){ return $this->redirect($external); }
             return $this->redirect($this->legacyUrl('file', $key));
+        }
+        if($kind === 'web'){
+            // the reduced copy of a large image; otherwise the file itself
+            $cached = $this->storage->webCache()->get($row, $path, $this->rows);
+            if($cached !== null){
+                return array('status' => 200, 'headers' => array('Content-Type' => 'image/jpeg',
+                    'Content-Length' => (string)filesize($cached), 'Cache-Control' => $this->cache($loginRequired)),
+                    'path' => $cached, 'offset' => 0, 'length' => intval(filesize($cached)));
+            }
         }
         $size = intval(filesize($path));
         $headers = array(

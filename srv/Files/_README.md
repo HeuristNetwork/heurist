@@ -32,9 +32,10 @@ both file tables (`RecordRepository::tablesExist`), otherwise `LegacyFileStore`.
 | POST | `/files/{id}/validate` | the checks only |
 | POST | `/files/upload` | start an upload `{name, size, type}` → `{token, chunkSize}` |
 | PUT, GET, DELETE | `/files/upload/{token}` | one chunk (raw body, Content-Range, X-Heurist-Client) / received size / cancel |
-| GET | `/files/{key}/content`, `/files/{key}/thumbnail` | the file (ranges, 206) and its thumbnail by the obfuscated key |
+| GET | `/files/{key}/asset`, `/files/{key}/thumbnail` | the file (ranges, 206; was `content` until 2026-11-16) and its thumbnail by the obfuscated key |
+| GET | `/files/{key}/web` | the reduced web copy of a large local image (`WebImageCache`), else the file as `asset` (2026-11-16) |
 
-Logged-in users only, except content and thumbnails of viewable files. Writes: same-site
+Logged-in users only, except the file (`asset`), web copy and thumbnail of viewable files. Writes: same-site
 Origin, JSON bodies; chunks need the `X-Heurist-Client` header. Register: any logged-in
 user; change and delete: the uploader or the database owner (legacy rule).
 
@@ -61,6 +62,11 @@ user; change and delete: the uploader or the database owner (legacy rule).
   service (canonical `info.json`), else the Content-Type of a HEAD request or the URL
   extension. An already registered URL gives its file. Without a known type the file type is
   `bin` (`guessed`) and the save returns the warning `file_type`.
+- `WebImageCache` — web copies (2026-11-16, = legacy `getWebImageCache`): JPEG of at most 400×400 of a local image
+  of 200 KB or more, `webimagecache/<key>.jpg` (blurred copies `blurredimagescache/<key>.png`). Legacy named them by the
+  stored file name without extension, so files of the same name shared one copy; such an old copy is taken (renamed to
+  the key) only when no other file has that name (`FileRowsInterface::storedNameUnique`). Removed by key and old name
+  when a file is deleted or gets new content.
 - `FileContent` — content with ranges; external resources, tiled stacks and old absolute
   paths redirect (to the URL or the legacy `?file=`); a missing thumbnail redirects to
   the legacy `?thumb=`. Login-required files are refused to guests (every type).

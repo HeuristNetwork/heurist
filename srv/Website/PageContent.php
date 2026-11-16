@@ -191,11 +191,16 @@ final class PageContent
         return $url === '' ? '' : '<img src="'.self::attribute($url).'" alt="">';
     }
 
-    /** URL of a registered file (the icon of a menu entry, an image field), or ''. */
-    public function fileUrl(int $fileId): string
+    /**
+     * URL of a registered file (the icon of a menu entry, an image field, the banner), or ''. New file endpoints
+     * (2026-11-16): `web` = the reduced copy of a large image (images in the page), `asset` = the file itself (a
+     * page-wide background); tiled, IIIF and remote files are redirected by the endpoint.
+     */
+    public function fileUrl(int $fileId, string $kind = 'web'): string
     {
         $key = $fileId > 0 ? $this->repository->fileKey($fileId) : '';
-        return $key === '' ? '' : $this->services['baseUrl'].'?db='.rawurlencode($this->services['database']).'&file='.rawurlencode($key);
+        return $key === '' ? '' : $this->services['baseUrl'].'api/'.rawurlencode($this->services['database'])
+            .'/files/'.rawurlencode($key).'/'.($kind === 'asset' ? 'asset' : 'web');
     }
 
     /**

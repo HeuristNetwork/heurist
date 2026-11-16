@@ -549,13 +549,13 @@ if($is_system_query){
 // Registered files as records (plan 20): GET|POST /files searches with the
 // /records contract, GET /files/{id} gives one file record; uploads (/files/upload),
 // registration and changes (POST/PUT/PATCH/DELETE /files/{id}) need a logged-in user;
-// GET /files/{key}/content|thumbnail may be read by guests (viewable files).
+// GET /files/{key}/asset|thumbnail|web may be read by guests (viewable files; asset was content until 2026-11-16).
 // See srv/Controller/FileController.php for the routes and checks.
 $is_files_query = ($resource === 'files');
 $is_files_search = false;
 if($is_files_query){
     $fileSegment = (string)($requestUri[4] ?? '');
-    $is_files_content = in_array((string)($requestUri[5] ?? ''), array('content','thumbnail'), true)
+    $is_files_content = in_array((string)($requestUri[5] ?? ''), array('asset','thumbnail','web'), true)
         && $fileSegment !== '' && !ctype_digit($fileSegment);
     // the search and /files/aggregate (op=count|rectypes) read the same JSON contract
     $is_files_search = (($fileSegment === '' || $fileSegment === 'aggregate')
