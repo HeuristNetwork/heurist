@@ -11,5 +11,6 @@ parameters:
         - vendor
         - external (?)
         - data (?)
+        - hserv/controller/LookupController.php # throws error in phpstan due to mysql connection
     paths:
         - .
