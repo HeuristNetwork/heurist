@@ -391,6 +391,12 @@ parameters:
 			path: hserv/utilities/DbExecuteScript.php
 
 		-
+			message: '#^Instantiated class Mysqldump not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: hserv/utilities/DbUtils.php
+
+		-
 			message: '#^Call to an undefined static method geoPHP\:\:getAdapter\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 2
@@ -467,6 +473,12 @@ parameters:
 			identifier: function.void
 			count: 1
 			path: import/biblio/syncZotero.php
+
+		-
+			message: '#^Path in include_once\(\) "external/php/tileserver\.php" is not a file or it does not exist\.$#'
+			identifier: includeOnce.fileNotFound
+			count: 1
+			path: mbtiles.php
 
 		-
 			message: '#^Instantiated class GeoJSON not found\.$#'
