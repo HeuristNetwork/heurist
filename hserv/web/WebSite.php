@@ -21,42 +21,42 @@ use hserv\entity\DbUsrSavedSearches;
 require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
-define('HEAD_E','</head>');
-
 /**
  * Class WebSite
- * 
+ *
  * It is initialized in FrontController
  *
- * This class generates web page content as browser output, file, or returns as string 
+ * This class generates web page content as browser output, file, or returns as string
  */
 class WebSite
 {
+    const HEAD_E = '</head>';
+
     private $system;
     private $params;
 
     private $messageError;
-    
+
     // 0 - in browser only
     // 1 - saves into generated-html and return true/false
     // 2 - download generated html as file (not used)
     // 3 - saves into generated-html and report output
     // 4 - returns as variable
     private $publishmode;
-    
-    private $outputfile; 
 
-    private $isWebPage = false;    
+    private $outputfile;
+
+    private $isWebPage = false;
     private $isEditMode = false;
     private $isJsAllowed = false;
     private $isHeadless; //output main conent only - without header and footer
-    
-    
+
+
     private $siteRecord; //it may set - to avoid header/footer generation for evey page
     private $pageRecord;
-    
+
     private $currentLang = 'en';
-    
+
     private $menuTree = null;    // hierarchy of ids
     private $menuRecords = null; // flat array of records with menu details
 
@@ -77,13 +77,13 @@ class WebSite
 
         $this->system->defineConstant('RT_CMS_HOME');
         $this->system->defineConstant('RT_CMS_PAGE');
-        
+
         $this->system->defineConstant('DT_NAME');
         $this->system->defineConstant('DT_SHORT_SUMMARY');
         $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
         $this->system->defineConstant('DT_THUMBNAIL');
         $this->system->defineConstant('DT_FILE_RESOURCE');
-        
+
         $this->system->defineConstant('DT_CMS_KEYWORDS');
         $this->system->defineConstant('DT_CMS_HEADER');
         $this->system->defineConstant('DT_CMS_FOOTER');
@@ -92,8 +92,8 @@ class WebSite
         $this->system->defineConstant('TRM_NO');
         $this->system->defineConstant('DT_LANGUAGE');
         $this->system->defineConstant('DT_CMS_PAGETYPE');
-        
-        
+
+
         $this->system->defineConstant('TRM_ICON_ONLY'); //2-9635
         $this->system->defineConstant('TRM_NAME_ONLY'); //2-9634
 
@@ -101,14 +101,14 @@ class WebSite
         $this->system->defineConstant('DT_CMS_MENU');
         $this->system->defineConstant('DT_CMS_MENU_FORMAT');
         $this->system->defineConstant('DT_THUMBNAIL');
-        
+
         $this->system->defineConstant('DT_CMS_ACTION');
         $this->system->defineConstant('DT_QUERY_STRING');
-        
+
         $this->system->defineConstant('DT_VERSION');
-        
+
     }
-    
+
     /**
      * Initializes properties from parameters or sets defaults.
      *
@@ -125,62 +125,62 @@ class WebSite
 
         $this->isHeadless = false; //if true it returns main content only
         $this->isJsAllowed = $this->system->settings->isJavaScriptAllowed();
-        
+
         $this->currentLang = $this->params['lang'];
-        
+
     }
-    
-    
+
+
     /**
     * Verifies provided siteID and pageID.
     * Checks presence, accessibility and record type
-    * 
+    *
     * return true is success
     */
     private function verifyWebsiteIds(): bool{
 
         $siteId = @$this->params['website']; //website id
-        $pageId = @$this->params['pageid'];  //page id  
+        $pageId = @$this->params['pageid'];  //page id
 
-        
+
         if(!isPositiveInt($siteId)){
             // if $siteId is not defined - use first available "CMS home" record
-            
+
             //find default website
             $res = recordSearch($this->system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));
             $def_rec_id = 0;
             if(@$res['status']==HEURIST_OK){
                 $def_rec_id = @$res['data']['records'][0];
             }
-            
+
             if(isPositiveInt($def_rec_id)){
                $siteId = $def_rec_id;
             }else{
                 $try_login = $this->system->getCurrentUser() == null;
                 $this->outputError('Sorry, there are no publicly accessible websites defined for this database. '
-                .'Please ' . ($try_login ? '<div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> or' 
+                .'Please ' . ($try_login ? '<div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> or'
                                          : '') . ' ask the owner to publish their website(s).');
-                
+
                 return false;
             }
         }
 
         $this->siteRecord = $this->verifyTypeAndAccess($siteId, true);
         $res = ($this->siteRecord!=null);
-        
+
         if(!$res){
             return false;
         }
-        
-        if(!$this->isWebPage && isPositiveInt($pageId)){ 
-        
+
+        if(!$this->isWebPage && isPositiveInt($pageId)){
+
             $this->pageRecord = $this->verifyTypeAndAccess($pageId, false);
             $res = ($this->pageRecord!=null);
             if($res){
                 $this->outputfile = $pageId.'.html';
             }
-        }   
-        
+        }
+
         if(!$res){
             //page id not defined or not found - load home page
             $this->pageRecord = null;
@@ -188,35 +188,35 @@ class WebSite
             $this->messageError = null;
             $res = true;
         }
-        
+
         return $res;
     }
-    
+
     /**
     * Loads record
-    * Checks allowed type and visibility  
+    * Checks allowed type and visibility
     *
-    * 
+    *
     * @param int $recId
     * @param mixed $recordType
     * @return {record|null}
     */
     private function verifyTypeAndAccess($recId, $isMainRecord){
-        
+
         //static url in external links may have outdated id - check if this record has been replaced (merged)
         $recId = recordSearchReplacement($this->system->getMysqli(), $recId, 0);
         $rec = recordSearchByID($this->system, $recId, false);
         $err_message = null;
-        
+
         if($rec==null){
             $err_message = 'Webpage with given ID not found';
-            
+
         }elseif(!($isMainRecord && $rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE)){
             $err_message = 'Record is not a Webpage';
         }else {
-            
+
             // see ReportRecord->recordIsVisible
-        
+
             $hasAccess = (($rec['rec_NonOwnerVisibility'] == 'public') ||
                            $this->system->isAdmin() ||
                 ( ($this->system->getUserId()>0) &&
@@ -229,9 +229,9 @@ class WebSite
                 $err_message = 'The Heurist website at this address is not yet publicly accessible. '
                     . ($try_login ? '<br>Try <div data-heurist-cms="HMenuPersonal" style="display:inline-block">{"reloadOnLogin":true}</div> to view this website.' : '');
             }
-            
+
         }
-        
+
         if($err_message==null){
             return $rec;
         }else{
@@ -252,25 +252,25 @@ class WebSite
         // Check if the system is initialized
         if (!isset($this->system) || !$this->system->isInited()) {
             $this->outputError();
-        } 
-        
+        }
+
         if(isset($this->params) && array_key_exists('webmenu', $this->params)){
             //returns menu content as array or html
             if($this->messageError){
                 $result = false;
-            }else{            
-                
+            }else{
+
                 if(@$this->params['isTree']){
-                    
+
                     if(is_string($this->params['webmenu'])){
                         $this->params['webmenu'] = json_decode($this->params['webmenu'],true);
                     }
-    
+
                     $this->menuTree = [];   //tree
                     $this->menuRecords = []; //flat array with data
                     $this->fillMenuTreeDetails($this->params['webmenu'], $this->menuTree, true);
                     $result = $this->getMenuTree(0, $this->menuTree);
-                    
+
                 }else{
                     $result = $this->getMenuTree( $this->params['webmenu'] );
                 }
@@ -287,30 +287,30 @@ class WebSite
             }
             return;
         }
-            
-        //html output    
+
+        //html output
         if (!isset($this->params)) {
             // Check if parameters are defined
             $this->outputError('Parameters for website are not defined');
         }elseif ($this->verifyWebsiteIds()) {
-            
+
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
-            
+
             if($this->siteRecord['rec_RecTypeID']==RT_CMS_PAGE){
                 $this->isWebPage = (defined('DT_CMS_PAGETYPE') &&
                         $this->getVal(DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));//TRM_PAGETYPE_WEBPAGE
-                        
+
                 if(!$this->isWebPage){
                     $this->outputError('Record is not a Website Home');
                 }
             }
         }
-        
+
         if(array_key_exists('header', $this->params)){
-            
+
             echo $this->getPageMargin('header'); //direct output
-            
+
         }elseif(array_key_exists('footer', $this->params)){
 
             echo $this->getPageMargin('footer');
@@ -318,40 +318,40 @@ class WebSite
         }elseif(array_key_exists('webtemplate', $this->params)){
             //returns content of page template
             echo $this->getTemplateContent('template', basename($this->params['webtemplate'].'.html'));
-        
+
         }else{
             ob_start();
             if($this->messageError){
                 include_once 'WebSiteInfo.php';
             }else{
-                include_once 'WebSiteTemplate.php';    
+                include_once 'WebSiteTemplate.php';
             }
             $output = ob_get_contents();
-            ob_end_clean();            
+            ob_end_clean();
             $this->handleOutput($output);
         }
-        
+
     }
-    
+
     public function getWebSiteVersion(){
-        
+
         if(!(defined('DT_VERSION') && DT_VERSION>0)){
             return 0;
         }
-        
+
         if (!isset($this->system) || !$this->system->isInited()) {
             return 0;
-        }    
-        
+        }
+
         if (!$this->verifyWebsiteIds()){
              return 0;
-        }     
-        
+        }
+
         $temp_rec = array('rec_ID' => intval($this->getSiteId()));
         recordSearchDetails($this->system, $temp_rec, DT_VERSION, false);
         return recordGetField($temp_rec, DT_VERSION);
     }
-    
+
     /**
     * Load details of record (logo, title, langs, bg images, keywords)
     */
@@ -359,16 +359,16 @@ class WebSite
         recordSearchDetails($this->system, $this->siteRecord, true);
     }
 
-    
+
     private function getVal($field_id, $is_safe=true){
         return $this->getValue($this->siteRecord, $field_id, $is_safe, $this->currentLang);
     }
-        
+
     //
     // TBD Move to new class HRecord
     //
     private function getValue($record, $field_id, $is_safe=false, $lang=null){
-        
+
         if(is_string($field_id) && strpos($field_id,'-')){
             $field_id = ConceptCode::getDetailTypeLocalID($field_id);
         }
@@ -376,11 +376,11 @@ class WebSite
         $val = @$record['details']?@$record['details'][$field_id]:@$record[$field_id];
 
         if(is_array($val) && count($val)>0){
-            
+
             if($lang==null){
-                $val = array_shift($val); //get first  
+                $val = array_shift($val); //get first
             }else{
-                $val = getCurrentTranslation($val, $lang);    
+                $val = getCurrentTranslation($val, $lang);
             }
 
         }elseif($val==null){
@@ -389,7 +389,7 @@ class WebSite
 
         return $is_safe ? USanitize::sanitizeString($val) : $val;
     }
-    
+
     //
     // Move to new class HRecord
     //
@@ -410,39 +410,39 @@ class WebSite
 
         return $file;
     }
-    
+
     /**
     * Returns values defined in siteRecord for website header meta tags
-    *     
+    *
     * @param mixed $field
     * @param mixed $is_out
     */
     public function meta($field, $is_out=true){
-        
+
         $val = '';
         if($this->siteRecord){
-            
-            $codes = array('title'=>DT_NAME, 
+
+            $codes = array('title'=>DT_NAME,
                            'keywords'=>DT_CMS_KEYWORDS,
                            'description'=>DT_SHORT_SUMMARY);
                            //'content'=>DT_EXTENDED_DESCRIPTION);
-            
+
             $val = '';
-            
+
             if(array_key_exists($field, $codes)){
                 $val = strip_tags($this->getVal($codes[$field]));
             }elseif($field=='lang'){
-                $val = $this->currentLang; 
-            }elseif($field=='favicon'){            
+                $val = $this->currentLang;
+            }elseif($field=='favicon'){
                 $val = $this->getFile($this->siteRecord, DT_THUMBNAIL, (HEURIST_BASE_URL.'favicon.ico'));
             }
-            
+
         }elseif($field=='favicon'){
             $val = HEURIST_BASE_URL.'favicon.ico';
         }elseif($field=='title'){
             $val = HEURIST_TITLE;
         }
-        
+
         if($is_out){
             echo $val;
         }
@@ -457,12 +457,12 @@ class WebSite
         $rec = $this->pageRecord??$this->siteRecord;
         return $rec['rec_ID'] ?? 0;
     }
-    
+
     //
     // Returns page main content (stored in DT_EXTENDED_DESCRIPTION)
     //
     public function getPageContent($is_out=true){
-        
+
         if($this->messageError){
             $val = $this->messageError;
         }else{
@@ -471,38 +471,38 @@ class WebSite
             if($this->pageRecord && !@$this->pageRecord['details']){
                 recordSearchDetails($this->system, $this->pageRecord, true);
             }
-            
+
             $record = $this->pageRecord??$this->siteRecord;
             $val = @$record['details']?@$record['details'][DT_EXTENDED_DESCRIPTION]:@$record[DT_EXTENDED_DESCRIPTION];
             if(is_array($val) && count($val)>0){
                 $val = implode('',$val);
             }
             //TBD $this->currentLang
-        */            
+        */
         }
-        
+
         if($is_out){
             echo $val;
         }
         return $val;
     }
-    
+
     /*
     *
     */
     private function getTemplateContent($type, $filename=null){
-        
+
         if(!$filename){
             $filename = 'default.html';
         }
-        
+
         $templateType = '';
         if($type=='footer'){
             $templateType = 'footers/';
         }elseif($type=='header'){
             $templateType = 'headers/';
         }
-        
+
         $template = null;
         $full_filename = HEURIST_DIR.'hserv/web/templates/'.$templateType.basename($filename);
         if(file_exists($full_filename)){
@@ -516,19 +516,19 @@ class WebSite
     }
 
     //
-    // 
+    //
     //
     //
     /*
-    *  Loads template for header/footer from file, record or given template 
+    *  Loads template for header/footer from file, record or given template
     *  Returns raw template or processed template
     */
     public function getPageMargin($type){
-        
+
         if($this->messageError){
             return '';
         }
-        
+
         if(@$this->params[$type]){
             //it can be eather template file name or template content
             $template = $this->params[$type];
@@ -537,17 +537,17 @@ class WebSite
                 $template = $this->getTemplateContent($type, $template);
             }
         }else{
-            //take from website home 
+            //take from website home
             if($this->isWebPage){
                 $template = '<header><div data-heurist-cms="HMenuPersonal" style="display:{$website.showLogin};position:fixed;left:10px;z-index:9999"></div><div style="position:fixed;right:10px;z-index:9999">{$website.languages}</div></header>';
             }else{
-                $template = $this->getVal($type=='footer'?DT_CMS_FOOTER:DT_CMS_HEADER, false);    
+                $template = $this->getVal($type=='footer'?DT_CMS_FOOTER:DT_CMS_HEADER, false);
                 if(!$template){ //not defined
                     $template = $this->getTemplateContent($type);
                 }
             }
         }
-        
+
         if(!$this->isWebPage && strpos($template,'<'.$type.' ')!==0){
             if($type=='header'){
                 $template = '<header id="main-header" style="background-image: url(&quot;{$website.bgImage}&quot;) !important; background-repeat: repeat-x !important; background-size: auto 100%;">'.$template.'</header>';
@@ -571,58 +571,58 @@ class WebSite
                 //$divInner = $doc->createDocumentFragment();
                 //$divInner->appendXML('<img src="{$website.logo}" alt="Logo"/>');
                 //$ele->appendChild($divInner);
-                
+
                 $img = $doc->createElement("img");
                 $img = $ele->appendChild($img);
-                $img->setAttribute('src', '{$website.logo}');                
-                
+                $img->setAttribute('src', '{$website.logo}');
+
                 //$ele->nodeValue = '<img src="{$website.logo}" alt="Logo"/>';
             }
-            
-            
+
+
             $ele = $doc->getElementById('main-title');
             if($ele) $ele->nodeValue = '{$website.title}';
-            $template = $doc->saveHTML();            
-            
+            $template = $doc->saveHTML();
+
             $template = str_replace('%7B%24','{$',$template);
             $template = str_replace('%7D','}',$template);
         }
-/*        
+/*
             #main-logo
             main-title
             main-logo-alt
             main-title-alt
             main-title-alt2
-*/        
-        
+*/
+
         //get header settings
         //replace template values {$website.xxxx} with settings from siteRecord (CMS_HOME)
         $header_tpl = $this->getWebSiteOptions( true );
-            
+
         $values_to_replace = array_map(function ($v) {
                     return "{\$website.$v}";
              }, array_keys($header_tpl));
-             
+
         //$header.classes DT_CMS_BANNER
         $result = str_replace($values_to_replace, array_values($header_tpl), $template);
-                
+
         return $result;
     }
-    
+
     //
     //
     //
     public function getWebSiteOptions($isFull){
 
-        //main menu - json array 
+        //main menu - json array
         $menuContent = $this->getMenuTree();
-        
+
         $isFixedFooter = false;
-        
+
         $footerPosition = $this->getVal(DT_CMS_FOOTER_FIXED);
         $isFixedFooter = (!($footerPosition == ConceptCode::getTermLocalID('3-5029') || //unset position
                             $footerPosition == TRM_NO)); //not fixed position  ConceptCode::getTermLocalID('2-531')
-        
+
         $webSiteOptions = array(
             'siteId'=>$this->getSiteId(),
             'pageId'=>$this->getPageId(),   //initial page
@@ -632,61 +632,61 @@ class WebSite
             'isFixedFooter'=>$isFixedFooter,
             //'languageCodes'=>$this->getLanguages()
         );
-        
+
         if($isFull){
 
-            // 
+            //
             $bgImage = $this->getFile($this->siteRecord, '99-951', ''); //DT_CMS_BANNER
             if($bgImage==null){
                 $bgImage = '';
             }
 
             $webSiteOptionsExt = array(
-                'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE), 
-                'logoAlt'=>$this->getFile($this->siteRecord, '2-926'), 
+                'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE),
+                'logoAlt'=>$this->getFile($this->siteRecord, '2-926'),
                 'version'=>$this->getVal('2-49'),
-                
+
                 'title'=>$this->getVal(DT_NAME),
                 'description'=>$this->getVal(DT_SHORT_SUMMARY),
                 'titleAlt1'=>$this->getVal('3-1009'),
                 'titleAlt2'=>$this->getVal('2-1052'),
-                
+
                 'url'=>$this->getPageUrl(0),
                 'urlAlt'=>$this->getVal('2-943') ?? '#',
-                
+
                 'bgImage'=>$bgImage,
                 'languages'=>$this->getLanguageSelector(), //returns html snipper for language selector
-                
+
                 'showLogin'=>'block',
                 'navbar'=>$this->getMainMenu(),  //returns html snippet for navbar menu  need for v3
-                
+
                 'pageTitle'=>'',
-                
+
                 'hostInfo' => '',
                 'heuristInfo'=>'<a href="https://HeuristNetwork.org" target="_blank" style="text-decoration:none;" title="This website is generated by Heurist, an academic knowledge management system developed at the University of Sydney Faculty of Arts and Social Sciences under the direction of Dr Ian Johnson, chief programmer Artem Osmakov.">
                 powered by &nbsp;&nbsp;<img src="'.ASSETS_URL.'v6/logo.png" height="32"> Heurist
                 </a>'
             );
-            
-        
-            $val = $this->getVal('2-1095');    
+
+
+            $val = $this->getVal('2-1095');
             $webSiteOptionsExt['showLogin']=$val==TRM_NO?'none':'block';
-                
+
             list($host_logo, $host_url) = USystem::getHostLogoAndUrl();
             if($host_logo){
                 $webSiteOptionsExt['hostInfo'] = '<a href="'.($host_url??'#')
                     .'" target="_blank" style="text-decoration:none;color:black;">'
                     .' at: &nbsp;<img src="'.$host_logo.'" height="32" align="center"></a>';
             }
-                
-            
+
+
             if(!$webSiteOptionsExt['logoAlt']){
                 $webSiteOptionsExt['logoAlt'] = ASSETS_URL.'16x16.gif';
             }
 
-            $webSiteOptions = array_merge($webSiteOptions, $webSiteOptionsExt);        
+            $webSiteOptions = array_merge($webSiteOptions, $webSiteOptionsExt);
         }
-        
+
         return $webSiteOptions;
     }
 
@@ -694,16 +694,16 @@ class WebSite
     // For header - language selector
     //
     private function getLanguageSelector(){
-        
+
         $res = '';
         if(defined('DT_LANGUAGE')){
             $website_languages = @$this->siteRecord['details'][DT_LANGUAGE];
-        
+
             if(!isEmptyArray($website_languages)){
                 //$website_languages = array_values($website_languages);
                 $orig_arr = print_r($website_languages,true);
                 $website_languages_codes = getTermCodes($this->system->getMysqli(), $website_languages);
-                
+
                 $website_languages_res = array();//defined codes
 
                 foreach($website_languages as $term_id){
@@ -720,19 +720,19 @@ class WebSite
                 }
                 //$website_languages = $website_languages_res;
             }
-        }        
-        
+        }
+
         if($res!=''){
              $res = '<select id="main-languages" class="form-select-sm me-2 w-auto">'.$res.'</select>';
         }
         return $res;
     }
-    
+
     //
     //
     //
     private function getPageUrl($pageId){
-        
+
         $url = HEURIST_BASE_URL.'?db='.$this->system->dbname()
                 .'&ver=3&website='.$this->siteRecord['rec_ID'];
         if($pageId>0){
@@ -744,7 +744,7 @@ class WebSite
         if($this->currentLang && $this->currentLang!='def'){
               $url .= '&lang='.$this->currentLang;
         }
-        
+
         return $url;
     }
 
@@ -752,42 +752,42 @@ class WebSite
     // Returns submenu as html
     //
     private function getMainSubMenu($menu, $records){
-        
+
         $res = '<ul class="dropdown-menu dropdown dropend">';
-        
+
         foreach($menu as $id=>$subs){
-            
+
             $menu_title = $this->getMainMenuTitle($id);
-            
+
             $has_subs = !empty($subs);
-            if($has_subs){ 
+            if($has_subs){
                 $res .= '<li class="dropdown dropend"><a class="dropdown-item dropdown-toggle" href="#" id="dropdown-layouts" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'.$menu_title.'</a>';
-                
+
                 $res .= $this->getMainSubMenu($subs, $records);
-                
+
                 $res .= '</li>';
-                
+
             }else{
                 $res .= '<li><a class="dropdown-item" data-heurist-pageid="'
                           .$id.'" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
             }
-            
+
         }
-        
+
         return $res .= '</ul>';
-                
+
     }
-    
+
     /*
     *
-    */ 
+    */
     private function getMainMenuTitle($pageId)
     {
             $menu_title = $this->getValue($this->menuRecords[$pageId], DT_NAME, true, $this->currentLang);
-            
+
             $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$pageId], DT_CMS_MENU_FORMAT):null;
             $menuIcon = $this->getFile($this->menuRecords[$pageId], DT_THUMBNAIL, '', 'thumb');
-            
+
             if($menuIcon && defined('TRM_NAME_ONLY') && $menuFormat!=TRM_NAME_ONLY){
                 if(defined('TRM_ICON_ONLY') && $menuFormat==TRM_ICON_ONLY){
                     $menu_title = '';
@@ -797,33 +797,33 @@ class WebSite
 
             return $menu_title;
     }
-    
+
     //
     // For header - navbar with first level of menu
     // Returns menu as HTML snippet
     //
     private function getMainMenu(){
-        
+
         if($this->isWebPage){
             return '';
         }
-        
-        $this->fillMenuTree();    
-        
+
+        $this->fillMenuTree();
+
         $siteID = $this->siteRecord['rec_ID'];
         $menu_tree = $this->menuTree[$siteID];
-        
+
         $isMenuWithSubsSelectable = $this->getVal('2-938')!=TRM_NO; //DT_CMS_TOPMENUSELECTABLE
-        
+
         $res = '<ul class="navbar-nav ms-auto dropdown-hover-all">'; //nav nav-pills  navbar-nav
-        
+
         foreach($menu_tree as $id=>$subs){ //first level is list of buttons with dropdowns
-        
+
             $menu_title = $this->getMainMenuTitle($id);
-            
+
             $has_subs = !empty($subs);
             if($has_subs){
-                
+
                 if($isMenuWithSubsSelectable){
                     $res .= '<li class="nav-item dropdown"><a class="nav-link" data-heurist-pageid="'
                             .$id.'" href="'.$this->getPageUrl($id)
@@ -832,11 +832,11 @@ class WebSite
                 }else{
                     $res .= '<li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">'.$menu_title.'</a>';
                 }
-                
+
                 $res .= $this->getMainSubMenu($subs, $this->menuRecords);
-                
+
                 $res .= '</li>';
-                
+
             }else{
                 $res .= '<li class="nav-item"><a class="nav-link" data-heurist-pageid="'
                         .$id.'" href="'.$this->getPageUrl($id).'">'.$menu_title.'</a></li>';
@@ -844,41 +844,41 @@ class WebSite
         }
         $res .= '</ul>';
         return $res;
-                
+
     }
-    
+
     //
     //
     //
     private function fillMenuTree($menuRecIDs=null){
-        
+
         if($this->menuTree==null){
             $this->menuRecords = array();  //
             //see recordSearch.php
             $this->menuTree = recordSearchMenuItems2($this->system, $menuRecIDs, $this->menuRecords, true );
         }
     }
-    
+
     //
     //
     //
     private function fillMenuTreeDetails($menuTreeIds, &$menuTree, $isRoot){
-        
-        //get flat array 
+
+        //get flat array
         $allIds = array();
-        
+
         foreach($menuTreeIds as $recID=>$subs){
-            
+
             if(is_string($recID) && strpos($recID,'folder')===0){ //TBD  || $recID=='action'
-            
-               $recID = 'folder'.(count($this->menuRecords)+1); 
+
+               $recID = 'folder'.(count($this->menuRecords)+1);
                $this->menuRecords[$recID] = array('title'=>@$subs['title']??'submenu', 'isFolder'=>true);
                $allIds = array_merge($allIds, $this->fillMenuTreeDetails($subs, $menuTree[$recID], false));
-               
+
             }elseif(is_array($subs) ){ //has childten
-            
+
                 $menuTree[$recID] = [];
-                
+
                 array_push($allIds, $recID);
                 $has_subs = !empty($subs);
                 if($has_subs){
@@ -886,14 +886,14 @@ class WebSite
                 }
             }elseif(is_numeric($subs) || strpos($subs,'svs')===0){
                 $menuTree[$subs] = [];
-                
+
                 array_push($allIds, $subs);
             }
         }
         if(!$isRoot){
-            return $allIds;  
-        } 
-        
+            return $allIds;
+        }
+
         $this->menuTree = $menuTree;
         //fill $this->menuRecords with details
         $detailIds = array(DT_NAME, DT_CMS_MENU_FORMAT, DT_THUMBNAIL);
@@ -906,7 +906,7 @@ class WebSite
         if(defined('DT_QUERY_STRING')){
             array_push($detailIds, DT_QUERY_STRING);
         }
-        
+
         $allFilterIds = [];
         $allPageIds = [];
         foreach($allIds as $id){
@@ -916,50 +916,50 @@ class WebSite
                 array_push($allPageIds, $id);
             }
         }
-        
+
         //flat array with menu items details
         if(!empty($allPageIds)){
             //
             $recs = recordSearchDetailsForRecIds($this->system, $allIds, $detailIds, false);
-            //add submenu/folders    
+            //add submenu/folders
             if(count($this->menuRecords)>0){
                 foreach($this->menuRecords as $id=>$params){
-                    $recs[$id] = $params;        
+                    $recs[$id] = $params;
                 }
             }
             $this->menuRecords = $recs;
-             
+
         }
-        
+
         if(!empty($allFilterIds)){
                 $svs = new DbUsrSavedSearches($this->system, array('svs_ID'=>$allFilterIds, 'details'=>'name'));
                 $res = $svs->search();
                  $res = $svs->getRecords($res);
-                
+
                 if(empty($res)){ //not found
                     return;
                 }
-                foreach($res as $id=>$filter){        
+                foreach($res as $id=>$filter){
                     $this->menuRecords["svs$id"] = $filter;
                 }
         }
-        
+
     }
 
     //
     //  Returns json tree for menu (used in _editCMS_SiteMenu)
     //
-    public function getMenuTree($parentMenuRecIDs=null, $menuTree=null){ //$parentKey=null, 
-        
+    public function getMenuTree($parentMenuRecIDs=null, $menuTree=null){ //$parentKey=null,
+
         if($menuTree==null){ //root
-        
+
             if($parentMenuRecIDs==null){
                 $siteID = $this->siteRecord['rec_ID'];
                 $parentMenuRecIDs = array($siteID);
             }else{
                 $parentMenuRecIDs = prepareIds($parentMenuRecIDs);
             }
-            
+
             $this->fillMenuTree($parentMenuRecIDs);
 
             if(count($parentMenuRecIDs)==1 && false){  //include home as first level menu
@@ -972,11 +972,11 @@ class WebSite
         }else{
             $parentKey = $parentMenuRecIDs;
         }
-        
+
         $res = array();
 
         foreach($menuTree as $menuId=>$subs){ //first level is list of buttons with dropdowns
-        
+
             $menuRec = $this->menuRecords[$menuId];
             $menuFormat = null;
             $menuIcon = null;
@@ -985,23 +985,23 @@ class WebSite
             $pageId = null;
             $key = $menuId; //$parentKey.','.$pageId;
             $item = array();
-        
+
             if(is_string($menuId) && strpos($menuId,'svs')===0){ //saved filter
                 $menuName = $menuRec['svs_Name'];
                 $action = 'search-saved-filter';
                 $actionParams = $menuRec['svs_ID'];
 
             }elseif(is_string($menuId) && strpos($menuId,'folder')===0){
-                
+
                 $menuName = $menuRec['title'];
                 $item['isFolder'] = true;
-                
+
             }elseif(is_string($menuId) && strpos($menuId,'dsh')===0){ //TBD action
-            
+
                 $menuName = $menuRec['dsh_Label'];
                 $action = $menuRec['dsh_CommandToRun'];
                 $actionParams = $menuRec['dsh_Parameters'];
-            
+
             }else{
                 $pageId = $menuId;
                 $menuName = $this->getValue($menuRec, DT_NAME, true, $this->currentLang);
@@ -1012,7 +1012,7 @@ class WebSite
                     if($action){
                         $action = getTermCodes($this->system->getMysqli(), $action);
                         if(is_array($action)) $action = array_shift($action);
-                        
+
                         $actionParams = $this->getValue($menuRec, DT_QUERY_STRING);
                     }
                 }else{
@@ -1020,46 +1020,46 @@ class WebSite
                     $actionParams = $pageId;
                 }
             }
-            
-            
+
+
             $item['key'] = $key; // set unique key
             $item['title'] = $menuName;
             //$item['parent_id'] = $parentKey; //reference to parent menu(or home)
-            
+
             if($menuFormat) $item['menuFormat'] = $menuFormat;
             if($menuIcon) $item['menuIcon'] = $menuIcon;
-            
+
             if($action){
                 $item['action'] = $action;
                 if($actionParams) $item['actionParams'] = $actionParams;
-                
+
             }
             if($pageId){
-                $item['pageId'] = $pageId;    
+                $item['pageId'] = $pageId;
                 $item['page_id'] = $pageId; //for backward capability
             }
-            
-            
+
+
             /*
             $item['page_showtitle'] = 1;
             $item['page_target'] = ''; //(this.options.target=='popup')?'popup':pageTarget;
-            //$res['expanded'] = (this.options.expand_levels>0 || lvl<this.options.expand_levels); 
+            //$res['expanded'] = (this.options.expand_levels>0 || lvl<this.options.expand_levels);
             $item['has_access'] = true;
-                        //(window.hWin.HAPI4.is_admin() 
+                        //(window.hWin.HAPI4.is_admin()
                         //|| window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
             */
-                               
+
             $has_subs = !empty($subs);
             if($has_subs){
                 $item['children'] = $this->getMenuTree($key, $subs);
             }
-            
+
             array_push($res, $item);
         }
-        
+
         return $res;
     }
-    
+
     //
     // for output (0,2,3,4) - outs error page with message
     // for file only (1) - in browser only
@@ -1088,7 +1088,7 @@ class WebSite
      *
      * @param string $website_output The rendered website output.
      * @param bool $need_sanitize whether or not to sanitize the output.
-     * 
+     *
      * @return true/false or string for publishmode==4
      */
     private function handleOutput($website_output, $need_sanitize=true){
@@ -1099,16 +1099,16 @@ class WebSite
         if($need_sanitize){
             //$website_output = $this->stripJavascriptAndSantize($website_output);
         }
-        
+
         if ($this->publishmode==4) {
             return $website_output;
         }
-        
+
 
         if($this->publishmode!=1){ // 1 = save to file only
             header("Content-type: text/html;charset=UTF-8");
         }
-        
+
         // 0 - in browser only (returns true/false)
         // 1 - saves into generated-html (returns true/false)
         // 2 - download generated html as file
@@ -1124,7 +1124,7 @@ class WebSite
         }elseif ($this->publishmode==0) {    //browser output only
 
             echo $website_output;
-            
+
         }else {
             //3 - save into file and report
             //1 - save into file and info page
@@ -1132,13 +1132,13 @@ class WebSite
             if($this->outputfile!=null){
                 $errors = $this->saveOutputToFile($this->outputfile, $website_output);
             }
-            
-            
+
+
             if($this->publishmode==3){
                 echo $website_output; //both save and output
             }else{ //publishmode==1 - save to file and report
                 //$this->generateInfoPage($this->outputfile, $errors);
-                
+
                 //TBD
             }
         }
@@ -1205,12 +1205,12 @@ class WebSite
      *
      * @return string The HTML content containing custom styles and scripts.
      */
-    // 
+    //
     // includes publisher's custom scripts and styles AND links to external resources
     //
     public function getCustomScriptsAndStyles()
     {
-        
+
          $head = '';
          $css_fields = array();
          if($this->system->defineConstant('DT_CMS_CSS')){
@@ -1236,7 +1236,7 @@ class WebSite
              $val = $this->getValue($record, DT_CMS_CSS);
              $head .= '<style>'.$val.'</style>';
          }
-         
+
          if($this->system->settings->isJavaScriptAllowed()){
 
              if(defined('DT_CMS_SCRIPT') && @$record['details'][DT_CMS_SCRIPT]){
@@ -1244,7 +1244,7 @@ class WebSite
                  $val = $this->getValue($record, DT_CMS_SCRIPT);
                  $head .= '<script>function afterPageLoad'.$this->getSiteId().'(){'.$val.'}</script>';
              }
-             
+
              if(defined('DT_CMS_EXTFILES') && @$record['details'][DT_CMS_EXTFILES]){
                  //add to header
                  $external_files = $record['details'][DT_CMS_EXTFILES] ?? [];
@@ -1260,20 +1260,20 @@ class WebSite
 
          return $head;
     }
-    
+
     /**
      * Returns website info (title, description) as json
      */
     public function getWebSiteInfo(){
        return '';
-/* TBD                
+/* TBD
        $webinfo = array('title'=>$this->getVal(DT_NAME),
             'description'=>$this->getVal(DT_SHORT_SUMMARY),
             'titleAlt1'=>$this->getVal('3-1009'),
             'titleAlt2'=>$this->getVal('2-1052'));
-        
-       return '<script>var websiteInfo='.json_encode($webinfo).'</script>';; 
-*/       
+
+       return '<script>var websiteInfo='.json_encode($webinfo).'</script>';;
+*/
     }
 
     /**
@@ -1329,7 +1329,7 @@ class WebSite
                     'src' => 'URI',
                     'type' => 'Text',
                 ));
-                
+
                 //$config->set('HTML.AllowedAttributes','*.data-heurist-rec');
                 $def->addAttribute('div', 'data-heurist-rec', 'Number');
 
@@ -1357,7 +1357,7 @@ class WebSite
 
                 if(!empty($font_styles)){
                     if(strpos($tpl_source, '<head>')>0){
-                        $tpl_source = str_replace(HEAD_E,$font_styles.HEAD_E, $tpl_source);
+                        $tpl_source = str_replace(self::HEAD_E, $font_styles . self::HEAD_E, $tpl_source);
                     }else{
                         $tpl_source = $font_styles.$tpl_source;
                     }

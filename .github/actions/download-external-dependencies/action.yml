@@ -1,0 +1,20 @@
+name: "Download external dependencies"
+description: "Download Heurist external dependencies from HEURIST/DISTRIBUTION/HEURIST_SUPPORT"
+inputs:
+  ref_server:
+    description: Heurist reference server
+    default: heuristref.net
+  path:
+    description: Path to external dependencies TAR file
+    default: HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        curl -fsSL --proto '=https' --proto-redir '=https' --retry 3 --retry-delay 3 -o ext.tar.bz2 $EXTERNAL_DEPS_URL
+        tar -xjf ext.tar.bz2 && rm -f ext.tar.bz2
+        mv external_h5 external
+      shell: bash
+      env:
+        EXTERNAL_DEPS_URL: https://${{ inputs.ref_server }}/${{ inputs.path }}
