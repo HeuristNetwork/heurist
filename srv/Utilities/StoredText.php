@@ -204,7 +204,7 @@ final class StoredText
 
     /**
      * `data-h-link` of a Record field element (plan 27g §6): `url` or `page:<page id>`; `goto:<id>|goto:home` (Go to a
-     * page); `filter:<page id>:<query source id>` (Saved filter, plan 27j).
+     * page); `filter:<page id>:<query source id>` (Saved filter, plan 27j), `filter:<page id>:f<saved filter id>` (plan 27l).
      */
     private static function fieldLink(): \HTMLPurifier_AttrDef
     {
@@ -212,7 +212,7 @@ final class StoredText
             public function validate($string, $config, $context)
             {
                 $string = trim((string)$string);
-                return preg_match('/^(url|page:\d+|goto:(\d+|home)|filter:\d+:\d+)$/', $string) === 1 ? $string : false;
+                return preg_match('/^(url|page:\d+|goto:(\d+|home)|filter:\d+:f?\d+)$/', $string) === 1 ? $string : false;
             }
         };
     }

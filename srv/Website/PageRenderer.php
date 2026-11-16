@@ -387,8 +387,8 @@ final class PageRenderer
                 $entry['url'] = $this->url($context, $pageId, $context['language'], $recordId);
                 $entry['current'] = $pageId === $current && intval($context['record']['rec_ID'] ?? 0) === $recordId;
             }elseif($action === 'savedFilter' || $action === 'search'){
-                // Saved filter (plan 27j): target = the page, `source` = the query source, `values`; a search box (plan
-                // 27k §6): the same link as a form, the typed text is the value `param`
+                // Saved filter (plan 27j): target = the page, `source` = the query source (or `filter` = a saved filter, plan
+                // 27l §7.2), `values`; a search box (plan 27k §6): the same link as a form, the typed text is the value `param`
                 $pageId = intval($target);
                 $siteId = $context['site'] !== null ? intval($context['site']['rec_ID']) : 0;
                 $param = (string)($item['param'] ?? '');
@@ -401,8 +401,7 @@ final class PageRenderer
                 if($values === null){ continue; }
                 // the typed text replaces a stored value of the same name
                 if($action === 'search' && is_array($values)){ unset($values[$param]); }
-                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']),
-                    SavedFilterLink::id($item['source']), $values);
+                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']), $item, $values);
                 if($entry['url'] === ''){ continue; }
                 if($action === 'search'){
                     $entry['search'] = array('param' => $param, 'placeholder' => (string)($labels[$language] ?? $item['label'] ?? ''));
@@ -559,7 +558,7 @@ final class PageRenderer
 
     /**
      * The search box of an action menu item (plan 27k §6): a GET form to the URL of the Saved filter link (`url`: the
-     * target page with `source` and the stored values as hidden inputs) and a text input named `v.<param>`; the same
+     * target page with `source` / `filter` and the stored values as hidden inputs) and a text input named `v.<param>`; the same
      * query as the link of a Saved filter (plan 27j), so the target page reads it the same way. Works without JS.
      */
     public static function searchForm(array $item): string
@@ -688,6 +687,15 @@ final class PageRenderer
                 'settings' => self::publicSettings($instance, !empty($context['design'])),
                 'state' => $instance['state'] ?? null
             );
+            // records and selection of a module (plan 27l §12; `sync` of round 1 read by the client), its own records
+            if(($instance['kind'] ?? '') === 'module' && CmsValidator::recordsValid($instance)){
+                foreach(array('records', 'selection') as $key){
+                    if(isset($instance[$key])){ $entry[$key] = $instance[$key]; }
+                }
+                if(in_array($instance['sync'] ?? null, array('selection', 'none'), true)){ $entry['sync'] = $instance['sync']; }
+                $source = CmsValidator::instanceDataSource($instance['dataSource'] ?? null, $entry['type']);
+                if($source !== null){ $entry['dataSource'] = $source; }
+            }
             $problem = CmsValidator::instanceProblem($instance);
             if($problem !== null){ $entry['problem'] = $problem[1]; }
             $result[(string)$id] = $entry;

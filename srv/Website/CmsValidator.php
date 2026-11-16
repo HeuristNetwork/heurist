@@ -32,9 +32,16 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs')
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs', 'filter')
     );
     public const CONFIG_VERSION = 1;
+
+    /** Page sync of a module instance (plan 27l §2.4; SYNC_MODES of shared/src/sync/SyncEngine.js). */
+    public const SYNC_MODES = array('all', 'selection', 'none');
+    /** A source of the records of a module (plan 27l §12; CMS_RECORDS_TOKEN of cmsDocument.js). */
+    public const RECORDS_TOKEN = '/^(own|links|filter:[A-Za-z0-9_-]+|module:[A-Za-z0-9_-]+)$/';
+    /** Record modules with their own records on a page (plan 27l §11.3; CMS_SOURCE_MODULES of cmsDocument.js). */
+    public const SOURCE_MODULES = array('data', 'map', 'timeline', 'graph', 'recordview');
     /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
     public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page', 'savedFilter');
 
@@ -238,7 +245,57 @@ final class CmsValidator
         if(isset($settings['mount']) && !in_array($settings['mount'], array('direct', 'iframe'), true)){
             return array('mount', 'mount must be "direct" or "iframe"');
         }
+        // page sync of a module (plan 27l §2.4)
+        if(isset($settings['sync']) && !in_array($settings['sync'], self::SYNC_MODES, true)){
+            return array('sync', 'sync must be "all", "selection" or "none"');
+        }
+        // the own records of a module (plan 27l §11.3)
+        if(isset($settings['dataSource'])
+            && (!in_array($type, self::SOURCE_MODULES, true) || self::instanceDataSource($settings['dataSource'], $type) === null)){
+            return array('data_source', 'dataSource must be {source}, {filter}, {query} without parameters or {record} (Record View)');
+        }
+        // records and selection (plan 27l §12)
+        if((isset($settings['records']) || isset($settings['selection'])) && ($kind !== 'module' || !self::recordsValid($settings))){
+            return array('records', 'records must be {from: [own | links | filter:<id> | module:<id>]} and selection true or false');
+        }
         return null;
+    }
+
+    /** Whether `records` / `selection` of an instance have the stored form (plan 27l §12; cmsRecordsValid of cmsDocument.js). */
+    public static function recordsValid(array $settings): bool
+    {
+        if(isset($settings['records'])){
+            $from = is_array($settings['records']) ? ($settings['records']['from'] ?? null) : null;
+            if(!is_array($from) || isset($settings['records'][0])){ return false; }
+            foreach($from as $token){
+                if(!is_string($token) || preg_match(self::RECORDS_TOKEN, $token) !== 1){ return false; }
+            }
+        }
+        return !isset($settings['selection']) || is_bool($settings['selection']);
+    }
+
+    /**
+     * The own records of a module that does not take the results of the page (plan 27l §11.3; cmsInstanceDataSource of
+     * cmsDocument.js): {source: id} | {filter: id} | {query: [...]} without parameters | {record: id} (Record View).
+     *
+     * @param mixed $value The stored `dataSource`.
+     * @param string $type Module type.
+     * @return array|null
+     */
+    public static function instanceDataSource($value, string $type = ''): ?array
+    {
+        if(!is_array($value) || count($value) !== 1 || isset($value[0])){ return null; }
+        $key = (string)array_key_first($value);
+        if(in_array($key, array('source', 'filter'), true) || ($key === 'record' && $type === 'recordview')){
+            $id = $value[$key];
+            return (is_int($id) || (is_string($id) && ctype_digit($id))) && intval($id) > 0 ? array($key => intval($id)) : null;
+        }
+        if($key !== 'query'){ return null; }
+        $query = $value['query'];
+        if(!is_array($query) || empty($query)){ return null; }
+        if(array_keys($query) !== range(0, count($query) - 1)){ $query = array($query); }
+        if(preg_match('/\$[A-Za-z][A-Za-z0-9_]*\$/', (string)json_encode($query)) === 1){ return null; }
+        return array('query' => $query);
     }
 
     /** A size of the header or footer (LAYOUT_SIZE). */

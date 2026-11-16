@@ -844,7 +844,17 @@ final class ServiceFactory
     {
         $database = $this->database;
         $runner = null;
+        $querySources = new QuerySourcePresentationService($this->presentations);
         return new PageContent($repository, $languages, array(
+            // the query of a public query source (Record cards, plan 27l §11.4); null when it can not be read
+            'querySource' => static function(int $id) use ($querySources): ?array {
+                try {
+                    $query = $querySources->getQuerySource($id)['source']['query'] ?? null;
+                } catch (\Throwable $error) {
+                    return null;
+                }
+                return is_array($query) ? $query : null;
+            },
             'search' => static function(array $query, int $limit) use ($database, $runtime): array {
                 $service = new RecordSearchService($database, $runtime, new QueryBuilder($database));
                 return $service->search(new SearchRequest($query, array('limit' => $limit)))->ids;
