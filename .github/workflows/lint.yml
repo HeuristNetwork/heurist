@@ -1,6 +1,8 @@
 name: Lint - Easy Coding Standard and PHPStan
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 permissions:
   contents: read
