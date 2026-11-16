@@ -57,6 +57,12 @@ final class StyleCompiler
     );
 
     /** Kinds of `styles.kinds` and their selectors. */
+    /**
+     * Selectors of the own styles of the header and footer (review 2026-11-16, CMS_PART_SELECTORS of cmsDocument.js):
+     * stronger than the header / footer themes of the layout.
+     */
+    public const PARTS = array('header' => 'html.h-site .h-site-header', 'footer' => 'html.h-site .h-site-footer');
+
     public const KINDS = array(
         // not the header default set and its brand (2026-11-14): their fallback layout is the website CSS; :where keeps the
         // specificity
@@ -100,9 +106,11 @@ final class StyleCompiler
      * @param string $scope Selector every rule is written below (plan 27f), e.g. `[data-h-page="5"]`; '' = none.
      * @param array $pageStyle Own style of the page (`styles.page`, plan 27i §9): written for its section, without the scope.
      * @param int $pageId The page of $pageStyle; 0 = any page (checks).
+     * @param array $partStyles Own styles of the header and footer (`styles.header` / `styles.footer` of the website
+     *        record, review 2026-11-16): {header, footer}, written for PARTS.
      */
     public function compile(array $base, array $nodeSets, array $kindSets = array(), array $presetSets = array(),
-        string $scope = '', array $pageStyle = array(), int $pageId = 0): string
+        string $scope = '', array $pageStyle = array(), int $pageId = 0, array $partStyles = array()): string
     {
         $this->issues = array();
         $this->scope = $scope !== '' ? $scope.' ' : '';
@@ -143,6 +151,13 @@ final class StyleCompiler
             $this->scope = $prefix;
             $this->flushScreens($css, $screens);
         }
+        foreach(self::PARTS as $part => $selector){
+            $style = $partStyles[$part] ?? null;
+            if(!is_array($style) || empty($style)){ continue; }
+            // the height is a minimum (the content may need more); not when the header is shrunk or collapsed (style.css)
+            $this->rule($selector, self::pageHeightAsMinimum($style), null, $css, $screens);
+        }
+        $this->flushScreens($css, $screens);
         foreach($nodeSets as $nodes){
             if(!is_array($nodes)){ continue; }
             foreach($nodes as $id => $style){

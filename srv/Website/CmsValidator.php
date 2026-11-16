@@ -32,7 +32,7 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email')
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs')
     );
     public const CONFIG_VERSION = 1;
     /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
@@ -43,6 +43,8 @@ final class CmsValidator
         'navigation' => array('reload', 'swap', 'scroll'),
         // fixed is the default since 2026-11-09 (was `default` = scroll); slide = an expand / collapse button (§13)
         'header' => array('position' => array('fixed', 'scroll', 'slide', 'none'), 'orientation' => array('horizontal', 'vertical'),
+            // a fixed horizontal header when the page scrolls (plan 27k §4): as it is, or small (logo, menu, languages)
+            'onScroll' => array('keep', 'shrink'),
             // the header default set: one row on normal screens, or two (plan 27f §13)
             'rows' => array('auto', 'two'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own')),
         'footer' => array('position' => array('default', 'fixed', 'none'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own'))
@@ -180,7 +182,9 @@ final class CmsValidator
             array(is_array($styles['nodes'] ?? null) ? $styles['nodes'] : array()),
             array(is_array($styles['kinds'] ?? null) ? $styles['kinds'] : array()),
             array(is_array($styles['presets'] ?? null) ? $styles['presets'] : array()), '',
-            is_array($styles['page'] ?? null) ? $styles['page'] : array());
+            is_array($styles['page'] ?? null) ? $styles['page'] : array(), 0,
+            array('header' => is_array($styles['header'] ?? null) ? $styles['header'] : array(),
+                'footer' => is_array($styles['footer'] ?? null) ? $styles['footer'] : array()));
         $issues = array_merge($issues, $compiler->issues());
         foreach($translations as $language => $blocks){
             foreach(array_keys(is_array($blocks) ? $blocks : array()) as $id){
@@ -257,7 +261,8 @@ final class CmsValidator
 
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
-     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false; `startPage` the id of
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) and `backToTop` (the button of plan
+     * 27k §6) true or false; `startPage` the id of
      * the page shown by the website URL without a page (2026-11-14; not given: the home page).
      *
      * @return array<int,string>
@@ -277,7 +282,7 @@ final class CmsValidator
                 }
             }elseif($key === 'startPage'){
                 if(!is_int($value) || $value < 1){ $problems[] = 'startPage must be a page id'; }
-            }elseif($key === 'hideHeader' || $key === 'hideFooter'){
+            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop'){
                 if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
             }elseif($key === 'header' || $key === 'footer'){
                 if(!is_array($value) || (!empty($value) && array_keys($value) === range(0, count($value) - 1))){

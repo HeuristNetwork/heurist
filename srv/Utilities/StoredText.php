@@ -91,7 +91,8 @@ final class StoredText
                 // a group with a caption: section[aria-labelledby] = the id of its heading (plan 27c §20)
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
-                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-link-values|data-h-bg-video]';
+                .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-link-values|data-h-bg-video'
+                .'|data-h-orientation|data-h-item-style|data-h-multiple|data-h-first-open|data-h-reveal]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -143,6 +144,16 @@ final class StoredText
             // the background video of a group (plan 27i §9 D): the key of a registered file; the site runtime adds the video
             $fileKey = self::fileKey();
             foreach($blocks as $element){ $def->addAttribute($element, 'data-h-bg-video', $fileKey); }
+            // tabs (plan 27k §3): vertical tabs and the style of the tabs (the item styles of the menus; none = tabs)
+            foreach($blocks as $element){
+                $def->addAttribute($element, 'data-h-orientation', 'Enum#vertical');
+                $def->addAttribute($element, 'data-h-item-style', 'Enum#links,underline,pills,buttons,outline');
+                // accordions (plan 27k §6): several sections open at a time, the first one open at start
+                $def->addAttribute($element, 'data-h-multiple', 'Enum#true');
+                $def->addAttribute($element, 'data-h-first-open', 'Enum#true');
+                // reveal on scroll (plan 27k §6): an element fades in or slides up when it comes into the window
+                $def->addAttribute($element, 'data-h-reveal', 'Enum#fade,up');
+            }
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
             $def->addAttribute('iframe', 'allowfullscreen', 'Bool');

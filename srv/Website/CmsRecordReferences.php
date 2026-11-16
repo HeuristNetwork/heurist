@@ -75,10 +75,11 @@ final class CmsRecordReferences
         return $result;
     }
 
-    /** The query source of settings with the action Saved filter (plan 27j), or 0. */
+    /** The query source of settings with the action Saved filter (plan 27j) or of a search box (plan 27k §6), or 0. */
     private static function filterSource($settings): int
     {
-        return is_array($settings) && ($settings['action'] ?? '') === 'savedFilter' ? SavedFilterLink::id($settings['source'] ?? null) : 0;
+        return is_array($settings) && in_array($settings['action'] ?? '', array('savedFilter', 'search'), true)
+            ? SavedFilterLink::id($settings['source'] ?? null) : 0;
     }
 
     /** @return array<string,array<int,int>> kind => record ids of one widget. */
