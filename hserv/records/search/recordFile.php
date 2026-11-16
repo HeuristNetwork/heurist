@@ -1082,14 +1082,15 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
         return false;
     }
 
-    //direct url to filestore folder
-    $file_path_info = pathinfo($file_path);
-
-    //return basename with extension
-    $file_name_cached = "{$file_path_info['filename']}.jpg";
+    //the copy is named by the obfuscated key (2026-11-16): files of the same name had one copy
+    $file_name_cached = fileCacheName($system, $fileinfo, DIR_WEBIMAGECACHE, 'jpg');
+    if($file_name_cached===null){
+        $system->addError(HEURIST_ACTION_BLOCKED, 'File skipped');
+        return false;
+    }
 
     $file_url_cached = $system->getSysUrl(DIR_WEBIMAGECACHE).$file_name_cached;
-    $file_path_cached =  "{$web_cache_dir}/{$file_name_cached}";
+    $file_path_cached =  $web_cache_dir.$file_name_cached;
     $fileExists = file_exists($file_path_cached);
 
     if($fileExists && $forceRefresh){ // force a refresh
@@ -1114,6 +1115,97 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
         return $returnURL ? $file_url_cached : $file_path_cached;
     }else{
         return false;
+    }
+}
+
+/**
+ * Make the web cached image of a file again (create_scaled_images of DbRecUploadedFiles): the cached copies
+ * are removed first, also a copy under the old name that is this file's.
+ *
+ * @param hserv\System $system - initialised Heurist system object
+ * @param array $fileinfo - data obtained by fileGetFullInfo
+ * @return bool | string - false on error, or the path of the cached image
+ */
+function rebuildWebImageCache($system, $fileinfo){
+    removeFileCaches($system, @$fileinfo['ulf_ObfuscatedFileID'], basename((string)@$fileinfo['fullPath']));
+    return getWebImageCache($system, $fileinfo, false, true);
+}
+
+/**
+ * Name of the cached copy of a file in a cache folder (web image, blurred image): the obfuscated key and the
+ * extension (2026-11-16). Before, the copy was named by the stored file name without extension, so two files of
+ * the same name shared one copy. Such an old copy is renamed to the new name when no other registered file has
+ * that name (it is this file's); otherwise a new copy is made.
+ *
+ * @param hserv\System $system
+ * @param array $fileinfo - data obtained by fileGetFullInfo (ulf_ObfuscatedFileID, fullPath)
+ * @param string $folder - DIR_WEBIMAGECACHE or DIR_BLURREDIMAGECACHE
+ * @param string $ext - extension of the copy
+ * @return string|null - file name in the folder, null without a key
+ */
+function fileCacheName($system, $fileinfo, $folder, $ext){
+
+    $key = preg_replace('/[^a-z0-9]/i', '', (string)@$fileinfo['ulf_ObfuscatedFileID']);
+    if($key==''){
+        return null;
+    }
+    $dir = $system->getSysDir($folder);
+    $name = $key.'.'.$ext;
+    if(!file_exists($dir.$name)){
+        $old_name = fileCacheOldName($system, basename((string)@$fileinfo['fullPath']));
+        if($old_name!==null && file_exists($dir.$old_name.'.'.$ext)){
+            @rename($dir.$old_name.'.'.$ext, $dir.$name);
+        }
+    }
+    return $name;
+}
+
+/**
+ * Old name of the cached copies of a file (the stored file name without extension) when no other registered
+ * file has it, so the copy is this file's; null otherwise.
+ *
+ * @param hserv\System $system
+ * @param string $stored_name - ulf_FileName
+ * @return string|null
+ */
+function fileCacheOldName($system, $stored_name){
+
+    $name = pathinfo((string)$stored_name, PATHINFO_FILENAME);
+    if($name==''){
+        return null;
+    }
+    $cnt = mysql__select_value($system->getMysqli(),
+        'SELECT COUNT(*) FROM recUploadedFiles WHERE ulf_FileName=? OR ulf_FileName LIKE ?',
+        array('ss', $name, addcslashes($name, '\\%_').'.%'));
+    // 0: the file row is deleted already
+    return intval($cnt) <= 1 ? $name : null;
+}
+
+/**
+ * Remove the cached copies of a file (web image, blurred image): by its key, and by the old name when the copy
+ * is this file's (fileCacheOldName). Call it before the row is deleted or when its content is replaced.
+ *
+ * @param hserv\System $system
+ * @param string|null $key - ulf_ObfuscatedFileID
+ * @param string|null $stored_name - ulf_FileName
+ */
+function removeFileCaches($system, $key, $stored_name){
+
+    $names = array();
+    $key = preg_replace('/[^a-z0-9]/i', '', (string)$key);
+    if($key!=''){
+        $names[] = $key;
+    }
+    $old_name = fileCacheOldName($system, $stored_name);
+    if($old_name!==null){
+        $names[] = $old_name;
+    }
+    $web_dir = $system->getSysDir(DIR_WEBIMAGECACHE);
+    $blur_dir = $system->getSysDir(DIR_BLURREDIMAGECACHE);
+    foreach($names as $name){
+        fileDelete($web_dir.$name.'.jpg');
+        fileDelete($web_dir.$name.'.png');
+        fileDelete($blur_dir.$name.'.png');
     }
 }
 
@@ -1145,8 +1237,6 @@ function getBlurredImage($system, $file_info, $return_url = true){
         return false;
     }
 
-    $file_path_info = pathinfo($file_path);
-
     $blur_file_dir = $system->getSysDir(DIR_BLURREDIMAGECACHE);
     $res = folderCreate2($blur_file_dir, '(for blurred due to visibility settings)', true);
     if(!empty($res)){
@@ -1154,8 +1244,12 @@ function getBlurredImage($system, $file_info, $return_url = true){
         return false;
     }
 
-    $blur_file_name = "{$file_path_info['filename']}.png";
-    $blur_file_path = "{$blur_file_dir}/{$blur_file_name}";
+    //named by the obfuscated key, as the web cached image (2026-11-16)
+    $blur_file_name = fileCacheName($system, $file_info, DIR_BLURREDIMAGECACHE, 'png');
+    if($blur_file_name===null){
+        return false;
+    }
+    $blur_file_path = $blur_file_dir.$blur_file_name;
     $blur_file_url = $system->getSysUrl(DIR_BLURREDIMAGECACHE). $blur_file_name;
     $scaled_message = "{$blur_file_dir}/scaled_msg.png";
 

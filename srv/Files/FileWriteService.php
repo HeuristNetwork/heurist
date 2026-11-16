@@ -271,6 +271,7 @@ final class FileWriteService extends EntityWriteService
                 if($tiled){
                     // the new stack replaces the old one in place (tile stacks are not removed, as legacy)
                     $this->storage->removeThumbnail($key);
+                    $this->storage->webCache()->remove($row);
                     $placed = $this->storage->placeTiles($upload, $fileId, (string)$upload['name'], $key);
                     // the type of the tiles chosen by the user wins over the one of the first image
                     if($mimeExt !== null){ $placed['ulf_MimeExt'] = $mimeExt; }

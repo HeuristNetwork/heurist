@@ -1466,6 +1466,10 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
 
                 $file_data[$row[0]] = array('path' => $fullpath, 'name' => $filename);
+
+                // remove web cached and blurred images: by key, and by the old name while the row still tells
+                // whether another file has that name (2026-11-16)
+                removeFileCaches($this->system, $row[0], @$row[2]);
             }
             $res->close();
         }
@@ -1491,17 +1495,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 //remove thumbnail
                 $thumbnail_file = HEURIST_THUMB_DIR."ulf_".$file_id.'.png';
                 fileDelete($thumbnail_file);
-
-                // remove web cached image
-                $webimage_name = pathinfo($file['name']);
-                $webcache_file = $this->system->getSysDir(DIR_WEBIMAGECACHE).$webimage_name['filename'];
-                fileDelete($webcache_file.'.jpg');
-                fileDelete($webcache_file.'.png');
-
-                // remove blurred cached image
-                $blurimage_name = pathinfo($file['name']);
-                $blurcache_file = $this->system->getSysDir(DIR_BLURREDIMAGECACHE).$blurimage_name['filename'].'.png';
-                fileDelete($blurcache_file);
+                // cached images are removed above (removeFileCaches)
             }
         }
 
@@ -2932,6 +2926,9 @@ class DbRecUploadedFiles extends DbEntityBase
             $fields['ulf_FileName'] = $newFileName;
             $fileinfo = ['entity' => 'recUploadedFiles', 'fields' => $fields];
 
+            // the key stays: the cached images of the old content must go (2026-11-16)
+            removeFileCaches($this->system, $ulfObfID, @$orgFileDetails[1]);
+
             $this->setData($fileinfo);
             $res = $this->save(); // copies temp from scratch to file_upload it returns ulf_ID
 
@@ -2981,7 +2978,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 continue;
             }
 
-            $cachedPath = getWebImageCache($this->system, $fileDetails[0], false, true);
+            $cachedPath = rebuildWebImageCache($this->system, $fileDetails[0]);
             if(!$cachedPath){
                 $results['error'][$ulfID] = $this->system->getErrorMsg();
                 $results['error'][$ulfID] = empty($results['error'][$ulfID]) ? 'An unknown issue occurred with creating the scaled down image' : $results['error'][$ulfID];

@@ -100,6 +100,12 @@ final class RecordFileRows implements FileRowsInterface
         return $fieldId > 0 ? $this->records->idsByValue($fieldId, strtolower($md5)) : array();
     }
 
+    /** Old cached copies are named by legacy rows only; the switch to these tables makes the cache again. */
+    public function storedNameUnique(string $baseName): bool
+    {
+        return false;
+    }
+
     public function transaction(callable $work)
     {
         return FileTransaction::run($this->database, $work);

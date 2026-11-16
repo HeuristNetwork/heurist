@@ -42,6 +42,12 @@ final class FileStorage
         return $this->paths;
     }
 
+    /** Web copies of large images (GET /files/{key}/web) and their removal. */
+    public function webCache(): WebImageCache
+    {
+        return new WebImageCache($this->paths);
+    }
+
     /** New obfuscated key of a file (legacy: sha1 of the id and a random number). */
     public function newKey(int $fileId): string
     {
@@ -124,13 +130,8 @@ final class FileStorage
         $path = $this->localPath($row);
         if($path !== null && is_file($path)){ @unlink($path); }
         $this->removeThumbnail((string)($row['ulf_ObfuscatedFileID'] ?? ''));
-        $name = (string)($row['ulf_FileName'] ?? '');
-        if($name !== ''){
-            foreach(array($this->paths->webCache.$name.'.jpg', $this->paths->webCache.$name.'.png',
-                $this->paths->blurredCache.$name.'.png') as $cached){
-                if(is_file($cached)){ @unlink($cached); }
-            }
-        }
+        // by key and by the legacy name (2026-11-16: the name with its extension was used here by mistake)
+        $this->webCache()->remove($row);
     }
 
     /** Remove the thumbnail of a file (new content gives a new one). */

@@ -73,6 +73,11 @@ final class LegacyFileRows implements FileRowsInterface
         return $this->files->idsByChecksum($md5);
     }
 
+    public function storedNameUnique(string $baseName): bool
+    {
+        return $this->files->countByStoredName($baseName) <= 1;
+    }
+
     public function transaction(callable $work)
     {
         return FileTransaction::run($this->database, $work);
