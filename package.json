@@ -5,7 +5,9 @@
   "main": "layout_default.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:js": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs"
+    "build:js": "npm run build:terser && npm run build:deps",
+    "build:terser": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs",
+    "build:deps": "server_management/server_synchronisation/code_synchronisation/build-external-js.sh"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,9 @@
     "url": "https://github.com/HeuristNetwork/heurist/issues"
   },
   "homepage": "https://github.com/HeuristNetwork/heurist#readme",
+  "dependencies": {
+    "jquery": "3.7.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "eslint": "^9.8.0",
