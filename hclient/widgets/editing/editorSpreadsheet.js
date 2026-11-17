@@ -410,7 +410,7 @@ class EditorSpreadsheet{
             return this.#jspreadsheet;
         }
 
-        this.#setupDictionary();
+        this.#setupDictionary(); // setup translation labels
 
         this.#inputDisplay = this.#input.style.display;
         this.#input.style.display = 'none';
@@ -437,7 +437,9 @@ class EditorSpreadsheet{
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
         if(this.#data?.[0]){
+
             this.#extractInlineCells();
+
             worksheetConfig['data'] = this.#data[0].data;
             worksheetConfig['columns'] = this.#data[0].columns;
         }
@@ -452,7 +454,7 @@ class EditorSpreadsheet{
         this.#initialInput = this.#input.value;
         this.#initialTableValue = this.#serialiseData() ?? '';
 
-        this.#applyInitialStyles();
+        this.#applyInitialAttributes();
 
         return this.#jspreadsheet;
     }
@@ -489,7 +491,7 @@ class EditorSpreadsheet{
         });
     }
 
-    #applyInitialStyles(){
+    #applyInitialAttributes(){
 
         for(let y = 0; y < this.#initialAttributes.length; y ++){
 
@@ -503,9 +505,16 @@ class EditorSpreadsheet{
 
                 for(let i = 0; i < this.#initialAttributes[y][x].length; i++){
 
+                    // Get cell attributes and split by '='
+                    const cellName = jspreadsheet.helpers.getCellNameFromCoords(x, y);
                     const [attrName, attrValue] = this.#initialAttributes[y][x][i].split('=');
 
-                    if(EditorSpreadsheet.#reversedAttributes.includes(attrName)){
+                    if(EditorSpreadsheet.#reversedAttributes.includes(attrName)){ // is an attribute used by JSS
+                        continue;
+                    }
+
+                    if(attrName === 'comment'){ // apply comments, not as an attribute
+                        this.#jspreadsheet[0].setComments(cellName, attrValue.slice(1, -1));
                         continue;
                     }
 
@@ -534,7 +543,7 @@ class EditorSpreadsheet{
 
         config.toolbar = (toolbar) => {
 
-            // Replace save with save_alt/export
+            // Replace save with save_alt
             const saveIndex = toolbar.items.findIndex(item => item.content === 'save');
             const divisor = {
                 type: 'divisor'
@@ -545,6 +554,7 @@ class EditorSpreadsheet{
                 toolbar.items[saveIndex].content = 'save_alt';
                 toolbar.items[saveIndex].tooltip = 'Export table as CSV';
 
+                // Add file import
                 if(typeof tabularjs === 'function'){
 
                     toolbar.items.splice(saveIndex, 0, {
@@ -565,6 +575,7 @@ class EditorSpreadsheet{
 
             toolbar.items.unshift(divisor);
 
+            // Edit settings
             toolbar.items.unshift({
                 type: 'icon',
                 content: 'settings',
@@ -587,7 +598,7 @@ class EditorSpreadsheet{
         this.#editorContainer.style.display = 'inline-block';
         this.#inputDiv.prepend(this.#editorContainer);
 
-        if(typeof tabularjs === 'function'){
+        if(typeof tabularjs === 'function'){ // setup importer
 
             this.#importInput = document.createElement('input');
             this.#importInput.classList.add('heurist-jss-file-upload');
@@ -835,12 +846,26 @@ class EditorSpreadsheet{
 
     #getCellAttributes(x, y){
 
+        const cellName = jspreadsheet.helpers.getCellNameFromCoords(x, y);
         const td = this.#jspreadsheet[0].getCellFromCoords(x, y);
         if(!td){
             return '';
         }
 
-        return this.#getAttributes(td).join(' ');
+        // Get all cell attributes
+        let attributes = this.#getAttributes(td);
+
+        // Handle cell comment
+        let commentIndex = attributes.findIndex(attribute => attribute.startsWith('comment='));
+        let comment = this.#jspreadsheet[0].getComments(cellName);
+        if(comment !== ''){
+
+            comment = `comment="${comment}"`;
+
+            commentIndex >= 0 ? attributes[commentIndex] = comment : attributes.push(comment);
+        }
+
+        return attributes.join(' ');
     }
 
     #getAttributes(element){
@@ -863,7 +888,7 @@ class EditorSpreadsheet{
             }
 
             if(attrValue.trim() === ''){
-
+                continue;
             }
 
             attributes.push(`${attr.name}="${attrValue}"`);
