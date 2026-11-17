@@ -26,6 +26,20 @@ class EditorSpreadsheet{
         'onresizecolumn', 'onresizerow'
     ]);
 
+    static #localeDictionary = new Set([
+        'Show', 'Search', 'entries', 'Column name', 'Change column type', 'Insert a new column before', 'Insert a new column after',
+        'Delete selected columns', 'Rename this column', 'Order ascending', 'Order descending', 'Insert a new row before', 'Insert a new row after',
+        'Delete selected rows', 'Edit comments', 'Add comments', 'Comments', 'Clear comments', 'Copy', 'Paste', 'Save as',
+        'About', 'Are you sure?', 'This action will destroy any existing merged cells. Are you sure?', 'Invalid merged properties',
+        'No cell selected', 'Rename this worksheet', 'Delete this worksheet', 'It was not possible to rename worksheet due conflict name',
+        'Cut', 'Hide', 'Unhide', 'Select All', 'Blanks', 'Add current selection to filter', 'Rename this cell',
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
+        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+        'Done', 'Reset', 'Update'
+    ]);
+    #dictionarySet = false;
+
     static #highlightClasses = ['highlight-selected', 'highlight', 'highlight-top', 'highlight-bottom', 'highlight-left', 'highlight-right'];
 
     static #reversedAttributes = ['data-x', 'data-y']; // ignore these attributes, as JSS uses them
@@ -395,6 +409,8 @@ class EditorSpreadsheet{
         }else if(this.#jspreadsheet){
             return this.#jspreadsheet;
         }
+
+        this.#setupDictionary();
 
         this.#inputDisplay = this.#input.style.display;
         this.#input.style.display = 'none';
@@ -935,5 +951,21 @@ class EditorSpreadsheet{
         if(this.#DEBUG){
             console.error(error);
         }
+    }
+
+    #setupDictionary(){
+
+        if(typeof window.hWin.HR !== 'function' || this.#dictionarySet){
+            return;
+        }
+
+        const dictionary = {};
+        for(const term of EditorSpreadsheet.#localeDictionary){
+            dictionary[term] = window.hWin.HR(term);
+        }
+
+        jspreadsheet.setDictionary(dictionary);
+
+        this.#dictionarySet = true;
     }
 }
