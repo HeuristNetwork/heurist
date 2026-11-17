@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   npm_audit:
+    name: NPM audit
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
@@ -21,6 +22,7 @@ jobs:
       run: npm audit --audit-level=critical
 
   composer_audit:
+    name: Composer audit
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v7
