@@ -67,6 +67,12 @@ final class CmsValidator
     public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
 
     /** An image of assets/cms of the website bundle: placeholders of media elements (plan 27i §9, CMS_ASSET_NAME). */
+    /** Name of an element (plan 27n §9, `data-h-name`; CMS_NAME of cmsDocument.js). */
+    public const NAME = '/^[A-Za-z0-9_-]{1,64}$/';
+
+    /** Colours of menus, action menus and tabs (plan 27n §7; ITEM_COLORS of cmsMenu.js): none = the colours of the site. */
+    public const ITEM_COLORS = array('inverted', 'own');
+
     public const ASSET_NAME = '/^cms\/(?:[A-Za-z0-9_-]+\/)?[A-Za-z0-9_-]+\.(?:png|jpe?g)$/';
 
     /**
@@ -123,12 +129,22 @@ final class CmsValidator
             foreach(CmsHtml::nodes((string)$html) as $node){ $nodes[] = $node; }
         }
         $seenNodes = array();
+        $seenNames = array();
         $seenHosts = array();
         $seenMedia = array();
         $media = is_array($config['media'] ?? null) ? $config['media'] : array();
         $texts = array();
         foreach($nodes as $node){
             $id = $node['node'];
+            // the name of an element (plan 27n §9): letters, digits, _ and -, unique
+            if($node['name'] !== null){
+                if(preg_match(self::NAME, $node['name']) !== 1){
+                    $issues[] = self::issue('warning', 'element_name', 'Name "'.$node['name'].'" may contain only letters, digits, _ and -', $id !== '' ? $id : null);
+                }elseif(isset($seenNames[$node['name']])){
+                    $issues[] = self::issue('warning', 'duplicate_name', 'Name "'.$node['name'].'" is used more than once', $id !== '' ? $id : null);
+                }
+                $seenNames[$node['name']] = true;
+            }
             if($id !== ''){
                 if(isset($seenNodes[$id])){
                     $issues[] = self::issue('warning', 'duplicate_node', 'Node id "'.$id.'" is used more than once', $id);
@@ -208,6 +224,14 @@ final class CmsValidator
                     $issues[] = self::issue('info', 'translation_missing', 'Text block "'.$id.'" is not translated into "'.$language.'"', $id);
                 }
             }
+        }
+        // the name of the element of an issue (plan 27n §9): the Check report shows `name (node id)`
+        $names = array();
+        foreach($nodes as $node){
+            if($node['name'] !== null && $node['node'] !== ''){ $names[$node['node']] = $node['name']; }
+        }
+        foreach($issues as $index => $issue){
+            if($issue['node'] !== null && isset($names[$issue['node']])){ $issues[$index]['name'] = $names[$issue['node']]; }
         }
         return $issues;
     }

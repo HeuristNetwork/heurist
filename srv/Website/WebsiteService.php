@@ -170,7 +170,7 @@ final class WebsiteService
      * state `hidden` = all values, `partly` = some; review 2026-11-08). A standalone page: only itself.
      *
      * @return array{issues:array,records:array<int,array{id:int,title:string,visibility:string,role:string,
-     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string}>,
+     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string,name?:string}>,
      *         fields?:array<int,array{id:int,name:string,state:string}>}>}
      * @throws WebsiteException
      */
@@ -223,6 +223,8 @@ final class WebsiteService
                 $site !== null ? intval($site['rec_ID']) : 0, intval($pageId));
             foreach($references as $reference){
                 $use = array('page' => intval($pageId), 'pageTitle' => $title($page), 'node' => $reference['node'], 'kind' => $reference['kind']);
+                // the name of the element (plan 27n §9)
+                if(isset($reference['name'])){ $use['name'] = $reference['name']; }
                 if($reference['kind'] === 'field'){
                     $fieldId = $definitions->localId('dty', (string)$reference['field']);
                     if($fieldId > 0){ $fieldUses[$reference['id']][$fieldId][] = $use; }

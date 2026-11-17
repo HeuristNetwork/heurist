@@ -430,6 +430,11 @@ final class PageRenderer
             }elseif($action === 'addRecord'){
                 $entry['action'] = 'addRecord';
                 $entry['target'] = (string)$target;
+            }elseif($action === 'toggle'){
+                // Show / hide an element of the page, header or footer (plan 27n §10): target = its node id
+                if(preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', (string)$target) !== 1){ continue; }
+                $entry['action'] = 'toggle';
+                $entry['target'] = (string)$target;
             }else{
                 continue;
             }
@@ -538,7 +543,9 @@ final class PageRenderer
             .($look['presentation'] === 'expand' && $look['open'] === 'click' ? ' h-site-menu-open-click' : '')
             .($fullscreen ? ' h-site-menu-fullscreen' : '')
             .($fullscreen && in_array($animation, array('right', 'fade'), true) ? ' h-site-menu-anim-'.$animation : '')
-            .($site && ($settings['alwaysCollapsed'] ?? false) === true ? ' h-site-menu-always-collapsed' : '');
+            .($site && ($settings['alwaysCollapsed'] ?? false) === true ? ' h-site-menu-always-collapsed' : '')
+            // colours of the items (plan 27n §7): inverted | own
+            .(in_array($settings['colors'] ?? null, CmsValidator::ITEM_COLORS, true) ? ' h-site-colors-'.$settings['colors'] : '');
     }
 
     /**
