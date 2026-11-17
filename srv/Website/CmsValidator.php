@@ -146,6 +146,9 @@ final class CmsValidator
                     $issues[] = self::issue('warning', 'duplicate_media', 'Media "'.$node['media'].'" has more than one element', $id);
                 }elseif(!isset($media[$node['media']])){
                     $issues[] = self::issue('warning', 'media_without_config', 'Media "'.$node['media'].'" has no settings', $id);
+                }elseif(self::isPlaceholder($media[$node['media']])){
+                    // a placeholder image of a page template stands in for the file (2026-11-17)
+                    $issues[] = self::issue('warning', 'media_placeholder', 'Replace placeholder image', $id);
                 }
                 $seenMedia[$node['media']] = true;
             }
@@ -318,8 +321,8 @@ final class CmsValidator
 
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
-     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) and `backToTop` (the button of plan
-     * 27k §6) true or false; `startPage` the id of
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page), `backToTop` (the button of plan
+     * 27k §6) and `searchEngines` (plan 27m §5: false = noindex, not given = index) true or false; `startPage` the id of
      * the page shown by the website URL without a page (2026-11-14; not given: the home page).
      *
      * @return array<int,string>
@@ -339,7 +342,7 @@ final class CmsValidator
                 }
             }elseif($key === 'startPage'){
                 if(!is_int($value) || $value < 1){ $problems[] = 'startPage must be a page id'; }
-            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop'){
+            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop' || $key === 'searchEngines'){
                 if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
             }elseif($key === 'header' || $key === 'footer'){
                 if(!is_array($value) || (!empty($value) && array_keys($value) === range(0, count($value) - 1))){
@@ -367,6 +370,14 @@ final class CmsValidator
             }
         }
         return $problems;
+    }
+
+    /** A media element that shows a placeholder image of assets/cms instead of a file (as cmsIsPlaceholder). */
+    public static function isPlaceholder($settings): bool
+    {
+        return is_array($settings) && is_string($settings['placeholder'] ?? null)
+            && preg_match(self::ASSET_NAME, $settings['placeholder']) === 1
+            && !preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? ''));
     }
 
     /**

@@ -18,7 +18,10 @@
 *   DELETE /website/{id}/assign {page} (or ?page=)        take a page out of the menu
 *   POST   /page/{0|id}/import {type, settings, state, title}   module configuration as a
 *                                          standalone page (module Publish)
-* POST /{website|page}/{id}/execute (the build job) is routed by api.php to the jobs.
+* POST /{website|page}/{id}/execute (the build job, body = Generate options of plan 27m §2.1) is routed by
+* api.php to the jobs.
+*   GET    /{website|page}/{id}            meta.generated: the generated site (plan 27m §3) with `changed`
+*   GET|DELETE /{website|page}/{id}/asset  the generated site: its manifest / remove it (live pages again)
 * New pages are public; their owner is the user (a page added to a website menu gets the
 * website's owner and visibility). Only database administrators create websites and change the
 * owner of a website or a page (review 2026-11-08).
@@ -39,6 +42,8 @@ namespace Heurist\Website;
 
 use Heurist\Records\Edit\RecordEditException;
 use Heurist\Records\Entity\RecordEntityHandler;
+use Heurist\Website\Build\GeneratedSites;
+use Heurist\Website\Build\WebsiteBuilder;
 
 /** Website and page entities. */
 final class WebsiteEntityHandler extends RecordEntityHandler
@@ -48,15 +53,18 @@ final class WebsiteEntityHandler extends RecordEntityHandler
     private WebsiteEditService $edit;
     private WebsiteService $service;
     private ?WebsiteSetup $setup;
+    private ?GeneratedSites $generated;
     /** A starter page was written for the website being inserted (removed if its save fails). */
     private bool $starter = false;
 
-    public function __construct(string $kind, WebsiteEditService $edit, WebsiteService $service, ?WebsiteSetup $setup = null)
+    public function __construct(string $kind, WebsiteEditService $edit, WebsiteService $service, ?WebsiteSetup $setup = null,
+        ?GeneratedSites $generated = null)
     {
         $this->kind = $kind;
         $this->edit = $edit;
         $this->service = $service;
         $this->setup = $setup;
+        $this->generated = $generated;
     }
 
     public function beforeSave(string $method, int $id, array $body, array $params, bool $dryRun = false): array
@@ -121,7 +129,26 @@ final class WebsiteEntityHandler extends RecordEntityHandler
 
     public function describe(int $id): array
     {
-        return $this->run(function() use ($id): array { return array('website' => $this->edit->summary($id)); });
+        return $this->run(function() use ($id): array {
+            return array('website' => $this->edit->summary($id), 'generated' => $this->generatedInfo($id));
+        });
+    }
+
+    /**
+     * The generated site of a website or standalone page (plan 27m §3): the manifest values and `changed` = the site
+     * or one of its pages was changed after the generation; null without one.
+     */
+    private function generatedInfo(int $id): ?array
+    {
+        $info = $this->generated !== null ? $this->generated->info($id) : null;
+        if($info === null){ return null; }
+        try{
+            $latest = WebsiteBuilder::lastChange($this->service->context($id));
+        }catch(WebsiteException $exception){
+            $latest = '';
+        }
+        $info['changed'] = $latest !== '' && $latest > (string)($info['modified'] ?? '');
+        return $info;
     }
 
     public function validate(int $id, array $params): array
@@ -153,6 +180,15 @@ final class WebsiteEntityHandler extends RecordEntityHandler
                 self::allow($method, array('POST'));
                 $index = isset($body['index']) && $body['index'] !== null && $body['index'] !== '' ? intval($body['index']) : null;
                 return $this->edit->assign($id, $page, intval($body['parent'] ?? 0), $index);
+            }
+            if($action === 'asset' && $id > 0){
+                // the generated site (plan 27m §2-3): its manifest, or remove it (the live pages answer again)
+                if($method === 'DELETE'){
+                    $this->edit->buildable($id);
+                    return array('removed' => $this->generated !== null && $this->generated->remove($id));
+                }
+                self::allow($method, array('GET'));
+                return array('generated' => $this->generatedInfo($id));
             }
             if($action === 'import' && $this->kind === 'page'){
                 self::allow($method, array('POST'));

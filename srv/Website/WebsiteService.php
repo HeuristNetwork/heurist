@@ -122,12 +122,12 @@ final class WebsiteService
         }
         $issues = $pageParsed['issues'];
         if($site !== null && !$home){ $issues = array_merge($issues, $siteParsed['issues']); }
-        $checkConfig = $pageParsed['config'];
-        if($site !== null && !$home){
-            // header and footer hosts are configured on the website record
-            $checkConfig['instances'] = $pageParsed['config']['instances'] + $siteParsed['config']['instances'];
-        }
-        $issues = array_merge($issues, CmsValidator::check($checkConfig, $parts, $pageTexts, $this->baseUrl));
+        // header and footer hosts are configured on the website record, together with the instances of the home
+        // content: those are "configured elsewhere", not instances without a host on this page (2026-11-17)
+        $otherInstances = $site !== null && !$home
+            ? array_map('strval', array_keys($siteParsed['config']['instances']))
+            : array();
+        $issues = array_merge($issues, CmsValidator::check($pageParsed['config'], $parts, $pageTexts, $this->baseUrl, $otherInstances));
 
         // a record page (plan 27g): the record of the URL with the rights of the visitor
         $recordPage = $site !== null && !$home && CmsValidator::recordCards($pageParsed['config']) !== null;
@@ -177,7 +177,9 @@ final class WebsiteService
     public function check(int $id, string $language = ''): array
     {
         $codes = $this->repository->codes();
+        // the home content itself (not the Startup page that the address without a page shows)
         $context = $this->context($id, 0, $language);
+        if($context['site'] !== null && !$context['home']){ $context = $this->context($id, $id, $language); }
         $site = $context['site'];
         $title = function(array $record) use ($codes): string {
             $name = WebsiteRepository::value($record, $codes['name']);
