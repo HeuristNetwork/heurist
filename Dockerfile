@@ -93,8 +93,8 @@ WORKDIR /var/www/html/HEURIST/heurist
 COPY --from=node:26-slim /usr/local/bin /usr/local/bin
 COPY --from=node:26-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY package.json package-lock.json ./
-RUN npm clean-install --ignore-scripts
-RUN npm run build:js
+RUN npm clean-install --ignore-scripts \
+    && npm run build:js
 
 WORKDIR /var/www/html/HEURIST/heurist
 USER www-data
