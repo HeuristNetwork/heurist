@@ -5,8 +5,12 @@ parameters:
     level: 0
     scanDirectories:
         - vendor
+    bootstrapFiles:
+        - autoload.php
     excludePaths:
         - vendor
+        - external (?)
         - data (?)
+        - hserv/controller/LookupController.php # throws error in phpstan due to mysql connection
     paths:
         - .

@@ -298,7 +298,7 @@ class HeuristModuleData extends HeuristModuleRecordset {
         return values.map(function(field) {
             return $.isPlainObject(field)
                 ? $.extend(true, {}, field)
-                : {field: $.trim(String(field))};
+                : {field: String(field).trim()};
         }).filter(function(field) { return field.field || field.code; });
     }
 

@@ -2810,22 +2810,7 @@ $.widget( "heurist.svs_list", {
                 let res = window.hWin.HEURIST4.query.hQueryStringify(prms); //json to string
 
                 if(!window.hWin.HEURIST4.util.isempty(res)){
-                            let dummy = document.createElement("input");
-                            dummy.value = res;
-                            document.body.appendChild(dummy);
-                            dummy.select();
-                            try {
-
-                                if(document.execCommand("copy"));  // Security exception may be thrown by some browsers.
-                                {
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Query is in clipboard');
-                                }
-                                
-                            } catch (ex) {
-                                console.warn("Copy to clipboard failed.", ex);
-                            } finally {
-                                document.body.removeChild(dummy);
-                            }        
+                    window.hWin.HEURIST4.util.copyStringToClipboard(res);      
                 }    
             }
         }

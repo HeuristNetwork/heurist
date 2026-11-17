@@ -1249,7 +1249,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         //1. get selected fields
         let tree = $.ui.fancytree.getTree( this._$('#field_treeview') );
         let fieldIds = tree.getSelectedNodes(false);
-        len = fieldIds.length;
+        const len = fieldIds.length;
 
         if(index>=len) return;
         if(!index) index = 0;

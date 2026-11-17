@@ -862,7 +862,7 @@ $.widget( "heurist.search_faceted", {
                     invalidList += `<strong>${recType}</strong>:<br>${fields.join('<br>')}`;
                 }
 
-                msg = `The following field(s) are referenced in this facet filter, but are no longer part of their record type:
+                let msg = `The following field(s) are referenced in this facet filter, but are no longer part of their record type:
                 <div style="max-height: 30em;overflow-y: auto;margin: 1em 0.5em 0px;">
                     ${invalidList}
                 </div>`;

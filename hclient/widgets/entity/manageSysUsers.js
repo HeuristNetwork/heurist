@@ -958,7 +958,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(window.hWin.HEURIST4.util.isempty(ORCID)){
             window.hWin.HEURIST4.msg.showMsgFlash('Please enter an ORCID...', 3000);
-            $getData.hide();
+            this.editForm.find('.get-orcid-details').hide();
             return;
         }else if(!this._isValidORCID()){
             let error = {

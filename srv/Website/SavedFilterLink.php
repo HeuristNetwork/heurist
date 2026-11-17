@@ -1,10 +1,11 @@
 <?php
 /**
-* SavedFilterLink.php - The CMS action Saved filter (plan 27j): a public query source, a target page and the values of
-* its parameters, as cmsSavedFilter.js of heurist-explorer.
+* SavedFilterLink.php - The CMS action Saved filter (plan 27j): a public query source or saved filter (plan 27l §7.2), a
+* target page and the values of its parameters, as cmsSavedFilter.js of heurist-explorer.
 *
-* Stored as a reference: `{source, page, values}` (an action menu item has the page in `target`). The link opens the
-* target page with `?source=<id>&v.<NAME>=<value>` (an array repeats the key); the site runtime of that page fills the
+* Stored as a reference: `{source, page, values}` or `{filter, page, values}` (an action menu item has the page in
+* `target`). The link opens the target page with `?source=<id>&v.<NAME>=<value>` (`?filter=<id>` for a saved filter; an
+* array repeats the key); the site runtime of that page fills the
 * values into the query. The server only writes the links and checks the stored values; it does not read them from a
 * URL (PHP would turn the dot of `v.NAME` into `_`).
 *
@@ -158,13 +159,38 @@ final class SavedFilterLink
     }
 
     /**
-     * The query string of the target page (cmsFilterQuery): `source=<id>&v.<NAME>=<value>`; '' when it is longer than
-     * the limit or the source is not an id.
+     * What a Saved filter runs (cmsFilterTarget): `['kind' => 'source', 'id']` (a query source id given as a number, or
+     * settings with `source`) or `['kind' => 'filter', 'id']` (settings with `filter`, or the target itself); null
+     * without one.
+     *
+     * @param mixed $value
+     * @return array{kind:string,id:int}|null
      */
-    public static function query(int $source, $values): string
+    public static function target($value): ?array
     {
-        if($source < 1){ return ''; }
-        $parts = array('source='.$source);
+        if(!is_array($value)){
+            $id = self::id($value);
+            return $id > 0 ? array('kind' => 'source', 'id' => $id) : null;
+        }
+        if(in_array($value['kind'] ?? null, array('source', 'filter'), true) && self::id($value['id'] ?? null) > 0){
+            return array('kind' => $value['kind'], 'id' => self::id($value['id']));
+        }
+        if(self::id($value['filter'] ?? null) > 0){ return array('kind' => 'filter', 'id' => self::id($value['filter'])); }
+        if(self::id($value['source'] ?? null) > 0){ return array('kind' => 'source', 'id' => self::id($value['source'])); }
+        return null;
+    }
+
+    /**
+     * The query string of the target page (cmsFilterQuery): `source=<id>&v.<NAME>=<value>` (`filter=<id>` for a saved
+     * filter); '' when it is longer than the limit or there is no source.
+     *
+     * @param mixed $source A query source id, or a target / settings (target()).
+     */
+    public static function query($source, $values): string
+    {
+        $target = self::target($source);
+        if($target === null){ return ''; }
+        $parts = array($target['kind'].'='.$target['id']);
         foreach(self::values($values)[0] as $name => $value){
             // a value from the record is filled in first (resolve)
             if(self::reference($value) !== null){ continue; }
@@ -176,8 +202,12 @@ final class SavedFilterLink
         return strlen($query) > self::LIMITS['query'] ? '' : $query;
     }
 
-    /** The URL of the target page with the query (cmsFilterHref); '' without a page URL or a query. */
-    public static function href(string $pageUrl, int $source, $values): string
+    /**
+     * The URL of the target page with the query (cmsFilterHref); '' without a page URL or a query.
+     *
+     * @param mixed $source A query source id, or a target / settings (target()).
+     */
+    public static function href(string $pageUrl, $source, $values): string
     {
         $query = self::query($source, $values);
         if($pageUrl === '' || $query === ''){ return ''; }
@@ -186,15 +216,15 @@ final class SavedFilterLink
     }
 
     /**
-     * Why a stored Saved filter is not valid, or null (cmsFilterProblem): a query source and a page, the values within
-     * the limits.
+     * Why a stored Saved filter is not valid, or null (cmsFilterProblem): a query source or saved filter and a page, the
+     * values within the limits.
      *
-     * @param array $settings `source`, `page` (or `target` of an action menu item), `values`.
+     * @param array $settings `source` or `filter`, `page` (or `target` of an action menu item), `values`.
      */
     public static function problem(array $settings): ?string
     {
-        $source = self::id($settings['source'] ?? null);
-        if($source < 1){ return 'a Saved filter needs a query source'; }
+        $source = self::target(array('source' => $settings['source'] ?? null, 'filter' => $settings['filter'] ?? null));
+        if($source === null){ return 'a Saved filter needs a query source or a saved filter'; }
         if(self::id($settings['page'] ?? $settings['target'] ?? null) < 1){ return 'a Saved filter needs a target page'; }
         [$values, $dropped] = self::values($settings['values'] ?? null);
         if($dropped){

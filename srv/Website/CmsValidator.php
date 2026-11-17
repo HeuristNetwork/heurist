@@ -32,9 +32,16 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email')
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs', 'filter')
     );
     public const CONFIG_VERSION = 1;
+
+    /** Page sync of a module instance (plan 27l §2.4; SYNC_MODES of shared/src/sync/SyncEngine.js). */
+    public const SYNC_MODES = array('all', 'selection', 'none');
+    /** A source of the records of a module (plan 27l §12; CMS_RECORDS_TOKEN of cmsDocument.js). */
+    public const RECORDS_TOKEN = '/^(own|links|filter:[A-Za-z0-9_-]+|module:[A-Za-z0-9_-]+)$/';
+    /** Record modules with their own records on a page (plan 27l §11.3; CMS_SOURCE_MODULES of cmsDocument.js). */
+    public const SOURCE_MODULES = array('data', 'map', 'timeline', 'graph', 'recordview');
     /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
     public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page', 'savedFilter');
 
@@ -43,6 +50,8 @@ final class CmsValidator
         'navigation' => array('reload', 'swap', 'scroll'),
         // fixed is the default since 2026-11-09 (was `default` = scroll); slide = an expand / collapse button (§13)
         'header' => array('position' => array('fixed', 'scroll', 'slide', 'none'), 'orientation' => array('horizontal', 'vertical'),
+            // a fixed horizontal header when the page scrolls (plan 27k §4): as it is, or small (logo, menu, languages)
+            'onScroll' => array('keep', 'shrink'),
             // the header default set: one row on normal screens, or two (plan 27f §13)
             'rows' => array('auto', 'two'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own')),
         'footer' => array('position' => array('default', 'fixed', 'none'), 'theme' => array('default', 'surface', 'primary', 'selected', 'own'))
@@ -180,7 +189,9 @@ final class CmsValidator
             array(is_array($styles['nodes'] ?? null) ? $styles['nodes'] : array()),
             array(is_array($styles['kinds'] ?? null) ? $styles['kinds'] : array()),
             array(is_array($styles['presets'] ?? null) ? $styles['presets'] : array()), '',
-            is_array($styles['page'] ?? null) ? $styles['page'] : array());
+            is_array($styles['page'] ?? null) ? $styles['page'] : array(), 0,
+            array('header' => is_array($styles['header'] ?? null) ? $styles['header'] : array(),
+                'footer' => is_array($styles['footer'] ?? null) ? $styles['footer'] : array()));
         $issues = array_merge($issues, $compiler->issues());
         foreach($translations as $language => $blocks){
             foreach(array_keys(is_array($blocks) ? $blocks : array()) as $id){
@@ -234,7 +245,57 @@ final class CmsValidator
         if(isset($settings['mount']) && !in_array($settings['mount'], array('direct', 'iframe'), true)){
             return array('mount', 'mount must be "direct" or "iframe"');
         }
+        // page sync of a module (plan 27l §2.4)
+        if(isset($settings['sync']) && !in_array($settings['sync'], self::SYNC_MODES, true)){
+            return array('sync', 'sync must be "all", "selection" or "none"');
+        }
+        // the own records of a module (plan 27l §11.3)
+        if(isset($settings['dataSource'])
+            && (!in_array($type, self::SOURCE_MODULES, true) || self::instanceDataSource($settings['dataSource'], $type) === null)){
+            return array('data_source', 'dataSource must be {source}, {filter}, {query} without parameters or {record} (Record View)');
+        }
+        // records and selection (plan 27l §12)
+        if((isset($settings['records']) || isset($settings['selection'])) && ($kind !== 'module' || !self::recordsValid($settings))){
+            return array('records', 'records must be {from: [own | links | filter:<id> | module:<id>]} and selection true or false');
+        }
         return null;
+    }
+
+    /** Whether `records` / `selection` of an instance have the stored form (plan 27l §12; cmsRecordsValid of cmsDocument.js). */
+    public static function recordsValid(array $settings): bool
+    {
+        if(isset($settings['records'])){
+            $from = is_array($settings['records']) ? ($settings['records']['from'] ?? null) : null;
+            if(!is_array($from) || isset($settings['records'][0])){ return false; }
+            foreach($from as $token){
+                if(!is_string($token) || preg_match(self::RECORDS_TOKEN, $token) !== 1){ return false; }
+            }
+        }
+        return !isset($settings['selection']) || is_bool($settings['selection']);
+    }
+
+    /**
+     * The own records of a module that does not take the results of the page (plan 27l §11.3; cmsInstanceDataSource of
+     * cmsDocument.js): {source: id} | {filter: id} | {query: [...]} without parameters | {record: id} (Record View).
+     *
+     * @param mixed $value The stored `dataSource`.
+     * @param string $type Module type.
+     * @return array|null
+     */
+    public static function instanceDataSource($value, string $type = ''): ?array
+    {
+        if(!is_array($value) || count($value) !== 1 || isset($value[0])){ return null; }
+        $key = (string)array_key_first($value);
+        if(in_array($key, array('source', 'filter'), true) || ($key === 'record' && $type === 'recordview')){
+            $id = $value[$key];
+            return (is_int($id) || (is_string($id) && ctype_digit($id))) && intval($id) > 0 ? array($key => intval($id)) : null;
+        }
+        if($key !== 'query'){ return null; }
+        $query = $value['query'];
+        if(!is_array($query) || empty($query)){ return null; }
+        if(array_keys($query) !== range(0, count($query) - 1)){ $query = array($query); }
+        if(preg_match('/\$[A-Za-z][A-Za-z0-9_]*\$/', (string)json_encode($query)) === 1){ return null; }
+        return array('query' => $query);
     }
 
     /** A size of the header or footer (LAYOUT_SIZE). */
@@ -257,7 +318,8 @@ final class CmsValidator
 
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
-     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) true or false; `startPage` the id of
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) and `backToTop` (the button of plan
+     * 27k §6) true or false; `startPage` the id of
      * the page shown by the website URL without a page (2026-11-14; not given: the home page).
      *
      * @return array<int,string>
@@ -277,7 +339,7 @@ final class CmsValidator
                 }
             }elseif($key === 'startPage'){
                 if(!is_int($value) || $value < 1){ $problems[] = 'startPage must be a page id'; }
-            }elseif($key === 'hideHeader' || $key === 'hideFooter'){
+            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop'){
                 if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
             }elseif($key === 'header' || $key === 'footer'){
                 if(!is_array($value) || (!empty($value) && array_keys($value) === range(0, count($value) - 1))){

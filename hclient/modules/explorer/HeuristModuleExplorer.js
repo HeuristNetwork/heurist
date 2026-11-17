@@ -375,7 +375,7 @@ class HeuristModuleExplorer extends HeuristModuleViewer {
                     is_modal: true,
                     input_element: input,
                     onClose: function() {
-                        var value = $.trim(input.val() || '');
+                        var value = String(input.val() || '').trim();
                         input.remove();
                         resolve(value || null);
                     }

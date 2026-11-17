@@ -29,11 +29,12 @@ final class ImageThumbnail
     private const MAX_PIXELS = 40000000;
 
     /**
-     * Write a PNG thumbnail (at most SIZE×SIZE, proportions kept).
+     * Write a PNG thumbnail (at most SIZE×SIZE, proportions kept); `$jpeg`: a JPEG on white (the web copy of
+     * WebImageCache, 2026-11-16).
      *
      * @return bool Whether the thumbnail was written.
      */
-    public static function create(string $source, string $target, int $size = self::SIZE): bool
+    public static function create(string $source, string $target, int $size = self::SIZE, bool $jpeg = false): bool
     {
         $image = self::load($source);
         if($image === null){ return false; }
@@ -43,11 +44,15 @@ final class ImageThumbnail
         $newWidth = max(1, (int)round($width * $scale));
         $newHeight = max(1, (int)round($height * $scale));
         $thumb = imagecreatetruecolor($newWidth, $newHeight);
-        imagealphablending($thumb, false);
-        imagesavealpha($thumb, true);
-        imagefill($thumb, 0, 0, imagecolorallocatealpha($thumb, 255, 255, 255, 127));
+        if($jpeg){
+            imagefill($thumb, 0, 0, imagecolorallocate($thumb, 255, 255, 255));
+        }else{
+            imagealphablending($thumb, false);
+            imagesavealpha($thumb, true);
+            imagefill($thumb, 0, 0, imagecolorallocatealpha($thumb, 255, 255, 255, 127));
+        }
         imagecopyresampled($thumb, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        $written = imagepng($thumb, $target);
+        $written = $jpeg ? imagejpeg($thumb, $target, 85) : imagepng($thumb, $target);
         imagedestroy($image);
         imagedestroy($thumb);
         return $written;

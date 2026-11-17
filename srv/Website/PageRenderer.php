@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 namespace Heurist\Website;
 
+use Heurist\Files\FileUrls;
 use Heurist\Utilities\LanguageCodes;
 
 /** HTML of a page context (WebsiteService::context). */
@@ -37,8 +38,17 @@ final class PageRenderer
     private const JSON_FLAGS = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
         | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
 
-    /** Presentations of a menu (plan 27k §1, MENU_PRESENTATIONS of HMenu.js); `menu` = the website menu. */
-    private const MENU_PRESENTATIONS = array('menu', 'row', 'links', 'buttons', 'icons', 'dropdown', 'expand');
+    /**
+     * Presentations of a menu (plan 27k §1, MENU_PRESENTATIONS of cmsMenu.js); `menu` = the website menu; `dropdown` =
+     * expand opened by a click (review 2026-11-16); `grow` icons that show their name on hover.
+     */
+    private const MENU_PRESENTATIONS = array('menu', 'row', 'links', 'buttons', 'icons', 'dropdown', 'expand', 'grow');
+
+    /** Widths of the line of the underline style (review 2026-11-16, MENU_LINE_WIDTHS of cmsMenu.js). */
+    private const MENU_LINE_WIDTHS = array('1px', '2px', '3px', '4px', '6px');
+
+    /** A colour of a menu setting (MENU_COLOR of cmsMenu.js). */
+    private const MENU_COLOR = '/^(?:#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([0-9\s.,%deg\/]+\)|var\(--h-color-[a-z-]{1,30}\))$/i';
 
     /** Styles of the items of a menu (plan 27k §1, MENU_STYLES of HMenu.js). */
     private const MENU_STYLES = array('plain', 'links', 'underline', 'pills', 'buttons', 'outline');
@@ -88,8 +98,10 @@ final class PageRenderer
         $own = $withSite ? $siteConfig : $pageConfig;
         // the own style of the page (plan 27i §9): its section, from the page record (the website record on the home page)
         $pageStyle = self::part($pageConfig, 'page');
+        // the own styles of the header and footer (review 2026-11-16): the website record
+        $partStyles = $site !== null ? array('header' => self::part($siteConfig, 'header'), 'footer' => self::part($siteConfig, 'footer')) : array();
         $styles = (new StyleCompiler($baseUrl))->compile(self::part($own, 'base'), array(self::part($own, 'nodes')),
-            array(self::part($own, 'kinds')), array(self::part($own, 'presets')), '', $withSite ? array() : $pageStyle, $pageId);
+            array(self::part($own, 'kinds')), array(self::part($own, 'presets')), '', $withSite ? array() : $pageStyle, $pageId, $partStyles);
         $pageStyles = $withSite ? (new StyleCompiler($baseUrl))->compile(self::part($pageConfig, 'base'),
             array(self::part($pageConfig, 'nodes')), array(self::part($pageConfig, 'kinds')), array(self::part($pageConfig, 'presets')),
             self::pageScope($pageId), $pageStyle, $pageId) : '';
@@ -97,9 +109,11 @@ final class PageRenderer
         $content = CmsHtml::translate(WebsiteRepository::value($page, $this->codes['content']), $pageTexts);
         $header = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['header']), $siteTexts) : '';
         $footer = $site !== null ? CmsHtml::translate(WebsiteRepository::value($site, $this->codes['footer']), $siteTexts) : '';
-        $content = $this->fill($content, $context);
-        $header = $this->fill($header, $context);
-        $footer = $this->fill($footer, $context);
+        // file URLs (stored ./api/… and legacy ?file=) as absolute file endpoints (plan 34), also in the filled
+        // instances (galleries, badges, cards)
+        $content = $this->fileUrls($this->fill($content, $context));
+        $header = $this->fileUrls($this->fill($header, $context));
+        $footer = $this->fileUrls($this->fill($footer, $context));
         // plan 27f §3: no header / footer at all, or classes of their position (the hide flags of a page are
         // classes too: the navigation modes keep one header and footer for all pages)
         $layout = $this->layout($context);
@@ -108,7 +122,7 @@ final class PageRenderer
         $bodyClass = self::bodyClasses($layout);
         // the banner image of the website and own colours of header / footer (plan 27f §13): a block of its own, the
         // preview of the designer replaces h-site-styles with the draft styles and keeps this one
-        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0)) : '');
+        $layoutCss = self::layoutCss($layout, $site !== null ? $this->fileUrlOf($site, intval($this->codes['banner'] ?? 0), 'asset') : '');
 
         $title = $this->text($page, $this->codes['name'], $language);
         $siteTitle = $site !== null ? $this->text($site, $this->codes['name'], $language) : '';
@@ -200,6 +214,7 @@ final class PageRenderer
             if(($instance['type'] ?? '') === 'menu'){ return array('html' => $this->menuHtml($context, $settings)); }
             if(($instance['type'] ?? '') === 'language'){ return $this->languageHtml($context, $settings); }
             if(($instance['type'] ?? '') === 'actionmenu'){ return array('html' => $this->actionMenuHtml($context, $settings)); }
+            if(($instance['type'] ?? '') === 'breadcrumbs'){ return array('html' => $this->breadcrumbsHtml($context, $settings)); }
             return $this->content !== null ? $this->content->widget($instance, $context) : null;
         });
     }
@@ -212,24 +227,104 @@ final class PageRenderer
      */
     private function menuHtml(array $context, array $settings = array()): string
     {
-        $tree = self::withoutRecordPages($this->menu($context, $context['menu']));
+        $full = $this->menu($context, $context['menu']);
+        // the section of the current page only (plan 27k §6, scope section)
+        $tree = ($settings['scope'] ?? '') === 'section' ? self::sectionTree($full) : self::withoutRecordPages($full);
         if(!empty($settings['showHome']) && $context['site'] !== null){
             array_unshift($tree, $this->homeItem($context));
         }
         $selectable = ($settings['selectableParent'] ?? true) !== false;
         // a div in the <nav> host (review 2026-11-15: one nav; the host is the navigation, data-h-label its name)
-        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="Site menu">'
+        // h-site-menu-main: the website menu, not an action menu (the shrunk header keeps it, plan 27k §4)
+        return '<div class="'.self::attr(self::menuClass($settings).' h-site-menu-main').'"'.self::menuStyleAttr($settings).' data-h-label="Site menu">'
             // the collapsed menu: the "3 bars" icon (2026-11-14)
             .'<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="Menu" aria-label="Menu">'
             .'<i class="fa-solid fa-bars" aria-hidden="true"></i></button>'
             .self::menuList($tree, 'h-site-menu-list', $selectable).'</div>';
     }
 
-    /** The home page as a menu item. */
+    /**
+     * The path of the current page in a menu tree (plan 27k §6): its parents and the page itself; empty when the page is
+     * not in the tree (the home page, a standalone page). menuPath of cmsMenu.js.
+     */
+    public static function menuPath(array $tree): array
+    {
+        foreach($tree as $item){
+            if(!empty($item['current'])){ return array($item); }
+            $path = self::menuPath(is_array($item['children'] ?? null) ? $item['children'] : array());
+            if(!empty($path)){
+                array_unshift($path, $item);
+                return $path;
+            }
+        }
+        return array();
+    }
+
+    /**
+     * The section menu (plan 27k §6, menu setting `scope: section`; sectionTree of cmsMenu.js): the current page and its
+     * sub pages, or, for a page without sub pages, its parent and the sub pages of the parent; the first entry has no
+     * sub entries. The home page, a page of the first level without sub pages and a page not in the menu (review
+     * 2026-11-16): the pages of the first level without their sub pages. Record pages are left out.
+     */
+    public static function sectionTree(array $tree): array
+    {
+        $path = self::menuPath($tree);
+        $last = end($path);
+        $children = $last !== false && empty($last['record'])
+            ? self::withoutRecordPages(is_array($last['children'] ?? null) ? $last['children'] : array()) : array();
+        $root = !empty($children) ? $last : ($path[count($path) - 2] ?? null);
+        if($root === null){
+            return array_map(function(array $item): array {
+                $item['children'] = array();
+                return $item;
+            }, self::withoutRecordPages($tree));
+        }
+        $items = self::withoutRecordPages(is_array($root['children'] ?? null) ? $root['children'] : array());
+        $root['children'] = array();
+        return array_merge(array($root), $items);
+    }
+
+    /**
+     * Breadcrumbs (plan 27k §6): Home, the parents of the page and the page in the menu tree; on a record page the record
+     * instead of the record page. `mode` history: the site runtime shows the record pages visited before (the path is the
+     * start, and stays without JS).
+     */
+    private function breadcrumbsHtml(array $context, array $settings): string
+    {
+        $items = array();
+        if($context['site'] !== null){ $items[] = $this->homeItem($context); }
+        if(empty($context['home'])){
+            $path = self::menuPath($this->menu($context, $context['menu']));
+            $record = $context['record'] ?? null;
+            if($record !== null && !empty($path)){
+                // the record instead of its record page
+                array_pop($path);
+                $path[] = array('title' => trim(strip_tags((string)($record['rec_Title'] ?? ''))), 'url' => $this->selfUrl($context, $context['language']));
+            }
+            $items = array_merge($items, $path);
+        }
+        $html = '';
+        $last = count($items) - 1;
+        foreach($items as $index => $item){
+            $title = self::text2html((string)($item['title'] ?? ''));
+            // the home page: class is-home (the site runtime writes Home in the language of the page, review 2026-11-16)
+            $home = !empty($item['home']) ? ' class="is-home"' : '';
+            $html .= $index === $last ? '<li'.$home.' aria-current="page"><span>'.$title.'</span></li>'
+                : '<li'.$home.'><a href="'.self::attr((string)($item['url'] ?? '#')).'">'.$title.'</a></li>';
+        }
+        $mode = ($settings['mode'] ?? '') === 'history' ? ' data-h-mode="history"' : '';
+        return '<ol class="h-site-breadcrumbs"'.$mode.'>'.$html.'</ol>';
+    }
+
+    /**
+     * The home page as a menu item: its caption is Home (review 2026-11-16; HMenu writes it in the language of the page),
+     * the name of the website its rollover.
+     */
     private function homeItem(array $context): array
     {
         $siteId = intval($context['site']['rec_ID']);
-        return array('id' => $siteId, 'title' => $this->text($context['site'], $this->codes['name'], $context['language']),
+        return array('id' => $siteId, 'title' => 'Home', 'home' => true,
+            'description' => $this->text($context['site'], $this->codes['name'], $context['language']),
             'url' => $this->url($context, $siteId, $context['language']), 'current' => !empty($context['home']),
             'icon' => '', 'format' => 'name', 'children' => array());
     }
@@ -291,19 +386,26 @@ final class PageRenderer
                     || !$this->isRecordPage($context['pages'][$pageId])){ continue; }
                 $entry['url'] = $this->url($context, $pageId, $context['language'], $recordId);
                 $entry['current'] = $pageId === $current && intval($context['record']['rec_ID'] ?? 0) === $recordId;
-            }elseif($action === 'savedFilter'){
-                // Saved filter (plan 27j): target = the page, `source` = the query source, `values`
+            }elseif($action === 'savedFilter' || $action === 'search'){
+                // Saved filter (plan 27j): target = the page, `source` = the query source (or `filter` = a saved filter, plan
+                // 27l §7.2), `values`; a search box (plan 27k §6): the same link as a form, the typed text is the value `param`
                 $pageId = intval($target);
                 $siteId = $context['site'] !== null ? intval($context['site']['rec_ID']) : 0;
+                $param = (string)($item['param'] ?? '');
                 if(SavedFilterLink::problem($item) !== null || ($pageId !== $siteId && (!isset($context['pages'][$pageId])
                     || $this->isRecordPage($context['pages'][$pageId])))){ continue; }
+                if($action === 'search' && preg_match('/^[A-Za-z][A-Za-z0-9_]*$/', $param) !== 1){ continue; }
                 // values from the record (plan 27j phase B): the record of a record page
                 $values = $this->content !== null ? $this->content->filterValues($item['values'] ?? null, $context['record'] ?? null)
                     : (SavedFilterLink::hasReferences($item['values'] ?? null) ? null : ($item['values'] ?? null));
                 if($values === null){ continue; }
-                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']),
-                    SavedFilterLink::id($item['source']), $values);
+                // the typed text replaces a stored value of the same name
+                if($action === 'search' && is_array($values)){ unset($values[$param]); }
+                $entry['url'] = SavedFilterLink::href($this->url($context, $pageId, $context['language']), $item, $values);
                 if($entry['url'] === ''){ continue; }
+                if($action === 'search'){
+                    $entry['search'] = array('param' => $param, 'placeholder' => (string)($labels[$language] ?? $item['label'] ?? ''));
+                }
             }elseif($action === 'back'){
                 // the page before (history back in the runtime); without history and JS: the home page
                 $entry['url'] = $context['site'] !== null ? $this->url($context, intval($context['site']['rec_ID']), $context['language']) : '#';
@@ -317,35 +419,42 @@ final class PageRenderer
             $items[] = $entry;
         }
         $label = trim((string)($settings['labels'][$language] ?? $settings['label'] ?? ''));
-        $presentation = self::menuLook($settings)['presentation'];
+        $look = self::menuLook($settings);
         $toggle = '';
-        if($presentation === 'dropdown'){
-            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false">'
-                .self::text2html($label !== '' ? $label : 'Menu').'</button>';
-        }elseif($presentation === 'expand'){
-            // the icons behind a button (plan 27k §2): its icon, its name as the rollover
-            $name = self::attr($label !== '' ? $label : 'Actions');
+        if($look['presentation'] === 'expand'){
+            // the items behind a button (plan 27k §2, the former drop-down: review 2026-11-16): its icon, its name shown
+            // (buttonText) or as the rollover; without both the default icon
+            $text = $label !== '' ? $label : ($look['buttonText'] ? 'Menu' : 'Actions');
             $icon = self::faClass((string)($settings['icon'] ?? ''));
-            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="'.$name.'" aria-label="'.$name.'">'
-                .'<i class="'.self::attr($icon !== '' ? $icon : self::MENU_EXPAND_ICON).'" aria-hidden="true"></i></button>';
+            $glyph = $icon !== '' || !$look['buttonText'] ? '<i class="'.self::attr($icon !== '' ? $icon : self::MENU_EXPAND_ICON).'" aria-hidden="true"></i>' : '';
+            $toggle = '<button type="button" class="h-site-menu-toggle" aria-expanded="false" title="'.self::attr($text).'" aria-label="'.self::attr($text).'">'
+                .$glyph.($look['buttonText'] ? '<span class="h-site-menu-toggle-text">'.self::text2html($text).'</span>' : '').'</button>';
         }
-        return '<div class="'.self::attr(self::menuClass($settings)).'" data-h-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
+        return '<div class="'.self::attr(self::menuClass($settings)).'"'.self::menuStyleAttr($settings)
+            .' data-h-label="'.self::attr($label !== '' ? $label : 'Actions').'">'
             .$toggle.self::menuList($items, 'h-site-menu-list').'</div>';
     }
 
-    /** Font Awesome classes of an icon (letters, digits, dashes and spaces only), or ''. */
-    private static function faClass(string $icon): string
+    /**
+     * Font Awesome classes of an icon (letters, digits, dashes and spaces only), or ''; fa-solid when no style is given
+     * (review 2026-11-16, faIcon of cmsMenu.js).
+     */
+    public static function faClass(string $icon): string
     {
-        $icon = trim($icon);
-        return preg_match('/^[a-z0-9 -]{1,80}$/', $icon) === 1 && strpos($icon, 'fa-') !== false ? $icon : '';
+        $icon = (string)preg_replace('/\s+/', ' ', trim($icon));
+        if(preg_match('/^[a-z0-9 -]{1,80}$/', $icon) !== 1 || strpos($icon, 'fa-') === false){ return ''; }
+        $styled = preg_match('/(?:^|\s)(?:fa|fas|far|fab|fal|fat|fad|fa-(?:solid|regular|brands|light|thin|duotone|sharp|sharp-solid|sharp-regular))(?=\s|$)/', $icon) === 1;
+        return $styled ? $icon : 'fa-solid '.$icon;
     }
 
     /**
-     * Presentation, style and orientation of a menu (plan 27f §6, 27k §1; menuLook of HMenu.js): presentation `menu`
-     * (the website menu), row, icons, dropdown or expand; a stored `links` / `buttons` presentation is a row with that
-     * style; style plain, links, underline, pills, buttons or outline; orientation horizontal, vertical or auto.
+     * Presentation, style and orientation of a menu (plan 27f §6, 27k §1; menuLook of cmsMenu.js): presentation `menu`
+     * (the website menu), row, icons, expand or grow; a stored `links` / `buttons` presentation is a row with that
+     * style, a stored `dropdown` expand opened by a click, a column, the name on the button (review 2026-11-16); style
+     * plain, links, underline, pills, buttons or outline; orientation horizontal, vertical or auto; `open` hover | click
+     * and `buttonText` of expand.
      *
-     * @return array{presentation: string, style: string, orientation: string}
+     * @return array{presentation: string, style: string, orientation: string, open: string, buttonText: bool}
      */
     public static function menuLook(array $settings): array
     {
@@ -353,23 +462,66 @@ final class PageRenderer
         if(!in_array($presentation, self::MENU_PRESENTATIONS, true)){ $presentation = 'menu'; }
         $style = (string)($settings['style'] ?? '');
         $styled = in_array($style, self::MENU_STYLES, true);
+        $orientation = (string)($settings['orientation'] ?? '');
+        $orientation = in_array($orientation, array('vertical', 'auto'), true) ? $orientation : 'horizontal';
+        $openGiven = in_array($settings['open'] ?? null, array('hover', 'click'), true);
+        $open = $openGiven ? $settings['open'] : 'hover';
+        $buttonText = ($settings['buttonText'] ?? null) === true;
         if($presentation === 'links' || $presentation === 'buttons'){
             if(!$styled){ $style = $presentation; $styled = true; }
             $presentation = 'row';
+        }elseif($presentation === 'dropdown'){
+            $presentation = 'expand';
+            if(!$openGiven){ $open = 'click'; }
+            if(empty($settings['orientation'])){ $orientation = 'vertical'; }
+            if(($settings['buttonText'] ?? null) !== false){ $buttonText = true; }
         }
-        $orientation = (string)($settings['orientation'] ?? '');
-        return array('presentation' => $presentation, 'style' => $styled ? $style : 'plain',
-            'orientation' => in_array($orientation, array('vertical', 'auto'), true) ? $orientation : 'horizontal');
+        return array('presentation' => $presentation, 'style' => $styled ? $style : 'plain', 'orientation' => $orientation,
+            'open' => $open, 'buttonText' => $buttonText);
     }
 
-    /** Classes of a menu: orientation, presentation, item style (none for a drop-down); menuClass of HMenu.js. */
+    /**
+     * The style attribute of a menu (menuStyle of cmsMenu.js, review 2026-11-16): variables of the width and colour of
+     * the underline (`lineWidth`, `lineColor`) and of the colours of the full-screen menu (`overlayBg`, `overlayText`);
+     * values that are not allowed are left out. '' without any.
+     */
+    public static function menuStyleAttr(array $settings): string
+    {
+        $colour = function($value): string {
+            return is_string($value) && preg_match(self::MENU_COLOR, trim($value)) === 1 ? trim($value) : '';
+        };
+        $values = array(
+            '--h-site-menu-line-width' => in_array($settings['lineWidth'] ?? null, self::MENU_LINE_WIDTHS, true) ? $settings['lineWidth'] : '',
+            '--h-site-menu-line-color' => $colour($settings['lineColor'] ?? null),
+            '--h-site-menu-overlay-bg' => $colour($settings['overlayBg'] ?? null),
+            '--h-site-menu-overlay-text' => $colour($settings['overlayText'] ?? null)
+        );
+        $style = '';
+        foreach($values as $name => $value){
+            if($value !== ''){ $style .= $name.':'.$value.';'; }
+        }
+        return $style !== '' ? ' style="'.self::attr($style).'"' : '';
+    }
+
+    /**
+     * Classes of a menu: orientation, presentation, item style (none for a drop-down); the website menu (plan 27k §5):
+     * `collapse` fullscreen with its `animation` (right, fade; down = no class) and `alwaysCollapsed`. menuClass of
+     * cmsMenu.js.
+     */
     public static function menuClass(array $settings): string
     {
         $look = self::menuLook($settings);
-        $classes = array('icons' => 'h-site-menu-icons', 'dropdown' => 'h-site-menu-dropdown', 'expand' => 'h-site-menu-expanding');
+        $classes = array('icons' => 'h-site-menu-icons', 'expand' => 'h-site-menu-expanding', 'grow' => 'h-site-menu-grow');
+        $site = $look['presentation'] === 'menu';
+        $fullscreen = $site && ($settings['collapse'] ?? '') === 'fullscreen';
+        $animation = (string)($settings['animation'] ?? '');
         return 'h-site-menu'.($look['orientation'] !== 'horizontal' ? ' h-site-menu-'.$look['orientation'] : '')
             .(isset($classes[$look['presentation']]) ? ' '.$classes[$look['presentation']] : '')
-            .($look['style'] !== 'plain' && $look['presentation'] !== 'dropdown' ? ' h-site-menu-style-'.$look['style'] : '');
+            .($look['style'] !== 'plain' ? ' h-site-menu-style-'.$look['style'] : '')
+            .($look['presentation'] === 'expand' && $look['open'] === 'click' ? ' h-site-menu-open-click' : '')
+            .($fullscreen ? ' h-site-menu-fullscreen' : '')
+            .($fullscreen && in_array($animation, array('right', 'fade'), true) ? ' h-site-menu-anim-'.$animation : '')
+            .($site && ($settings['alwaysCollapsed'] ?? false) === true ? ' h-site-menu-always-collapsed' : '');
     }
 
     /**
@@ -382,8 +534,13 @@ final class PageRenderer
         foreach($items as $item){
             $children = is_array($item['children'] ?? null) ? $item['children'] : array();
             $classes = 'h-site-menu-item'.(!empty($item['current']) ? ' is-current' : '').(!empty($children) ? ' has-children' : '')
-                .(!empty($item['hidden']) ? ' is-menu-hidden' : '');
+                .(!empty($item['hidden']) ? ' is-menu-hidden' : '').(!empty($item['home']) ? ' is-home' : '');
             if(self::hasCurrent($children)){ $classes .= ' is-current-parent'; }
+            if(is_array($item['search'] ?? null)){
+                // a search box of an action menu (plan 27k §6)
+                $html .= '<li class="h-site-menu-item h-site-menu-search">'.self::searchForm($item).'</li>';
+                continue;
+            }
             $label = self::menuLabel($item);
             $entry = !empty($children) && !$selectableParent
                 ? '<span class="h-site-menu-label" tabindex="0">'.$label.'</span>'
@@ -397,6 +554,30 @@ final class PageRenderer
                 .(!empty($children) ? self::menuList($children, 'h-site-menu-sub', $selectableParent) : '').'</li>';
         }
         return '<ul class="'.$class.'">'.$html.'</ul>';
+    }
+
+    /**
+     * The search box of an action menu item (plan 27k §6): a GET form to the URL of the Saved filter link (`url`: the
+     * target page with `source` / `filter` and the stored values as hidden inputs) and a text input named `v.<param>`; the same
+     * query as the link of a Saved filter (plan 27j), so the target page reads it the same way. Works without JS.
+     */
+    public static function searchForm(array $item): string
+    {
+        $url = (string)($item['url'] ?? '');
+        $parts = explode('#', $url, 2);
+        [$path, $query] = array_pad(explode('?', $parts[0], 2), 2, '');
+        $hidden = '';
+        foreach($query !== '' ? explode('&', $query) : array() as $pair){
+            [$name, $value] = array_pad(explode('=', $pair, 2), 2, '');
+            $hidden .= '<input type="hidden" name="'.self::attr(rawurldecode($name)).'" value="'.self::attr(rawurldecode($value)).'">';
+        }
+        $placeholder = trim((string)($item['search']['placeholder'] ?? '')) ?: 'Search';
+        $fa = (string)($item['fa'] ?? '');
+        return '<form class="h-site-search" method="get" action="'.self::attr($path).'" role="search">'.$hidden
+            .'<input type="search" class="h-site-search-input" name="'.self::attr('v.'.(string)$item['search']['param']).'"'
+            .' placeholder="'.self::attr($placeholder).'" aria-label="'.self::attr($placeholder).'" maxlength="'.SavedFilterLink::LIMITS['length'].'">'
+            .'<button type="submit" class="h-site-search-button" title="'.self::attr($placeholder).'" aria-label="'.self::attr($placeholder).'">'
+            .'<i class="'.self::attr($fa !== '' ? $fa : 'fa-solid fa-magnifying-glass').'" aria-hidden="true"></i></button></form>';
     }
 
     /**
@@ -446,6 +627,8 @@ final class PageRenderer
                 // a record page and its record (plan 27g)
                 'recordPage' => !empty($context['recordPage']),
                 'record' => !empty($context['record']) ? intval($context['record']['rec_ID']) : null,
+                // the trail of the breadcrumbs in mode history (plan 27k §6)
+                'recordTitle' => !empty($context['record']) ? trim(strip_tags((string)($context['record']['rec_Title'] ?? ''))) : null,
                 'title' => $site !== null ? $this->text($site, $this->codes['name'], $context['language']) : '',
                 'language' => $context['language'] !== null ? strtolower($context['language']) : null,
                 'languages' => array_map(function(string $code) use ($context){
@@ -504,6 +687,15 @@ final class PageRenderer
                 'settings' => self::publicSettings($instance, !empty($context['design'])),
                 'state' => $instance['state'] ?? null
             );
+            // records and selection of a module (plan 27l §12; `sync` of round 1 read by the client), its own records
+            if(($instance['kind'] ?? '') === 'module' && CmsValidator::recordsValid($instance)){
+                foreach(array('records', 'selection') as $key){
+                    if(isset($instance[$key])){ $entry[$key] = $instance[$key]; }
+                }
+                if(in_array($instance['sync'] ?? null, array('selection', 'none'), true)){ $entry['sync'] = $instance['sync']; }
+                $source = CmsValidator::instanceDataSource($instance['dataSource'] ?? null, $entry['type']);
+                if($source !== null){ $entry['dataSource'] = $source; }
+            }
             $problem = CmsValidator::instanceProblem($instance);
             if($problem !== null){ $entry['problem'] = $problem[1]; }
             $result[(string)$id] = $entry;
@@ -524,7 +716,8 @@ final class PageRenderer
     {
         $own = $context['site'] !== null ? ($context['siteConfig'] ?? array()) : $context['pageConfig'];
         $layout = is_array($own['layout'] ?? null) ? $own['layout'] : array();
-        $layout = array_intersect_key($layout, array('navigation' => true, 'cache' => true, 'header' => true, 'footer' => true));
+        $layout = array_intersect_key($layout, array('navigation' => true, 'cache' => true, 'header' => true, 'footer' => true,
+            'backToTop' => true));
         $page = is_array($context['pageConfig']['layout'] ?? null) ? $context['pageConfig']['layout'] : array();
         foreach(array('hideHeader', 'hideFooter') as $flag){
             if(($page[$flag] ?? false) === true){ $layout[$flag] = true; }
@@ -573,11 +766,17 @@ final class PageRenderer
         $position = (string)($header['position'] ?? CmsValidator::LAYOUT['header']['position'][0]);
         if(in_array($position, array('fixed', 'slide'), true)){ $classes[] = 'h-site-header-'.$position; }
         if(($header['orientation'] ?? '') === 'vertical'){ $classes[] = 'h-site-header-vertical'; }
+        // shrink on scroll (plan 27k §4): a fixed horizontal header only; the runtime adds h-site-header-shrunk
+        if($position === 'fixed' && ($header['orientation'] ?? '') !== 'vertical' && ($header['onScroll'] ?? '') === 'shrink'){
+            $classes[] = 'h-site-header-shrink';
+        }
         if((($footer['position'] ?? '') === 'fixed')){ $classes[] = 'h-site-footer-fixed'; }
         foreach(array('header' => $header, 'footer' => $footer) as $part => $settings){
             $theme = (string)($settings['theme'] ?? 'default');
             if($theme !== 'default' && in_array($theme, CmsValidator::LAYOUT[$part]['theme'], true)){ $classes[] = 'h-site-'.$part.'-theme-'.$theme; }
         }
+        // the Back to top button (plan 27k §6): the site runtime adds it
+        if(($layout['backToTop'] ?? false) === true){ $classes[] = 'h-site-back-to-top'; }
         if(!empty($layout['hideHeader'])){ $classes[] = 'h-site-hide-header'; }
         if(!empty($layout['hideFooter'])){ $classes[] = 'h-site-hide-footer'; }
         return implode(' ', $classes);
@@ -604,14 +803,15 @@ final class PageRenderer
             if($rules !== ''){ $css .= '.h-site-'.$part.'{'.$rules."}\n"; }
         }
         // sizes (review 2026-11-10): the width of a vertical header (the column of the body grid on wider screens), the
-        // height of a horizontal header (not when collapsed) and of the footer: a minimum, the content in the middle
+        // height of a horizontal header (not when collapsed or shrunk, plan 27k §4) and of the footer: a minimum, the
+        // content in the middle
         $header = is_array($layout['header'] ?? null) ? $layout['header'] : array();
         $footer = is_array($layout['footer'] ?? null) ? $layout['footer'] : array();
         $middle = 'display:flex;flex-direction:column;justify-content:center;';
         if(($header['orientation'] ?? '') === 'vertical'){
             if(CmsValidator::isLayoutSize($header['width'] ?? null)){ $css .= 'html.h-site{--h-site-header-width:'.trim($header['width']).";}\n"; }
         }elseif(CmsValidator::isLayoutSize($header['height'] ?? null)){
-            $css .= 'body:not(.h-site-header-collapsed)>.h-site-header{min-height:'.trim($header['height']).';'.$middle."}\n";
+            $css .= 'body:not(.h-site-header-collapsed,.h-site-header-shrunk)>.h-site-header{min-height:'.trim($header['height']).';'.$middle."}\n";
         }
         if(CmsValidator::isLayoutSize($footer['height'] ?? null)){
             $css .= '.h-site-footer{min-height:'.trim($footer['height']).';'.$middle."}\n";
@@ -619,11 +819,17 @@ final class PageRenderer
         return $css;
     }
 
-    /** URL of the file in a file field of a record, or ''. */
-    private function fileUrlOf(array $record, int $fieldId): string
+    /** File URLs of HTML (stored `./api/…`, legacy `?file=`) as the absolute file endpoints (plan 34). */
+    private function fileUrls(string $html): string
+    {
+        return FileUrls::resolveHtml($html, (string)($this->environment['database'] ?? ''), (string)$this->environment['baseUrl']);
+    }
+
+    /** URL of the file in a file field of a record (`$kind`: web | asset, PageContent::fileUrl), or ''. */
+    private function fileUrlOf(array $record, int $fieldId, string $kind = 'web'): string
     {
         $fileId = $fieldId > 0 ? intval(WebsiteRepository::value($record, $fieldId)) : 0;
-        return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId) : '';
+        return $fileId > 0 && $this->content !== null ? $this->content->fileUrl($fileId, $kind) : '';
     }
 
     /** Scope of the page styles: its section (plan 27f §2.2). */

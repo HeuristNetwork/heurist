@@ -3955,7 +3955,7 @@ $.widget( "heurist.editing_input", {
                     .insertBefore($input);
 
                 function __refreshFieldTitle(){
-                    let code = $.trim($input.val() || '');
+                    let code = String($input.val() || '').trim();
                     let title = '';
 
                     if(code){
@@ -4013,7 +4013,7 @@ $.widget( "heurist.editing_input", {
                     .insertBefore($input);
 
                 function __parseDatasetFields(){
-                    let value = $.trim($input.val() || '');
+                    let value = String($input.val() || '').trim();
                     if(!value){ return []; }
                     try{
                         let parsed = JSON.parse(value);

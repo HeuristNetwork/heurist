@@ -218,6 +218,8 @@ final class ServiceFactory
         // file store of the database and its disk quota (legacy fileUpload.php: 10 GB when not set)
         $factory->fileEnvironment = array(
             'root' => (string)$system->getSysDir(),
+            // the web server may send uploaded files itself (legacy $allowWebAccessUploadedFiles, plan 34)
+            'staticUrl' => !empty($GLOBALS['allowWebAccessUploadedFiles'] ?? null) ? (string)$system->getSysUrl() : null,
             'quota' => static function() use ($system): int {
                 $quota = intval($system->settings->getDiskQuota());
                 return $quota > 0 ? $quota : 10737418240;
@@ -423,6 +425,25 @@ final class ServiceFactory
      * Create the /files controller (plan 20). Files are read from fileRecords/fileRecDetails
      * when the database has these tables (after the switch), else from recUploadedFiles.
      */
+    /**
+     * File content for a guest without the legacy system (plan 34): GET /files/{key}/asset|web|thumbnail of public
+     * files are asked for by every page; one connection, no session, no settings, no write services.
+     *
+     * @param string $storeRoot File store folder of the database (ends with /).
+     * @param string|null $staticRootUrl URL of that folder when the web server may send uploaded files itself.
+     */
+    public static function guestFileContent(string $databaseName, string $databaseNameFull, string $storeRoot,
+        ?string $staticRootUrl): FileContent
+    {
+        $database = DatabaseFactory::fromHeuristConfiguration($databaseNameFull);
+        $runtime = new RuntimeContext($databaseName, $databaseNameFull, 0, defined('HEURIST_BASE_URL') ? HEURIST_BASE_URL : '');
+        $recordStore = (new RecordRepository($database, new RecordSchema(RecordSchema::FILE_TABLES)))->tablesExist();
+        $rows = $recordStore
+            ? new RecordFileRows($database, new FileRecordMapping(DefinitionLookup::shared($database), FileRepository::shared($database)))
+            : new LegacyFileRows($database);
+        return new FileContent($rows, new FileStorage(new FilePaths($storeRoot)), $runtime, $staticRootUrl);
+    }
+
     public function fileController(?FilePaths $paths = null, ?callable $fetch = null): FileController
     {
         $fileRecords = new RecordRepository($this->database, new RecordSchema(RecordSchema::FILE_TABLES));
@@ -430,6 +451,9 @@ final class ServiceFactory
         $store = $recordStore
             ? new RecordFileStore($this->database, $this->runtime)
             : new LegacyFileStore($this->database, $this->runtime);
+        // the web server sends public files of the database's own store (not of a file store given by a test);
+        // read before $paths gets its default below
+        $staticUrl = $paths === null ? ($this->fileEnvironment['staticUrl'] ?? null) : null;
         $root = $paths !== null ? $paths->root : (string)($this->fileEnvironment['root'] ?? '');
         if($root === '' || !($this->database instanceof WritableDatabaseInterface)){
             return new FileController($store, $this->runtime); // read only
@@ -449,7 +473,7 @@ final class ServiceFactory
             }, self::iniBytes((string)ini_get('post_max_size')));
         $writer = new FileWriteService($rows, $mapping, $storage, $uploads, new FileUrlInspector($allowed, $fetch),
             RecordRepository::shared($this->database), $definitions, $this->runtime, $allowed);
-        return new FileController($store, $this->runtime, $writer, new FileContent($rows, $storage, $this->runtime));
+        return new FileController($store, $this->runtime, $writer, new FileContent($rows, $storage, $this->runtime, $staticUrl));
     }
 
     /** Bytes of a php.ini size ("40M", "2G"); 0 when not set. */
@@ -820,7 +844,17 @@ final class ServiceFactory
     {
         $database = $this->database;
         $runner = null;
+        $querySources = new QuerySourcePresentationService($this->presentations);
         return new PageContent($repository, $languages, array(
+            // the query of a public query source (Record cards, plan 27l §11.4); null when it can not be read
+            'querySource' => static function(int $id) use ($querySources): ?array {
+                try {
+                    $query = $querySources->getQuerySource($id)['source']['query'] ?? null;
+                } catch (\Throwable $error) {
+                    return null;
+                }
+                return is_array($query) ? $query : null;
+            },
             'search' => static function(array $query, int $limit) use ($database, $runtime): array {
                 $service = new RecordSearchService($database, $runtime, new QueryBuilder($database));
                 return $service->search(new SearchRequest($query, array('limit' => $limit)))->ids;

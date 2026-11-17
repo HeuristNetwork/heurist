@@ -235,12 +235,12 @@ final class LegacyFileStore implements FileStoreInterface
         );
     }
 
-    /** Thumbnail URL (legacy ?thumb=) of a file that gives one (image, media service, IIIF). */
+    /** Thumbnail URL (`/api/{db}/files/{key}/thumbnail`, plan 34) of a file that gives one (image, media service, IIIF). */
     private function thumbnailUrl(array $row): ?string
     {
         $key = preg_replace('/[^a-z0-9]/i', '', (string)($row['ulf_ObfuscatedFileID'] ?? ''));
         if($key === '' || !FileRepository::hasThumbnail($row) || !defined('HEURIST_BASE_URL')){ return null; }
-        return HEURIST_BASE_URL.'?db='.rawurlencode($this->runtime->databaseName).'&thumb='.$key;
+        return FileUrls::url($key, 'thumbnail', $this->runtime->databaseName, HEURIST_BASE_URL);
     }
 
     private function meta(array $params, array $selection, array $records, bool $defs): array

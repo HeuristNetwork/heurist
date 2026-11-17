@@ -46,6 +46,12 @@ interface FileRowsInterface
     /** @return array<int,int> Files with this MD5 checksum. */
     public function idsByChecksum(string $md5): array;
 
+    /**
+     * Whether no other file has this stored name (ulf_FileName, with any extension): an old cached copy named by it
+     * belongs to one file only (WebImageCache, 2026-11-16).
+     */
+    public function storedNameUnique(string $baseName): bool;
+
     /** Run a function in one transaction. */
     public function transaction(callable $work);
 }

@@ -304,6 +304,9 @@ final class WebsiteEditService
                 && strpos($html, 'data-h-instance="'.$id.'"') !== false){
                 $instanceId = (string)$id;
                 if(isset($existing['mount'])){ $instance['mount'] = $existing['mount']; }
+                foreach(array('sync', 'records', 'selection', 'dataSource') as $key){
+                    if(isset($existing[$key])){ $instance[$key] = $existing[$key]; }
+                }
                 break;
             }
         }

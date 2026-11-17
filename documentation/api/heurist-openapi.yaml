@@ -75,12 +75,16 @@ tags:
 - name: Files
   description: >-
     Registered files (uploads and external resources) as records of the record type Registered file
-    (2-1106), in the JSON of /records: search, chunked upload, registration, changes, content and thumbnails.
-    Logged-in users only, except the content and thumbnail of viewable files.
+    (2-1106), in the JSON of /records: search, chunked upload, registration, changes, and the file itself
+    (asset), its reduced web copy (web) and its thumbnail by the file key. Logged-in users only, except asset,
+    web and thumbnail of viewable files. Every file URL of the server (thumbnails of the JSON, map image layers,
+    report players, website pages) uses these endpoints; stored values use the relative form
+    ./api/{database}/files/{fileKey}/{asset|web|thumbnail}.
 - name: External services
   description: >-
-    Services of external providers called by the server for logged-in users - machine translation (the server
-    chooses the provider; its key stays on the server).
+    Services of external providers called by the server - machine translation for logged-in users (the server
+    chooses the provider; its key stays on the server) and the email form of websites (guests, mail sent by the
+    server).
 paths:
   /databases:
     get:
@@ -940,7 +944,9 @@ paths:
       - name: fields
         in: query
         schema: {type: string}
-        description: Headers, virtual headers (rec_ThumbnailURL, rec_OwnerName), field IDs or _all.
+        description: >-
+          Headers, virtual headers (rec_ThumbnailURL = /api/{database}/files/{fileKey}/thumbnail, rec_OwnerName),
+          field IDs or _all.
       - name: detail
         in: query
         schema: {type: string, enum: [records, ids], default: records}
@@ -1054,7 +1060,8 @@ paths:
       summary: Retrieve one registered file
       description: >-
         One file record, as GET /records/{recordId}: fields default to _all; records is empty when the file does
-        not exist.
+        not exist. GET only: the file id or its key (rec_Hash, read only). The record is JSON; the file itself is
+        GET /files/{fileKey}/asset.
       security:
       - bearerAuth: []
       parameters:
@@ -1062,7 +1069,11 @@ paths:
       - name: fileId
         in: path
         required: true
-        schema: {type: integer, minimum: 1}
+        description: File id; for GET also the file key (rec_Hash).
+        schema:
+          oneOf:
+          - {type: integer, minimum: 1}
+          - {type: string, pattern: '^[a-z0-9]{10,64}$'}
       - name: fields
         in: query
         schema: {type: string}
@@ -1304,21 +1315,24 @@ paths:
       - bearerAuth: []
       responses:
         '200': {description: '{"cancelled": token}'}
-  /{database}/files/{fileKey}/content:
+  /{database}/files/{fileKey}/asset:
     get:
       tags: [Files]
-      operationId: fileContent
-      summary: The content of a file, by its key (rec_Hash)
+      operationId: fileAsset
+      summary: The file itself, by its key (rec_Hash)
       description: >-
-        Local files are sent with range support (206, Content-Range, Accept-Ranges); external resources are
-        redirected to; tiled stacks and files the legacy code keeps elsewhere are redirected to the legacy
-        ?file= link. Guests may read viewable files; login-required files need a login (403).
+        The original file (full resolution), inline unless download=1. Was /files/{fileKey}/content until
+        2026-11-16 (no alias). Local files are sent with range support (206, Content-Range, Accept-Ranges) for
+        audio and video; when the installation allows web access to uploaded files ($allowWebAccessUploadedFiles)
+        a public file is redirected to the file store of the web server instead (not a download). External
+        resources are redirected to; tiled stacks, files of a repository with credentials (Nakala, sent with the API
+        key) and files the legacy code keeps elsewhere are redirected to the legacy ?file= link. Guests may read
+        viewable files; login-required files need a login (403). The endpoint gives a file only: players (video,
+        audio, YouTube / Vimeo / SoundCloud, PDF, images) are built by the client or by report templates
+        ({wrap dt="file" mode="player"}).
       parameters:
       - $ref: '#/components/parameters/Database'
-      - name: fileKey
-        in: path
-        required: true
-        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      - $ref: '#/components/parameters/FileKey'
       - name: download
         in: query
         schema: {type: boolean}
@@ -1329,21 +1343,38 @@ paths:
       responses:
         '200': {description: The file}
         '206': {description: A part of the file}
-        '302': {description: External resource or legacy link}
+        '302': {description: 'External resource, file store of the web server, or legacy link'}
         '403': {description: Login required}
         '404': {description: Unknown key}
         '416': {description: Range not satisfiable}
+  /{database}/files/{fileKey}/web:
+    get:
+      tags: [Files]
+      operationId: fileWeb
+      summary: The reduced web copy of a large image, by the file key
+      description: >-
+        A JPEG of at most 400x400 pixels of a local image of 200 KB or more (made on the first request, cached in
+        webimagecache/{fileKey}.jpg); any other file (small images, video, audio, documents, external and tiled
+        files) is answered as GET /files/{fileKey}/asset. What the legacy ?file= link without fullres gave: images
+        shown in pages use it. Guests may read viewable files.
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      - $ref: '#/components/parameters/FileKey'
+      responses:
+        '200': {description: 'image/jpeg (the web copy) or the file'}
+        '206': {description: A part of the file (not an image)}
+        '302': {description: 'As /asset: external resource, file store of the web server, or legacy link'}
+        '403': {description: Login required}
+        '404': {description: Unknown key}
   /{database}/files/{fileKey}/thumbnail:
     get:
       tags: [Files]
       operationId: fileThumbnail
       summary: The thumbnail of a file (PNG); one not made yet is redirected to the legacy ?thumb= link
+      description: Guests may read viewable files. rec_ThumbnailURL of the JSON is this URL.
       parameters:
       - $ref: '#/components/parameters/Database'
-      - name: fileKey
-        in: path
-        required: true
-        schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
+      - $ref: '#/components/parameters/FileKey'
       responses:
         '200': {description: PNG}
         '302': {description: Legacy thumbnail link (made on the first request)}
@@ -2636,6 +2667,113 @@ paths:
           description: >-
             No translation provider is configured, or the provider failed (configuration, billing, quota);
             error service_error with the message of the service
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+  /{database}/external/email:
+    get:
+      tags:
+      - External services
+      operationId: emailFormQuestion
+      summary: A captcha question for the email form of a website
+      description: >-
+        The email form of a website (CMS widget email). Guests allowed, same site only. The answer is kept in the
+        session of the visitor and used once; the answer is never cached (Cache-Control no-store).
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      responses:
+        '200':
+          description: The question
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [question]
+                properties:
+                  question: {type: string}
+              example:
+                question: '4 + 7 + 1 ='
+        '403':
+          description: A request from another site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+    post:
+      tags:
+      - External services
+      operationId: emailFormSend
+      summary: Send a message of the email form of a website
+      description: >-
+        The message goes to the e-mail address of the website (DT_EMAIL of the website record), else to the owner
+        of the database, through the SMTP relay of the installation ($mailSmtp) or the legacy mailer. Guests
+        allowed; same site only, JSON body; the captcha answer of GET first; at most 5 messages per session and
+        hour.
+      security: []
+      parameters:
+      - $ref: '#/components/parameters/Database'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [site, name, email, message, captcha]
+              properties:
+                site: {type: integer, minimum: 1, description: Website record id}
+                name: {type: string, maxLength: 100, description: 'Name of the sender, one line'}
+                email: {type: string, format: email}
+                message: {type: string, minLength: 1, maxLength: 5000}
+                captcha: {type: string, description: Answer to the question of GET}
+                url: {type: string, description: Address of the page the message was sent from}
+            example:
+              site: 209605
+              name: Jane Doe
+              email: jane@example.org
+              message: Hello
+              captcha: '12'
+              url: https://example.org/heurist/db/site/209605
+      responses:
+        '200':
+          description: Sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sent]
+                properties:
+                  sent: {type: boolean, const: true}
+        '400':
+          description: A field is missing or not valid (invalid_request)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '403':
+          description: Wrong captcha answer (captcha), or a request from another site
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '404':
+          description: Not a website (not_found)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '415':
+          description: Content-Type is not application/json
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '429':
+          description: Too many messages from this visitor (too_many_requests)
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '502':
+          description: The website has no e-mail address, or the mail could not be sent (service_error)
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
@@ -4277,6 +4415,12 @@ components:
       bearerFormat: JWT
       description: JWT supplied in the Authorization header. Existing Heurist browser sessions may also be recognised.
   parameters:
+    FileKey:
+      name: fileKey
+      in: path
+      required: true
+      description: The key of a registered file (rec_Hash, legacy ulf_ObfuscatedFileID)
+      schema: {type: string, pattern: '^[a-z0-9]{10,64}$'}
     JobId:
       name: jobId
       in: path

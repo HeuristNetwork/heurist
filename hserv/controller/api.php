@@ -161,6 +161,21 @@ if(@$requestUri[0]=='api'){
    array_unshift($requestUri,'heurist');
 }
 
+// GET /api/{db}/files/{key}/thumbnail|web of a public file that is already on disk: sent as a static file, before
+// the system is initialised (no database, no session; pages ask for many thumbnails at once). Otherwise the
+// normal request below (access check, the file made on the first request). See srv/Files/StaticFileSender.php.
+if(@$requestUri[1] === 'api' && @$requestUri[3] === 'files'
+    && Heurist\Files\StaticFileSender::trySend((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'), array_slice($requestUri, 2), array(
+        'allowWebAccessThumbnails' => $GLOBALS['allowWebAccessThumbnails'] ?? false,
+        'allowWebAccessUploadedFiles' => $GLOBALS['allowWebAccessUploadedFiles'] ?? false,
+        'defaultRootFileUploadPath' => (string)($GLOBALS['defaultRootFileUploadPath'] ?? ''),
+        'documentRoot' => (string)($_SERVER['DOCUMENT_ROOT'] ?? ''),
+        'ifModifiedSince' => (string)($_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? ''),
+        'ifNoneMatch' => (string)($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')
+    ))){
+    exit;
+}
+
 //$requestUri[1] = "api"
 //$requestUri[2] - database name
 //$requestUri[3] - resource(entity )
@@ -549,13 +564,13 @@ if($is_system_query){
 // Registered files as records (plan 20): GET|POST /files searches with the
 // /records contract, GET /files/{id} gives one file record; uploads (/files/upload),
 // registration and changes (POST/PUT/PATCH/DELETE /files/{id}) need a logged-in user;
-// GET /files/{key}/content|thumbnail may be read by guests (viewable files).
+// GET /files/{key}/asset|thumbnail|web may be read by guests (viewable files; asset was content until 2026-11-16).
 // See srv/Controller/FileController.php for the routes and checks.
 $is_files_query = ($resource === 'files');
 $is_files_search = false;
 if($is_files_query){
     $fileSegment = (string)($requestUri[4] ?? '');
-    $is_files_content = in_array((string)($requestUri[5] ?? ''), array('content','thumbnail'), true)
+    $is_files_content = in_array((string)($requestUri[5] ?? ''), array('asset','thumbnail','web'), true)
         && $fileSegment !== '' && !ctype_digit($fileSegment);
     // the search and /files/aggregate (op=count|rectypes) read the same JSON contract
     $is_files_search = (($fileSegment === '' || $fileSegment === 'aggregate')
@@ -695,6 +710,35 @@ if($record_entity !== null && $http_verb === 'GET'){
 // limit of EmailFormService protect it
 if($is_external_query && ($requestUri[4] ?? '') === 'email'){
     $allow_anonymous = true;
+}
+
+// GET /files/{key}/asset|web|thumbnail (plan 34): first as a guest without the legacy system (one connection; no
+// session file, login check, settings or daily tasks); a public file is answered here. Only a file that needs a
+// login (403 for a guest) goes on to the full initialisation with the session of the user.
+if(!$skip_auth_processing && $is_files_query && $is_files_content && in_array($http_verb, array('GET', 'HEAD'), true)
+    && !UJwt::get_auth_header()){
+    list($guestDbFull, $guestDb) = mysql__get_names((string)@$req_params['db']);
+    if($guestDb !== null && mysql__check_dbname($guestDb) === null){
+        try{
+            $guestRoot = Heurist\Files\StaticFileSender::root((string)($GLOBALS['defaultRootFileUploadPath'] ?? ''),
+                (string)($_SERVER['DOCUMENT_ROOT'] ?? '')).$guestDb.'/';
+            // legacy System::initPathConstants: the configured URL, else the default folder of the server
+            $guestUrl = !empty($GLOBALS['allowWebAccessUploadedFiles'])
+                ? (!isEmptyStr($GLOBALS['defaultRootFileUploadURL'] ?? '') ? $GLOBALS['defaultRootFileUploadURL']
+                    : HEURIST_SERVER_URL.'/HEURIST/HEURIST_FILESTORE/').$guestDb.'/'
+                : null;
+            if(is_dir($guestRoot)){
+                // CORS headers: sent above for every API request
+                $guestContent = ServiceFactory::guestFileContent($guestDb, $guestDbFull, $guestRoot, $guestUrl);
+                if($guestContent->trySendPublic($http_verb, (string)($requestUri[4] ?? ''), (string)($requestUri[5] ?? ''),
+                    (string)($_SERVER['HTTP_RANGE'] ?? ''), filter_var($req_params['download'] ?? false, FILTER_VALIDATE_BOOLEAN))){
+                    exit;
+                }
+            }
+        }catch(\Throwable $e){
+            // the normal request below reports it
+        }
+    }
 }
 
 if(!$skip_auth_processing){

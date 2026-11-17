@@ -432,7 +432,8 @@ final class FieldPredicateCompiler
 
     /**
      * "Contains": word-prefix MATCH where the column has a FULLTEXT index, otherwise LIKE.
-     * Values with % or _ are legacy LIKE patterns (starts with, ends with) and stay LIKE.
+     * Values with % are legacy LIKE patterns (starts with, ends with) and stay LIKE; values with _ too
+     * (a substring of a file name, not a word prefix), as "contains".
      */
     public function containsCondition(string $column, string $text, SqlBuildContext $state, bool $negate = false): string
     {
@@ -571,12 +572,15 @@ final class FieldPredicateCompiler
         return str_replace('\\', '\\\\', $value);
     }
 
-    /** Preserve legacy % and _ wildcards and add contains wildcards when absent. */
+    /**
+     * Preserve a legacy % pattern (starts with, ends with), else "contains". As legacy, only % makes a
+     * pattern: a _ is a plain character ("top_banner" finds "top_banner_1500x500.jpg", 2026-11-16).
+     */
     public function likePattern(string $value): string
     {
         $value = $this->escapeLike($value);
-        return strpos($value, '%') === false && strpos($value, '_') === false
-            ? '%'.$value.'%'
+        return strpos($value, '%') === false
+            ? '%'.str_replace('_', '\_', $value).'%'
             : $value;
     }
 

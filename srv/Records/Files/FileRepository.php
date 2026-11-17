@@ -158,6 +158,18 @@ final class FileRepository
     }
 
     /**
+     * Files whose stored name (ulf_FileName) is this name, without or with any extension (old names of cached
+     * images, WebImageCache).
+     */
+    public function countByStoredName(string $baseName): int
+    {
+        if($baseName === ''){ return 0; }
+        return intval($this->database->fetchValue(
+            'SELECT COUNT(*) FROM recUploadedFiles WHERE ulf_FileName=? OR ulf_FileName LIKE ?',
+            array($baseName, addcslashes($baseName, '\\%_').'.%'), 0));
+    }
+
+    /**
      * Known file extensions with their MIME type (defFileExtToMimetype).
      *
      * @return array<string,string> lower-case extension => MIME type

@@ -14,9 +14,10 @@
 *   PUT      /files/upload/{token}      one chunk: raw body, Content-Range "bytes a-b/total"
 *   GET      /files/upload/{token}      received bytes (resume)
 *   DELETE   /files/upload/{token}      cancel
-*   GET      /files/{key}/content       the file (range requests), by the obfuscated key
+*   GET      /files/{key}/asset         the file (range requests), by the obfuscated key (was content, 2026-11-16)
 *   GET      /files/{key}/thumbnail     its thumbnail
-* Content and thumbnails may be read by guests (viewable files); everything else
+*   GET      /files/{key}/web           reduced web copy of a large image, else the file (2026-11-16)
+* The file (asset), web copy and thumbnail may be read by guests (viewable files); everything else
 * needs a logged-in user. Writes must come from this site: the Origin is checked,
 * JSON bodies are required and chunks need the X-Heurist-Client header (a custom
 * header cannot be sent cross-site without a CORS preflight).
@@ -149,7 +150,7 @@ final class FileController
     public function handleRequest(string $method, array $segments, array $params, ?array $json = null, array $request = array()): void
     {
         $segments = array_values(array_filter($segments, static function($segment){ return $segment !== ''; }));
-        if(count($segments) === 2 && in_array($segments[1], array('content', 'thumbnail'), true)
+        if(count($segments) === 2 && in_array($segments[1], array('asset', 'thumbnail', 'web'), true)
             && !preg_match('/^\d+$/', (string)$segments[0])){
             $this->sendContent(strtoupper($method), (string)$segments[0], (string)$segments[1], $params, $request);
             return;

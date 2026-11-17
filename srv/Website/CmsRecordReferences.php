@@ -75,10 +75,11 @@ final class CmsRecordReferences
         return $result;
     }
 
-    /** The query source of settings with the action Saved filter (plan 27j), or 0. */
+    /** The query source of settings with the action Saved filter (plan 27j) or of a search box (plan 27k §6), or 0. */
     private static function filterSource($settings): int
     {
-        return is_array($settings) && ($settings['action'] ?? '') === 'savedFilter' ? SavedFilterLink::id($settings['source'] ?? null) : 0;
+        return is_array($settings) && in_array($settings['action'] ?? '', array('savedFilter', 'search'), true)
+            ? SavedFilterLink::id($settings['source'] ?? null) : 0;
     }
 
     /** @return array<string,array<int,int>> kind => record ids of one widget. */
@@ -95,6 +96,13 @@ final class CmsRecordReferences
         }
         $filters = self::ids($sources);
         $ids = self::widgetIds($type, $settings);
+        // the own records of a module (plan 27l §11.3, §12): its query source or record, when it uses them
+        $from = is_array($instance['records']['from'] ?? null) ? $instance['records']['from'] : array();
+        if(in_array('own', $from, true) || in_array($instance['sync'] ?? null, array('selection', 'none'), true) || $type === 'recordview'){
+            $own = CmsValidator::instanceDataSource($instance['dataSource'] ?? null, $type);
+            $id = intval($own['source'] ?? $own['record'] ?? 0);
+            if($id > 0){ $ids['module'] = array($id); }
+        }
         return empty($filters) ? $ids : $ids + array('filter' => $filters);
     }
 
@@ -105,6 +113,8 @@ final class CmsRecordReferences
             case 'report':
                 return array('report' => self::ids(is_array($settings['files'] ?? null) ? array_values($settings['files']) : array()));
             case 'cards':
+                // the query source of the cards (plan 27l §11.4)
+                if((string)($settings['mode'] ?? '') === 'source'){ return array('cards' => self::ids(array($settings['querySource'] ?? 0))); }
                 if((string)($settings['mode'] ?? 'manual') !== 'manual'){ return array(); }
                 $text = is_array($settings['query'] ?? null) ? ($settings['query'][0]['ids'] ?? '') : '';
                 return array('cards' => self::ids(is_string($text) || is_int($text) ? explode(',', (string)$text) : array()));

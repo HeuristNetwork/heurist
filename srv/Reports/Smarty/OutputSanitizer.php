@@ -28,6 +28,8 @@ declare(strict_types=1);
 
 namespace Heurist\Reports\Smarty;
 
+use Heurist\Files\FileUrls;
+
 /** Sanitizes and completes report output. */
 final class OutputSanitizer
 {
@@ -65,8 +67,10 @@ final class OutputSanitizer
             ? $this->withScripts($output, $styles, $snippet)
             : $this->purify($output, $styles);
 
-        // images of blocktext fields with relative URLs
+        // file URLs (stored ./api/… and legacy ?file=) as the absolute file endpoints (plan 34); other images of
+        // blocktext fields with relative URLs
         $db = $this->environment->databaseName;
+        $output = FileUrls::resolveHtml($output, $db, $this->environment->baseUrl);
         $output = str_replace(' src="./?db='.$db.'&', ' src="'.$this->environment->baseUrl.'?db='.$db.'&', $output);
 
         $onclick = $popupLinks ? 'onclick="'

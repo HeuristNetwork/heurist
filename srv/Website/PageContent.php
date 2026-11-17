@@ -191,11 +191,16 @@ final class PageContent
         return $url === '' ? '' : '<img src="'.self::attribute($url).'" alt="">';
     }
 
-    /** URL of a registered file (the icon of a menu entry, an image field), or ''. */
-    public function fileUrl(int $fileId): string
+    /**
+     * URL of a registered file (the icon of a menu entry, an image field, the banner), or ''. New file endpoints
+     * (2026-11-16): `web` = the reduced copy of a large image (images in the page), `asset` = the file itself (a
+     * page-wide background); tiled, IIIF and remote files are redirected by the endpoint.
+     */
+    public function fileUrl(int $fileId, string $kind = 'web'): string
     {
         $key = $fileId > 0 ? $this->repository->fileKey($fileId) : '';
-        return $key === '' ? '' : $this->services['baseUrl'].'?db='.rawurlencode($this->services['database']).'&file='.rawurlencode($key);
+        return $key === '' ? '' : $this->services['baseUrl'].'api/'.rawurlencode($this->services['database'])
+            .'/files/'.rawurlencode($key).'/'.($kind === 'asset' ? 'asset' : 'web');
     }
 
     /**
@@ -255,7 +260,11 @@ final class PageContent
             if($record === null){ return !empty($context['design']) ? '<p class="h-site-note">The record of the page URL is shown here</p>' : ''; }
             $ids = array(intval($record['rec_ID']));
         }else{
-            $query = $settings['query'] ?? null;
+            // a public query source without parameters (plan 27l §11.4), read on each render: its latest query
+            $query = ($settings['mode'] ?? '') === 'source'
+                ? (isset($this->services['querySource']) && intval($settings['querySource'] ?? 0) > 0
+                    ? call_user_func($this->services['querySource'], intval($settings['querySource'])) : null)
+                : ($settings['query'] ?? null);
             if(!is_array($query) || empty($query) || self::hasParameters($query) || $file === ''){ return ''; }
             $ids = array_slice(array_map('intval', (array)call_user_func($this->services['search'], $query, self::CARD_LIMIT)), 0, self::CARD_LIMIT);
         }
@@ -347,13 +356,13 @@ final class PageContent
 
     /**
      * Saved filter (plan 27j): a stretched link over the element to the target page of this website (`context.pageLink`)
-     * with the query source and its values (`?source=<id>&v.<NAME>=`, SavedFilterLink); '' for a page that is not in the
+     * with the query source (or saved filter) and its values (`?source=<id>&v.<NAME>=`, SavedFilterLink); '' for a page that is not in the
      * website, a record page, or values over the limits.
      *
      * Values from the record (phase B) are filled in from $record; when none of them has a value there is no link (it
      * would show every record).
      *
-     * @param array $settings `source`, `page` (or `target`), `values`.
+     * @param array $settings `source` or `filter`, `page` (or `target`), `values`.
      * @param array|null $record The record of the element (with its details), for values from the record.
      */
     public function filterLink(array $settings, array $context, ?array $record = null): string
@@ -365,7 +374,7 @@ final class PageContent
         $pageLink = $context['pageLink'] ?? null;
         $found = is_callable($pageLink) ? $pageLink($pageId) : null;
         if(!is_array($found) || $found[0] === ''){ return ''; }
-        $href = SavedFilterLink::href($found[0], SavedFilterLink::id($settings['source']), $values);
+        $href = SavedFilterLink::href($found[0], $settings, $values);
         if($href === ''){ return ''; }
         return '<a class="h-site-rec-link" href="'.self::attribute($href).'"><span class="h-site-visually-hidden">'
             .self::text($found[1] !== '' ? $found[1] : '#'.$pageId).'</span></a>';
@@ -406,15 +415,15 @@ final class PageContent
      */
     public function fieldLink(string $reference, string $link, array $context, string $linkValues = ''): string
     {
-        // Saved filter (plan 27j): `filter:<page>:<source>`, the values in data-h-link-values; any reference; values from the
-        // record (phase B) from the record of the reference
-        if(preg_match('/^filter:(\d+):(\d+)$/', $link, $filter) === 1){
+        // Saved filter (plan 27j): `filter:<page>:<source>` (`filter:<page>:f<saved filter>`, plan 27l §7.2), the values in
+        // data-h-link-values; any reference; values from the record (phase B) from the record of the reference
+        if(preg_match('/^filter:(\d+):(f?)(\d+)$/', $link, $filter) === 1){
             $values = $linkValues !== '' ? json_decode($linkValues, true) : null;
             $record = null;
             if(SavedFilterLink::hasReferences($values) && preg_match('/^(website|page|record|\d+)\./', $reference, $prefix) === 1){
                 $record = $this->sourceRecord($prefix[1], $context);
             }
-            return $this->filterLink(array('page' => intval($filter[1]), 'source' => intval($filter[2]),
+            return $this->filterLink(array('page' => intval($filter[1]), ($filter[2] === 'f' ? 'filter' : 'source') => intval($filter[3]),
                 'values' => is_array($values) ? $values : null), $context, $record);
         }
         if(preg_match('/^goto:(\d+|home)$/', $link, $goto) === 1){

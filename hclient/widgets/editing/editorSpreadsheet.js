@@ -26,6 +26,11 @@ class EditorSpreadsheet{
         'onresizecolumn', 'onresizerow'
     ]);
 
+    static #highlightClasses = ['highlight-selected', 'highlight', 'highlight-top', 'highlight-bottom', 'highlight-left', 'highlight-right'];
+
+    static #reversedAttributes = ['data-x', 'data-y']; // ignore these attributes, as JSS uses them
+    static #dataAttributes = new Set(['id', 'class', 'title', 'style', 'alt', 'width', 'height', 'dir', 'lang', 'rel', 'target', 'role']);
+
     #DEBUG = false;
 
     #inputDiv;
@@ -38,11 +43,7 @@ class EditorSpreadsheet{
 
     #jspreadsheet;
     #defaultConfig = {
-        //tabs: false, // worksheets not handled, for now
         allowExport: true,
-        //allowMoveWorksheet: false,
-        //allowRenameWorksheet: false,
-        //allowDeleteWorksheet: false,
         worksheets: []
     };
     #defaultSheetConfig = {
@@ -59,19 +60,22 @@ class EditorSpreadsheet{
     #data = {};
     #initialInput;
     #initialTableValue;
-    #initialStyling = [];
+    #initialAttributes = [];
 
     #handledTypes = ['csv', 'json', 'table'];
     #dataType;
-    #exportOptions = {
-        type: '',
-        headers: true,
-        raw: true,
-        styling: false
-    };
-    #CSVParsingOptions = {
-        delimiter: null,
-        firstRowHeader: null
+
+    #options = {
+        export: {
+            type: '',
+            headers: true,
+            raw: true,
+            styling: false
+        },
+        csvParsing: {
+            delimiter: null,
+            firstRowHeader: null
+        }
     };
 
     #loadingScripts = false;
@@ -107,7 +111,7 @@ class EditorSpreadsheet{
 
         if(data === ''){
             this.#dataType = 'csv';
-            this.#exportOptions.type = 'table';
+            this.#options.export.type = 'table';
             return '';
         }
 
@@ -186,8 +190,8 @@ class EditorSpreadsheet{
 
     #parseCSV(data){
 
-        if(this.#CSVParsingOptions.firstRowHeader === null){
-            this.#getParseCSVSettings();
+        if(this.#options.csvParsing.firstRowHeader === null){
+            this.#getParseCSVSettings(data);
             throw new Error('waiting');
         }
 
@@ -207,7 +211,7 @@ class EditorSpreadsheet{
             if(char === '"'){
 
                 if(isQuoted && prev === '\\'){
-                    field.slice(0, -1); // remove slash
+                    field = field.slice(0, -1); // remove slash
                     field += '"';
                 }else{
                     isQuoted = !isQuoted;
@@ -217,7 +221,7 @@ class EditorSpreadsheet{
             }
 
             // Special characters outside of quotes
-            if(char === this.#CSVParsingOptions.delimiter && !isQuoted){ // Delimiter outside of quotes
+            if(char === this.#options.csvParsing.delimiter && !isQuoted){ // Delimiter outside of quotes
 
                 row.push(field);
                 field = '';
@@ -259,13 +263,13 @@ class EditorSpreadsheet{
 
         const columns = rows[0].map((column, index) => (
             {
-                title: this.#CSVParsingOptions.firstRowHeader ? column : `Column ${index + 1}`,
+                title: this.#options.csvParsing.firstRowHeader ? column : `Column ${index + 1}`,
                 type: 'text',
                 name: `column${index}`
             }
         ));
 
-        if(this.#CSVParsingOptions.firstRowHeader){
+        if(this.#options.csvParsing.firstRowHeader){
             rows.shift();
         }
 
@@ -300,9 +304,10 @@ class EditorSpreadsheet{
         this.#initialTableValue = this.#serialiseData() ?? '';
     }
 
-    #getParseCSVSettings(){
+    #getParseCSVSettings(data){
 
-        this.#CSVParsingOptions.delimiter = this.#CSVParsingOptions.delimiter !== '' ? this.#CSVParsingOptions.delimiter : this.#detectDelimiter(data);
+        this.#options.csvParsing.delimiter = this.#options.csvParsing.delimiter && this.#options.csvParsing.delimiter !== ''
+            ? this.#options.csvParsing.delimiter : this.#detectDelimiter(data);
 
         let modal;
         let dialog = this.#inputDiv.querySelector('.heurist-jss-parse-csv');
@@ -329,15 +334,16 @@ class EditorSpreadsheet{
 
             let $__continueParse = () => {
 
-                modal.close();
                 let delimiter = dialog.querySelector('[name="csv-delimiter"]').value;
                 delimiter = delimiter === 'semicolon' ? ';' : delimiter;
                 if(!delimiter || delimiter === ''){
                     return;
                 }
-                this.#CSVParsingOptions.delimiter = delimiter;
+                this.#options.csvParsing.delimiter = delimiter;
 
-                this.#CSVParsingOptions.firstRowHeader = dialog.querySelector('[name="columns-first-row"]').checked;
+                this.#options.csvParsing.firstRowHeader = dialog.querySelector('[name="columns-first-row"]').checked;
+
+                modal.close();
 
                 this.show();
             };
@@ -351,15 +357,14 @@ class EditorSpreadsheet{
             dialog.querySelector('button:nth-child(2)').addEventListener('click', $__closeModal);
 
             jSuites.dropdown(dialog.querySelector('[name="csv-delimiter"]'), {
-                width: '12.5em',
-                placeholder: 'Select a delimiter...'
+                width: '12.5em'
             });
         }
 
-        let delimiter = this.#CSVParsingOptions.delimiter !== '' ? this.#CSVParsingOptions.delimiter : '\t';
+        let delimiter = this.#options.csvParsing.delimiter && this.#options.csvParsing.delimiter !== ''
+            ? this.#options.csvParsing.delimiter : '\t';
         delimiter = delimiter === ';' ? 'semicolon' : delimiter;
         dialog.querySelector('[name="csv-delimiter"]').value = delimiter;
-        dialog.querySelector('[name="csv-delimiter"]').dispatchEvent(new Event('change', {bubbles: false}));
 
         modal = jSuites.modal(dialog, {
             title: window.hWin.HR('CSV Parsing'),
@@ -406,7 +411,7 @@ class EditorSpreadsheet{
             return;
         }
 
-        this.#exportOptions.type = this.#dataType;
+        this.#options.export.type = this.#dataType;
 
         if(this.#jspreadsheet){
             return this.#jspreadsheet;
@@ -415,7 +420,8 @@ class EditorSpreadsheet{
         const config = this.#getConfiguration();
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
-        if(this.#data?.[0]){            
+        if(this.#data?.[0]){
+            this.#extractInlineCells();
             worksheetConfig['data'] = this.#data[0].data;
             worksheetConfig['columns'] = this.#data[0].columns;
         }
@@ -430,7 +436,67 @@ class EditorSpreadsheet{
         this.#initialInput = this.#input.value;
         this.#initialTableValue = this.#serialiseData() ?? '';
 
+        this.#applyInitialStyles();
+
         return this.#jspreadsheet;
+    }
+
+    #extractInlineCells(){
+
+        if(!['csv', 'json'].includes(this.#dataType)){
+            this.#initialAttributes = [];
+            return;
+        }
+
+        const parser = new DOMParser();
+
+        this.#data[0].data.forEach((row, y) => {
+
+            this.#initialAttributes.push({});
+
+            row.forEach((cell, x) => {
+
+                if(!cell.startsWith('<jss-cell') || !cell.endsWith('</jss-cell>')){
+                    this.#initialAttributes[y][x] = '';
+                    return;
+                }
+
+                const stub = parser.parseFromString(cell, 'text/html');
+                const element = stub.body.firstChild;
+
+                const attributes = this.#getAttributes(element);
+
+                this.#initialAttributes[y][x] = attributes;//.join(' ');
+
+                this.#data[0].data[y][x] = element.innerHTML;
+            });
+        });
+    }
+
+    #applyInitialStyles(){
+
+        for(let y = 0; y < this.#initialAttributes.length; y ++){
+
+            for(const x in this.#initialAttributes[y]){
+
+                const td = this.#jspreadsheet[0].getCellFromCoords(x, y);
+
+                if(!td){
+                    continue;
+                }
+
+                for(let i = 0; i < this.#initialAttributes[y][x].length; i++){
+
+                    const [attrName, attrValue] = this.#initialAttributes[y][x][i].split('=');
+
+                    if(EditorSpreadsheet.#reversedAttributes.includes(attrName)){
+                        continue;
+                    }
+
+                    td.setAttribute(attrName, attrValue.slice(1, -1));
+                }
+            }
+        }
     }
 
     #getConfiguration(){
@@ -442,7 +508,7 @@ class EditorSpreadsheet{
         config.onevent = (event, a, b, c, d) => {
 
             if(event === 'onchangestyle'){
-                this.#exportOptions.styling = true;
+                this.#options.export.styling = true;
             }
 
             if(this.#jspreadsheet && EditorSpreadsheet.#dataEvents.has(event)){
@@ -555,8 +621,9 @@ class EditorSpreadsheet{
 
     #serialiseData(){
 
-        let type = this.#handledTypes.includes(this.#exportOptions.type) ? this.#exportOptions.type : '';
+        let type = this.#handledTypes.includes(this.#options.export.type) ? this.#options.export.type : '';
         type = type === '' && this.#dataType !== '' ? this.#dataType : type;
+
         switch(type){
             case 'json':
                 return this.#toJSON();
@@ -599,7 +666,7 @@ class EditorSpreadsheet{
 
             let $__performExport = () => {
 
-                this.#exportOptions = {
+                this.#options.export = {
                     type: dialog.querySelector('[name="export-format"]:checked').value,
                     headers: dialog.querySelector('[name="include-headers"]').checked,
                     raw: dialog.querySelector('[name="raw-output"]').checked,
@@ -619,12 +686,12 @@ class EditorSpreadsheet{
             dialog.querySelector('button:nth-child(2)').addEventListener('click', $__closeModal);
         }
 
-        const type = this.#handledTypes.includes(this.#exportOptions.type) ? this.#exportOptions.type : 'csv';
+        const type = this.#handledTypes.includes(this.#options.export.type) ? this.#options.export.type : 'csv';
         dialog.querySelector(`[name="export-format"][value="${type}"]`).checked = true;
 
-        dialog.querySelector(`[name="include-styling"]`).checked = this.#exportOptions.styling;
-        dialog.querySelector(`[name="include-headers"]`).checked = this.#exportOptions.headers;
-        dialog.querySelector(`[name="raw-output"]`).checked = this.#exportOptions.raw;
+        dialog.querySelector(`[name="include-styling"]`).checked = this.#options.export.styling;
+        dialog.querySelector(`[name="include-headers"]`).checked = this.#options.export.headers;
+        dialog.querySelector(`[name="raw-output"]`).checked = this.#options.export.raw;
 
         modal = jSuites.modal(dialog, {
             title: window.hWin.HR('Settings'),
@@ -640,7 +707,7 @@ class EditorSpreadsheet{
 
         let data = this.#getData();
 
-        if(this.#exportOptions.headers){
+        if(this.#options.export.headers){
 
             const headers = this.#jspreadsheet[0].getHeaders().split(',');
 
@@ -669,7 +736,7 @@ class EditorSpreadsheet{
             }).join(',') // "\t"
         );
 
-        if(this.#exportOptions.headers){
+        if(this.#options.export.headers){
             const headers = this.#jspreadsheet[0].getHeaders().split(',');
             data.unshift(headers);
         }
@@ -680,7 +747,7 @@ class EditorSpreadsheet{
     #toTable(){
 
         const headers = this.#jspreadsheet[0].getHeaders().split(',');
-        const data = this.#jspreadsheet[0].getData(false, this.#exportOptions.raw);
+        const data = this.#jspreadsheet[0].getData(false, this.#options.export.raw);
 
         let table = `<table>`;
 
@@ -694,15 +761,14 @@ class EditorSpreadsheet{
         table += '</colgroup>';
         headerHTML += `</tr></thead>`;
 
-        if(this.#exportOptions.headers){
+        if(this.#options.export.headers){
             table += headerHTML;
         }
 
-        let y = -1;
+        let y = 0;
         table += '<tbody>';
         data.forEach(row => {
 
-            ++ y;
             const rowElement = this.#jspreadsheet[0].rows[y].element;
             table += `<tr${rowElement.style.cssText !== '' ? ` style="${rowElement.style.cssText}"` : ''}>`;
 
@@ -710,7 +776,7 @@ class EditorSpreadsheet{
 
             row.forEach(cell => {
 
-                const attributes = this.#exportOptions.styling ? this.#getCellAttributes(x, y) : '';
+                const attributes = this.#options.export.styling ? this.#getCellAttributes(x, y) : '';
 
                 cell.replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
@@ -719,6 +785,8 @@ class EditorSpreadsheet{
                 table += `<td${attributes !== '' ? ` ${attributes}` : ''}>${cell ?? ''}</td>`
             });
             table += '</tr>';
+
+            y ++;
         });
         table += '</tbody></table>';
 
@@ -727,7 +795,7 @@ class EditorSpreadsheet{
 
     #getData(){
 
-        const data = this.#jspreadsheet[0].getData(false, this.#exportOptions.raw);
+        const data = this.#jspreadsheet[0].getData(false, this.#options.export.raw);
 
         let y = -1;
         return data.map(row => {
@@ -737,7 +805,7 @@ class EditorSpreadsheet{
 
             return row.map(cell => {
 
-                const attributes = this.#exportOptions.styling ? ` ${this.#getCellAttributes(x, y)}` : '';
+                const attributes = this.#options.export.styling ? ` ${this.#getCellAttributes(x, y)}` : '';
                 x ++;
 
                 cell.replace(/&/g, '&amp;')
@@ -756,14 +824,33 @@ class EditorSpreadsheet{
             return '';
         }
 
-        let attributes = '';
-        for(const attr of td.attributes){
+        return this.#getAttributes(td).join(' ');
+    }
 
-            if((!attr.name.startsWith('data-') && attr.name !== 'style') || attr.name === 'data-x' || attr.name === 'data-y'){
+    #getAttributes(element){
+
+        let attributes = [];
+        for(const attr of element.attributes){
+
+            const attrNameLower = attr.name.toLowerCase();
+            let attrValue = attr.value;
+            if(EditorSpreadsheet.#reversedAttributes.includes(attrNameLower)
+                || (!EditorSpreadsheet.#dataAttributes.has(attrNameLower) && !/^(?:data-*|aria-*)/.test(attrNameLower))){
+
                 continue;
             }
 
-            attributes += `${attr.name}="${attr.value}"`;
+            if(attrNameLower === 'class'){ // remove highlight/selection classes
+
+                const classes = element.classList.value.split(' ');
+                attrValue = classes.filter(className => !EditorSpreadsheet.#highlightClasses.includes(className)).join(' ');
+            }
+
+            if(attrValue.trim() === ''){
+
+            }
+
+            attributes.push(`${attr.name}="${attrValue}"`);
         }
 
         return attributes;
@@ -822,7 +909,7 @@ class EditorSpreadsheet{
         this.#initialTableValue = null;
         this.#dataType = '';
 
-        this.#CSVParsingOptions = {
+        this.#options.csvParsing = {
             firstRowHeader: null,
             delimiter: null
         };

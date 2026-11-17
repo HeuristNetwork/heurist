@@ -1054,15 +1054,32 @@ window.hWin.HEURIST4.util = {
     //
     //flflnaixr
     //
-    copyStringToClipboard: function(string_to_copy) {
-        function handler (event){
+    copyStringToClipboard: async function(string_to_copy) {
+
+        if(navigator.clipboard?.writeText){
+
+            try{
+                await navigator.clipboard.writeText(string_to_copy);
+                return;
+            }catch{
+                // Use legacy below
+            }
+        } // else: Use legacy method
+
+        function copyHandler(event){
             event.clipboardData.setData('text/plain', string_to_copy);
             event.preventDefault();
-            document.removeEventListener('copy', handler, true);
+            document.removeEventListener('copy', copyHandler, true);
         }
 
-        document.addEventListener('copy', handler, true);
-        document.execCommand('copy');
+        document.addEventListener('copy', copyHandler, true);
+        try{
+            if(!document.execCommand('copy')){
+                throw new Error('Failed');
+            }
+        }catch{
+            document.removeEventListener('copy', copyHandler, true); // remove event listener
+        }
     },
 
     //
@@ -1072,7 +1089,7 @@ window.hWin.HEURIST4.util = {
 
         let matches = url.match(/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/);
 
-        return matches[1];
+        return matches?.[1];
     },
 
     getWikiFileDetails: async function(url){
@@ -1354,13 +1371,12 @@ window.hWin.HEURIST4.util = {
 
         let $__checkForCapsLock = (event) => {
 
-            // was: let isCapsLockOn = event.type === 'blur' ? false : event.originalEvent.getModifierState('CapsLock');
-            // ChatGPT mod: Some click or synthetic events do not provide getModifierState.
+            // Some click or synthetic events do not provide getModifierState.
             // Blur always clears the Caps Lock warning.
             let originalEvent = event.originalEvent || event;
             let isCapsLockOn = event.type !== 'blur'
-            && typeof originalEvent.getModifierState === 'function'
-            && originalEvent.getModifierState('CapsLock');
+                && typeof originalEvent.getModifierState === 'function'
+                && originalEvent.getModifierState('CapsLock');
     
             let $input = $(event.target);
 
