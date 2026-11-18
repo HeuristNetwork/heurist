@@ -5,4 +5,3 @@ $dbAdminUsername = getenv('HEURIST_DB_ADMIN_USERNAME') ?: 'heurist';
 $dbAdminPassword = getenv('HEURIST_DB_ADMIN_PASSWORD') ?: 'heurist';
 $dbPort = 3306;
 require_once __DIR__ . '/../autoload.php';
-?>

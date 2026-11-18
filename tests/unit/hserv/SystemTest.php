@@ -19,4 +19,3 @@ final class SystemTest extends TestCase
         $this->assertTrue($successful);
     }
 }
-?>
