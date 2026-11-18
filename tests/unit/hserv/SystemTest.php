@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use hserv\System;
 
+#[CoversClass(System::class)]
 final class SystemTest extends TestCase
 {
     protected function tearDown(): void {
