@@ -2,7 +2,11 @@ name: "Setup PHP and Composer"
 runs:
   using: composite
   steps:
-    - uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3 # 6.1.2
+    - name: Setup PHP with Composer
+      uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
       with:
-        php_version: "8.5"
-        php_extensions: pdo_mysql
+        php-version: '8.5'
+        extensions: pdo_mysql xdebug
+        coverage: xdebug
+    - run: composer install --no-interaction
+      shell: bash
