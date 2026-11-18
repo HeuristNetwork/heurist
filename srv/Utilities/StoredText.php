@@ -92,7 +92,7 @@ final class StoredText
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
                 .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-link-values|data-h-bg-video'
-                .'|data-h-orientation|data-h-item-style|data-h-multiple|data-h-first-open|data-h-reveal|data-h-name|data-h-colors]';
+                .'|data-h-orientation|data-h-item-style|data-h-multiple|data-h-first-open|data-h-reveal|data-h-name|data-h-colors|data-h-hidden]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -155,7 +155,9 @@ final class StoredText
                 $def->addAttribute($element, 'data-h-multiple', 'Enum#true');
                 $def->addAttribute($element, 'data-h-first-open', 'Enum#true');
                 // reveal on scroll (plan 27k §6, 27n §8): fade / slide / zoom when it comes into the window; hidden = shown by an action
-                $def->addAttribute($element, 'data-h-reveal', 'Enum#fade,up,down,left,right,zoom,hidden');
+                $def->addAttribute($element, 'data-h-reveal', 'Enum#fade,up,down,left,right,zoom');
+                // initially hidden (plan 27n §18.2b): shown by a Show / hide action, with its reveal effect
+                $def->addAttribute($element, 'data-h-hidden', 'Enum#true');
             }
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
