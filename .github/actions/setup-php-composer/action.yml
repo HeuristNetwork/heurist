@@ -8,5 +8,7 @@ runs:
         php-version: '8.5'
         extensions: pdo_mysql xdebug
         coverage: xdebug
+        # ini values for PHPUnit
+        ini-values: display_errors=On, display_startup_errors=On, error_reporting=-1, zend.assertions=1
     - run: composer install --no-interaction
       shell: bash
