@@ -1079,8 +1079,8 @@ class ReportRecord
      *                           For 'rty'/'dty', it defaults to 'rty_Name'/'dty_Name'.
      *                           For 'ulf', can be 'ulf_Caption' (default) or 'ulf_Description'
      * @param string|null $language_code The 3-letter language code (e.g., 'fre'). If null, uses the current system language.
-     * @return string|array If a single ID was provided, returns the translated string.
-     *                      If multiple IDs were provided, returns an associative array `[ID => translated_string]`.
+     * @return string|array A string (empty if no value is available) for a scalar ID.
+     *                      An associative array `[ID => translated_string]` for an array or comma-separated list.
      */
     public function getTranslation($entity, $ids, $field = null, $language_code = null)
     {
@@ -1092,8 +1092,10 @@ class ReportRecord
         $def_values = array();
         $id_clause = '';
 
-        if (!is_array($ids)) {
-            $ids = explode(',', $ids);
+        $returnMap = is_array($ids);
+        if (!$returnMap) {
+            $ids = explode(',', (string)$ids);
+            $returnMap = count($ids) > 1;
         }
 
         if (!array_key_exists($language_code, $this->translations[$entity])) {
@@ -1103,9 +1105,9 @@ class ReportRecord
         $cache = $this->translations[$entity][$language_code];
 
         if ($entity == 'trm') {
-            $field = strpos(strtolower($field), 'desc') === false ? 'trm_Label' : 'trm_Description';
+            $field = stripos((string)$field, 'desc') === false ? 'trm_Label' : 'trm_Description';
         } elseif($entity == 'ulf') {
-            $field = strpos(strtolower($field), 'desc') === false ? 'ulf_Caption' : 'ulf_Description';
+            $field = stripos((string)$field, 'desc') === false ? 'ulf_Caption' : 'ulf_Description';
         } else {
             $field = $entity . '_Name';
         }
@@ -1119,7 +1121,7 @@ class ReportRecord
         }
 
         if (empty($ids)) {
-            return count($rtn) == 1 ? array_shift($rtn) : $rtn;
+            return $returnMap ? $rtn : (string)array_shift($rtn);
         }
 
         $ids = prepareIds($ids);
@@ -1144,7 +1146,7 @@ class ReportRecord
         }
 
         $this->translations[$entity][$language_code] = $cache;
-        return count($rtn) == 1 ? array_shift($rtn) : $rtn;
+        return $returnMap ? $rtn : (string)array_shift($rtn);
     }
 
     /**

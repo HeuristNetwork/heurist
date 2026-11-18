@@ -145,7 +145,8 @@ final class ReportDefinitions
     /**
      * Translations of terms (trm_Label, trm_Description), files (ulf_Caption,
      * ulf_Description), record types and fields (names), with the default text
-     * where no translation exists. One id gives a string, several ids an array.
+     * where no translation exists. A scalar ID gives a string (empty if no value
+     * is available). An array or comma-separated list gives an ID-keyed array.
      *
      * @param string $entity trm, ulf, rty or dty.
      * @param mixed $ids One id, a comma-separated list or an array.
@@ -165,7 +166,11 @@ final class ReportDefinitions
         }else{
             $field = $entity.'_Name';
         }
-        $ids = is_array($ids) ? $ids : explode(',', (string)$ids);
+        $returnMap = is_array($ids);
+        if(!$returnMap){
+            $ids = explode(',', (string)$ids);
+            $returnMap = count($ids) > 1;
+        }
         $ids = array_values(array_filter(array_map('trim', array_map('strval', $ids)), 'strlen'));
         $cache = &$this->translations[$entity][$lang];
         $result = array();
@@ -188,7 +193,7 @@ final class ReportDefinitions
             }
         }
         unset($cache);
-        return count($result) === 1 ? (string)array_shift($result) : $result;
+        return $returnMap ? $result : (string)array_shift($result);
     }
 
     /**

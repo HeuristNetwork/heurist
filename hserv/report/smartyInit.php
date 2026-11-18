@@ -181,7 +181,9 @@ function smartyInit($system, $smarty_templates_dir=null){
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'asort', 'heuristModifierArrayASort');
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'ksort', 'heuristModifierArrayKSort');
 
-        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', 'heuristModifierTranslate');
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'translate', static function ($input, $lang, $field = null) use ($smarty) {
+            return getTranslation($input, $lang, $field, $smarty->getTemplateVars('heurist'));
+        });
 
         
         return $smarty;
@@ -255,20 +257,6 @@ function heuristModifierArrayColumn($arr, $column){
         return '';
     }
 }
-/**
- * Smarty modifier: Translates a given input string using Heurist's `getTranslation` mechanism.
- * (Assumes a global `getTranslation` function is available, likely from `ULocale.php`).
- *
- * @param mixed $input The string or entity ID to translate.
- * @param string $lang The target language code.
- * @param string|null $field (Optional) The specific field of the entity to translate if applicable.
- * @return string The translated string.
- */
-function heuristModifierTranslate($input, $lang, $field=null)
-{
-    return getTranslation($input, $lang, $field);//see ULocale
-}
-
 /**
  * Smarty modifier `arraysortby`: Sorts an array of associative arrays by one or more specified fields.
  *
