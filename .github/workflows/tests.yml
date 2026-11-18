@@ -1,0 +1,20 @@
+name: Tests with PHPUnit
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: ./.github/actions/setup-php-composer
+    - uses: docker/setup-compose-action@54042514f505b273907334ae2b9cdbb9a0213c1a # 2.4.0
+    - name: Launch database with docker compose
+      run: docker compose up db --detach --wait --wait-timeout 30
+    - name: PHPUnit tests
+      run: vendor/bin/phpunit tests
