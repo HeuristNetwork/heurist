@@ -21,7 +21,9 @@ language, split into rows by `RecordValidator` and joined by `RecordDataService`
 - `CmsRecordReferences.php` — record ids picked on a page (record fields, media, reports, manual cards, galleries) for the check of a website (`WebsiteService::check`, review 2026-11-08).
 - `StyleCompiler.php` — base settings, kind defaults (`styles.kinds`), presets (`styles.presets`, `data-h-style`)
   and node styles as CSS (values: `Utilities/StoredCss`; plan 27c §6a).
-- `SiteUrls.php` — `/{db}/site/{id}[/{page}]` or `?db=&site=&pageid=`.
+- `SiteUrls.php` — `/{db}/site/{id}[/{page}]` or `?db=&site=&pageid=`; sitemap `/{db}/site/{id}/sitemap.xml`
+  (`&sitemap=1`, plan 27m §5: `PageRenderer::sitemap`, read as a guest). Every page has canonical, hreflang + x-default,
+  description; `noindex` for `?design=1`, `?live=1`, frames and `layout.searchEngines` false (`PageRenderer::indexable`).
   `?design=1` (logged-in users): the preview of the CMS designer (plan 27c): class `h-site-design`, `runtime.design`.
 - `WebsiteSetup.php`, `WebsiteDefinitionsInterface.php` — `GET|POST /api/{db}/website/setup`;
   the definition writer is `hserv/web/WebsiteDefinitions.php` (fields, optional website logo).
@@ -32,8 +34,14 @@ language, split into rows by `RecordValidator` and joined by `RecordDataService`
   configuration into a standalone page, menu assign (add, move with index) / remove, owner and
   visibility passed on to menu pages, pages deleted with a website. Writes through
   `RecordSaveService` / `RecordDeleteService`.
-- `Build/WebsiteBuilder.php`, `Build/WebsiteBuildJob.php` — job `website-build`: all pages ×
-  languages rendered with guest rights into files (`SiteUrls::files()`), zipped in the job folder.
+- `Build/WebsiteBuilder.php`, `Build/WebsiteBuildJob.php` — job `website-build` (plan 27m §2): pages × chosen
+  languages (+ record pages by query) rendered with guest rights; target `folder` = `generated-sites/{id}/`
+  (`Build/GeneratedSites.php`, manifest, swapped in when complete) served at the live URLs, `zip` = relative files
+  (`SiteUrls::files()`, with its public address also canonical, sitemap, robots.txt), or both.
+- `Build/GeneratedPages.php` — which generated file answers a bare page URL (still visible to guests); everything
+  else is live. `GET|DELETE /{website|page}/{id}/asset` = the generated site; `meta.generated` on read.
+- Own domain of a v4 website: `domainWebsites.json` `{ "db": ..., "site": <id> }` (`RequestRouter::routeOwnDomainSite`,
+  `SiteUrls::domain()`): `/`, `/{page}[/{record}]`, `/robots.txt`, `/site/{id}/sitemap.xml`.
 
 API (plan 27d; generic record controller `RecordEditController::executeEntity`, logged-in users):
 `GET|POST /website/setup`, `POST /website/0` (create), `GET|PUT|PATCH|DELETE /website/{id}`

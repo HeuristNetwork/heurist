@@ -935,7 +935,9 @@ if($is_def_query){
             $controller = $factory->jobController($record_entity === 'output'
                 ? $factory->reportJobHandlers($reportRenderer, $reportWriter) : $factory->websiteJobHandlers());
             $controller->handleRequest('POST', array(), $req_params, array('type' => $entityJob,
-                'params' => $record_entity === 'output' ? array('output' => intval($entityId)) : array('id' => intval($entityId))));
+                // a website build: the Generate options of the body (plan 27m §2.1)
+                'params' => $record_entity === 'output' ? array('output' => intval($entityId))
+                    : array('id' => intval($entityId), 'options' => is_array($json) ? $json : array())));
         }
     }else{
         $controller->handleEntityRequest($record_entity, $http_verb, array_slice($requestUri, 4), $req_params,

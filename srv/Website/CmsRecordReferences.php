@@ -48,26 +48,28 @@ final class CmsRecordReferences
         foreach($parts as $html){
             foreach(CmsHtml::nodes((string)$html) as $node){
                 $name = (string)($node['node'] !== '' ? $node['node'] : ($node['instance'] ?? ''));
+                // the name of the element (plan 27n §9), shown by the Check report
+                $named = $node['name'] !== null ? array('name' => $node['name']) : array();
                 // `record.` (plan 27g): the record of the URL, not a record of the website
                 if($node['field'] !== null && preg_match('/^(website|page|\d+)\.(\d+(?:-\d+)?)$/', $node['field'], $match) === 1){
                     $own = !ctype_digit($match[1]);
                     $id = $match[1] === 'website' ? $websiteId : ($match[1] === 'page' ? $pageId : intval($match[1]));
                     if($id > 0){
-                        $result[] = array('id' => $id, 'node' => $name, 'kind' => 'field', 'field' => $match[2]) + ($own ? array('own' => true) : array());
+                        $result[] = array('id' => $id, 'node' => $name, 'kind' => 'field', 'field' => $match[2]) + ($own ? array('own' => true) : array()) + $named;
                     }
                 }
                 if($node['media'] !== null && is_array($media[$node['media']] ?? null)){
                     $record = intval($media[$node['media']]['settings']['record'] ?? 0);
-                    if($record > 0){ $result[] = array('id' => $record, 'node' => $name, 'kind' => 'media'); }
+                    if($record > 0){ $result[] = array('id' => $record, 'node' => $name, 'kind' => 'media') + $named; }
                     $source = self::filterSource($media[$node['media']]['settings'] ?? null);
-                    if($source > 0){ $result[] = array('id' => $source, 'node' => $name, 'kind' => 'filter'); }
+                    if($source > 0){ $result[] = array('id' => $source, 'node' => $name, 'kind' => 'filter') + $named; }
                 }
                 if(($node['link'] ?? null) !== null && preg_match('/^filter:\d+:(\d+)$/', (string)$node['link'], $filter) === 1){
-                    $result[] = array('id' => intval($filter[1]), 'node' => $name, 'kind' => 'filter');
+                    $result[] = array('id' => intval($filter[1]), 'node' => $name, 'kind' => 'filter') + $named;
                 }
                 if($node['instance'] !== null && is_array($instances[$node['instance']] ?? null)){
                     foreach(self::instanceIds($instances[$node['instance']]) as $kind => $ids){
-                        foreach($ids as $id){ $result[] = array('id' => $id, 'node' => $name, 'kind' => $kind); }
+                        foreach($ids as $id){ $result[] = array('id' => $id, 'node' => $name, 'kind' => $kind) + $named; }
                     }
                 }
             }

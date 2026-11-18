@@ -26,6 +26,20 @@ class EditorSpreadsheet{
         'onresizecolumn', 'onresizerow'
     ]);
 
+    static #localeDictionary = new Set([
+        'Show', 'Search', 'entries', 'Column name', 'Change column type', 'Insert a new column before', 'Insert a new column after',
+        'Delete selected columns', 'Rename this column', 'Order ascending', 'Order descending', 'Insert a new row before', 'Insert a new row after',
+        'Delete selected rows', 'Edit comments', 'Add comments', 'Comments', 'Clear comments', 'Copy', 'Paste', 'Save as',
+        'About', 'Are you sure?', 'This action will destroy any existing merged cells. Are you sure?', 'Invalid merged properties',
+        'No cell selected', 'Rename this worksheet', 'Delete this worksheet', 'It was not possible to rename worksheet due conflict name',
+        'Cut', 'Hide', 'Unhide', 'Select All', 'Blanks', 'Add current selection to filter', 'Rename this cell',
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'January', 'February', 'March', 'April', 'June', 'July', 'August', 'September', 'October', 'November', 'December',
+        'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+        'Done', 'Reset', 'Update'
+    ]);
+    #dictionarySet = false;
+
     static #highlightClasses = ['highlight-selected', 'highlight', 'highlight-top', 'highlight-bottom', 'highlight-left', 'highlight-right'];
 
     static #reversedAttributes = ['data-x', 'data-y']; // ignore these attributes, as JSS uses them
@@ -396,6 +410,8 @@ class EditorSpreadsheet{
             return this.#jspreadsheet;
         }
 
+        this.#setupDictionary(); // setup translation labels
+
         this.#inputDisplay = this.#input.style.display;
         this.#input.style.display = 'none';
 
@@ -421,7 +437,9 @@ class EditorSpreadsheet{
         const worksheetConfig = structuredClone(this.#defaultSheetConfig);
 
         if(this.#data?.[0]){
+
             this.#extractInlineCells();
+
             worksheetConfig['data'] = this.#data[0].data;
             worksheetConfig['columns'] = this.#data[0].columns;
         }
@@ -436,7 +454,7 @@ class EditorSpreadsheet{
         this.#initialInput = this.#input.value;
         this.#initialTableValue = this.#serialiseData() ?? '';
 
-        this.#applyInitialStyles();
+        this.#applyInitialAttributes();
 
         return this.#jspreadsheet;
     }
@@ -473,7 +491,7 @@ class EditorSpreadsheet{
         });
     }
 
-    #applyInitialStyles(){
+    #applyInitialAttributes(){
 
         for(let y = 0; y < this.#initialAttributes.length; y ++){
 
@@ -487,9 +505,16 @@ class EditorSpreadsheet{
 
                 for(let i = 0; i < this.#initialAttributes[y][x].length; i++){
 
+                    // Get cell attributes and split by '='
+                    const cellName = jspreadsheet.helpers.getCellNameFromCoords(x, y);
                     const [attrName, attrValue] = this.#initialAttributes[y][x][i].split('=');
 
-                    if(EditorSpreadsheet.#reversedAttributes.includes(attrName)){
+                    if(EditorSpreadsheet.#reversedAttributes.includes(attrName)){ // is an attribute used by JSS
+                        continue;
+                    }
+
+                    if(attrName === 'comment'){ // apply comments, not as an attribute
+                        this.#jspreadsheet[0].setComments(cellName, attrValue.slice(1, -1));
                         continue;
                     }
 
@@ -518,7 +543,7 @@ class EditorSpreadsheet{
 
         config.toolbar = (toolbar) => {
 
-            // Replace save with save_alt/export
+            // Replace save with save_alt
             const saveIndex = toolbar.items.findIndex(item => item.content === 'save');
             const divisor = {
                 type: 'divisor'
@@ -529,6 +554,7 @@ class EditorSpreadsheet{
                 toolbar.items[saveIndex].content = 'save_alt';
                 toolbar.items[saveIndex].tooltip = 'Export table as CSV';
 
+                // Add file import
                 if(typeof tabularjs === 'function'){
 
                     toolbar.items.splice(saveIndex, 0, {
@@ -549,6 +575,7 @@ class EditorSpreadsheet{
 
             toolbar.items.unshift(divisor);
 
+            // Edit settings
             toolbar.items.unshift({
                 type: 'icon',
                 content: 'settings',
@@ -571,7 +598,7 @@ class EditorSpreadsheet{
         this.#editorContainer.style.display = 'inline-block';
         this.#inputDiv.prepend(this.#editorContainer);
 
-        if(typeof tabularjs === 'function'){
+        if(typeof tabularjs === 'function'){ // setup importer
 
             this.#importInput = document.createElement('input');
             this.#importInput.classList.add('heurist-jss-file-upload');
@@ -819,12 +846,26 @@ class EditorSpreadsheet{
 
     #getCellAttributes(x, y){
 
+        const cellName = jspreadsheet.helpers.getCellNameFromCoords(x, y);
         const td = this.#jspreadsheet[0].getCellFromCoords(x, y);
         if(!td){
             return '';
         }
 
-        return this.#getAttributes(td).join(' ');
+        // Get all cell attributes
+        let attributes = this.#getAttributes(td);
+
+        // Handle cell comment
+        let commentIndex = attributes.findIndex(attribute => attribute.startsWith('comment='));
+        let comment = this.#jspreadsheet[0].getComments(cellName);
+        if(comment !== ''){
+
+            comment = `comment="${comment}"`;
+
+            commentIndex >= 0 ? attributes[commentIndex] = comment : attributes.push(comment);
+        }
+
+        return attributes.join(' ');
     }
 
     #getAttributes(element){
@@ -847,7 +888,7 @@ class EditorSpreadsheet{
             }
 
             if(attrValue.trim() === ''){
-
+                continue;
             }
 
             attributes.push(`${attr.name}="${attrValue}"`);
@@ -935,5 +976,21 @@ class EditorSpreadsheet{
         if(this.#DEBUG){
             console.error(error);
         }
+    }
+
+    #setupDictionary(){
+
+        if(typeof window.hWin.HR !== 'function' || this.#dictionarySet){
+            return;
+        }
+
+        const dictionary = {};
+        for(const term of EditorSpreadsheet.#localeDictionary){
+            dictionary[term] = window.hWin.HR(term);
+        }
+
+        jspreadsheet.setDictionary(dictionary);
+
+        this.#dictionarySet = true;
     }
 }

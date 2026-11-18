@@ -77,6 +77,20 @@ final class PageRenderer
         $this->content = $content;
     }
 
+    /** The same renderer with other URLs (plan 27m: a record page of a built site is one folder deeper). */
+    public function withUrls(SiteUrls $urls): self
+    {
+        $renderer = clone $this;
+        $renderer->environment['urls'] = $urls;
+        return $renderer;
+    }
+
+    /** The URLs of the pages. */
+    public function urls(): SiteUrls
+    {
+        return $this->environment['urls'];
+    }
+
     /** The HTML document of a page. */
     public function render(array $context): string
     {
@@ -131,7 +145,8 @@ final class PageRenderer
         if($record !== null){ $title = trim(strip_tags((string)($record['rec_Title'] ?? ''))) ?: $title; }
         $documentTitle = $site !== null && !$context['home'] && $siteTitle !== '' ? $title.' – '.$siteTitle : ($title ?: $siteTitle);
         $keywords = trim(strip_tags(WebsiteRepository::value($page, $this->codes['keywords'])));
-        $description = $record !== null ? $this->description($record, $language) : '';
+        // the short summary of the record, else of the page (the website record on the home page; plan 27m §5)
+        $description = $this->description($record ?? $page, $language);
 
         $html = '<!doctype html><html lang="'.self::attr($this->languages->code2($language ?? '') ?? 'en').'" class="h-site'
             .(!empty($context['design']) ? ' h-site-design' : '').'">'
@@ -139,7 +154,8 @@ final class PageRenderer
             .'<title>'.self::text2html($documentTitle).'</title>'
             .($keywords !== '' ? '<meta name="keywords" content="'.self::attr($keywords).'">' : '')
             .($description !== '' ? '<meta name="description" content="'.self::attr($description).'">' : '')
-            .($record !== null ? '<link rel="canonical" href="'.self::attr($this->selfUrl($context, $language)).'">' : '')
+            .(self::indexable($context) ? '' : '<meta name="robots" content="noindex">')
+            .$this->canonicalLink($context)
             .$this->alternateLinks($context)
             .'<link rel="stylesheet" href="'.self::attr($baseUrl.self::BUNDLE.'heurist-website-main.css').'">'
             .'<style id="h-site-styles">'."\n".$styles.'</style>'
@@ -175,7 +191,8 @@ final class PageRenderer
             'state' => $instance['state'] ?? null), self::JSON_FLAGS);
         $module = 'heurist-'.$type;
         $assets = $this->environment['baseUrl'].'hclient/bundles/'.$module.'/';
-        return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        // the frame of an instance is a part of its page, not a page of its own (plan 27m §5)
+        return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">'
             .'<meta name="viewport" content="width=device-width,initial-scale=1">'
             .'<title>'.self::text2html($module).'</title>'
             .'<link rel="stylesheet" href="'.self::attr($assets.$module.'-main.css').'">'
@@ -413,6 +430,11 @@ final class PageRenderer
             }elseif($action === 'addRecord'){
                 $entry['action'] = 'addRecord';
                 $entry['target'] = (string)$target;
+            }elseif($action === 'toggle'){
+                // Show / hide an element of the page, header or footer (plan 27n §10): target = its node id
+                if(preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', (string)$target) !== 1){ continue; }
+                $entry['action'] = 'toggle';
+                $entry['target'] = (string)$target;
             }else{
                 continue;
             }
@@ -521,7 +543,9 @@ final class PageRenderer
             .($look['presentation'] === 'expand' && $look['open'] === 'click' ? ' h-site-menu-open-click' : '')
             .($fullscreen ? ' h-site-menu-fullscreen' : '')
             .($fullscreen && in_array($animation, array('right', 'fade'), true) ? ' h-site-menu-anim-'.$animation : '')
-            .($site && ($settings['alwaysCollapsed'] ?? false) === true ? ' h-site-menu-always-collapsed' : '');
+            .($site && ($settings['alwaysCollapsed'] ?? false) === true ? ' h-site-menu-always-collapsed' : '')
+            // colours of the items (plan 27n §7): inverted | own
+            .(in_array($settings['colors'] ?? null, CmsValidator::ITEM_COLORS, true) ? ' h-site-colors-'.$settings['colors'] : '');
     }
 
     /**
@@ -968,16 +992,129 @@ final class PageRenderer
         return mb_strlen($text) > 300 ? rtrim(mb_substr($text, 0, 297)).'...' : $text;
     }
 
-    /** <link rel="alternate" hreflang> for the other languages. */
+    /**
+     * <link rel="alternate" hreflang> for every language of the page (itself too) and x-default = the default
+     * language (plan 27m §5); in a built site only with its public base URL (§4).
+     */
     private function alternateLinks(array $context): string
     {
-        if(count($context['languages']) < 2){ return ''; }
+        $urls = $this->environment['urls'];
+        if(count($context['languages']) < 2 || ($urls->isFiles() && !$urls->hasPublicBase())){ return ''; }
         $links = '';
-        foreach($context['languages'] as $code){
-            $links .= '<link rel="alternate" hreflang="'.self::attr($this->languages->code2($code) ?? strtolower($code)).'" href="'
-                .self::attr($this->selfUrl($context, $code)).'">';
+        foreach($this->alternates($context) as $hreflang => $url){
+            $links .= '<link rel="alternate" hreflang="'.self::attr($hreflang).'" href="'.self::attr($url).'">';
         }
         return $links;
+    }
+
+    /**
+     * URLs of this page by hreflang (2 letters where known), and `x-default` = the default language.
+     *
+     * @return array<string,string>
+     */
+    private function alternates(array $context): array
+    {
+        $urls = array();
+        foreach($context['languages'] as $code){
+            $urls[$this->languages->code2($code) ?? strtolower($code)] = $this->environment['urls']->absolute($this->selfUrl($context, $code));
+        }
+        $urls['x-default'] = $this->environment['urls']->absolute($this->selfUrl($context, $context['languages'][0] ?? null));
+        return $urls;
+    }
+
+    /**
+     * <link rel="canonical">: the URL of this page in its language without other parameters (a Saved filter, the
+     * designer), a record page with its record (plan 27g); in a built site only with its public base URL (plan 27m §4).
+     */
+    private function canonicalLink(array $context): string
+    {
+        $url = $this->environment['urls']->absolute($this->selfUrl($context, $context['language']));
+        return $url !== '' ? '<link rel="canonical" href="'.self::attr($url).'">' : '';
+    }
+
+    /**
+     * Whether search engines may index the page (plan 27m §5): not the designer preview and the live output beside a
+     * generated site (`design`, `live`), not a website (standalone page) with `layout.searchEngines` false.
+     */
+    public static function indexable(array $context): bool
+    {
+        if(!empty($context['design']) || !empty($context['live'])){ return false; }
+        $own = $context['site'] !== null ? ($context['siteConfig'] ?? array()) : ($context['pageConfig'] ?? array());
+        return ($own['layout']['searchEngines'] ?? true) !== false;
+    }
+
+    /**
+     * The sitemap of a website or standalone page (plan 27m §5): the home page and the pages of the menu (not record
+     * pages, not their sub pages) in every language, with alternates and the date of the last change. Empty when
+     * search engines are not allowed. `$context`: the context of the home page (or the standalone page) read as a guest.
+     * `$records`: generated record pages (plan 27m §2.1), page id => record id => date of the last change ('' = none).
+     */
+    public function sitemap(array $context, array $records = array()): string
+    {
+        $entries = '';
+        if(self::indexable($context)){
+            $pages = array($context['page']);
+            if($context['site'] !== null){
+                $pages = array($context['site']);
+                $walk = function(array $items) use (&$walk, &$pages): void {
+                    foreach($items as $item){
+                        $pages[] = $item['page'];
+                        $walk($item['children']);
+                    }
+                };
+                $walk($this->sitemapTree($context, $context['menu']));
+            }
+            $seen = array();
+            foreach($pages as $page){
+                $id = intval($page['rec_ID']);
+                if(isset($seen[$id])){ continue; }
+                $seen[$id] = true;
+                $entries .= $this->sitemapEntries(array('page' => $page, 'record' => null) + $context, $id, 0,
+                    (string)($page['rec_Modified'] ?? ''));
+            }
+            foreach($records as $pageId => $recordIds){
+                $page = $context['pages'][intval($pageId)] ?? null;
+                if($page === null){ continue; }
+                foreach($recordIds as $recordId => $modified){
+                    $entries .= $this->sitemapEntries(array('page' => $page, 'record' => array('rec_ID' => intval($recordId))) + $context,
+                        intval($pageId), intval($recordId), (string)$modified);
+                }
+            }
+        }
+        return '<?xml version="1.0" encoding="UTF-8"?>'."\n"
+            .'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'."\n"
+            .$entries.'</urlset>'."\n";
+    }
+
+    /** The entries of one page (or record of a record page) in every language (sitemap). */
+    private function sitemapEntries(array $pageContext, int $pageId, int $recordId, string $modified): string
+    {
+        $urls = $this->environment['urls'];
+        $time = $modified !== '' ? strtotime($modified) : false;
+        $alternates = count($pageContext['languages']) > 1 ? $this->alternates($pageContext) : array();
+        $entries = '';
+        foreach($pageContext['languages'] ?: array(null) as $language){
+            $loc = $urls->absolute($this->url($pageContext, $pageId, $language, $recordId));
+            if($loc === ''){ continue; }
+            $entries .= '<url><loc>'.self::xml($loc).'</loc>'.($time ? '<lastmod>'.gmdate('Y-m-d', $time).'</lastmod>' : '');
+            foreach($alternates as $hreflang => $url){
+                if($url !== ''){ $entries .= '<xhtml:link rel="alternate" hreflang="'.self::xml($hreflang).'" href="'.self::xml($url).'"/>'; }
+            }
+            $entries .= '</url>'."\n";
+        }
+        return $entries;
+    }
+
+    /** The menu tree with the page records, without record pages and their sub pages (sitemap). */
+    private function sitemapTree(array $context, array $tree): array
+    {
+        $result = array();
+        foreach($tree as $item){
+            $page = $context['pages'][$item['id']] ?? null;
+            if($page === null || $this->isRecordPage($page)){ continue; }
+            $result[] = array('page' => $page, 'children' => $this->sitemapTree($context, $item['children']));
+        }
+        return $result;
     }
 
     /**
@@ -1039,6 +1176,11 @@ final class PageRenderer
     private static function attr(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    private static function xml(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES | ENT_XML1, 'UTF-8');
     }
 
     private static function text2html(string $value): string
