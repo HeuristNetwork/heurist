@@ -192,13 +192,12 @@ use hserv\utilities\DeepL;
      * @param string $lang The target language code (2 or 3 letters).
      * @param string|null $field Optional. If translating a term, specifies which field of the term to translate (e.g., 'label', 'desc').
      *                           Defaults to 'label' for terms.
+     * @param \hserv\report\ReportRecord|null $heuristRec Report lookup for term and file translations.
      * @return string|array|null The translated string if found. If no translation is available for the specified language,
      *                    it returns the original input (for strings) or the default language value.
-     *                    Returns null if input is invalid or Smarty context is unavailable for term translation.
+     *                    Returns null if input is invalid.
      */
-    function getTranslation($input, $lang, $field=null){
-        global $smarty;
-
+    function getTranslation($input, $lang, $field=null, $heuristRec=null){
         $res = null;
         $lang = getLangCode3($lang);
 
@@ -210,12 +209,8 @@ use hserv\utilities\DeepL;
 
             $trm = @$input[0] ? $input[0] : $input;
 
-            if(isset($smarty)){
-
-                $heuristRec = $smarty->getTemplateVars('heurist');
-                if($heuristRec){
-                    return $heuristRec->getTranslation('trm', $trm['id'], $field, $lang);
-                }
+            if($heuristRec){
+                return $heuristRec->getTranslation('trm', $trm['id'], $field, $lang);
             }
 
             return $trm[$field];
@@ -226,12 +221,8 @@ use hserv\utilities\DeepL;
 
             $file = @$input[0] ? $input[0] : $input;
 
-            if(isset($smarty)){
-
-                $heuristRec = $smarty->getTemplateVars('heurist');
-                if($heuristRec){
-                    return $heuristRec->getTranslation('ulf', $file['ulf_ID'], $field, $lang);
-                }
+            if($heuristRec){
+                return $heuristRec->getTranslation('ulf', $file['ulf_ID'], $field, $lang);
             }
 
             return $file[$field];
