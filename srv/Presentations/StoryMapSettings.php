@@ -1,9 +1,10 @@
 <?php
 /**
-* StoryMapSettings.php - Check of the configuration of a story map (Presentation set of kind storymap, plan 27q1 §4)
+* StoryMapSettings.php - Check of the configuration of a story map (Presentation set of kind storymap, plan 27q1 §4, §15)
 *
 * Only the form of the settings is checked: a draft can be saved without a rule or a template, but a value that is
-* given must have the right type. The client normalises the same settings in shared/src/widgets/storymap/storyMapModel.js.
+* given must have the right type. The client normalises the same settings in shared/src/widgets/storymap/storyMapModel.js
+* (the client also reads the older form of 2026-11-18: patterns, overview, messages at the top).
 *
 * @project     Heurist academic knowledge management system
 * @package     Presentations
@@ -22,13 +23,14 @@ namespace Heurist\Presentations;
 /** Form check of the settings of a story map. */
 final class StoryMapSettings
 {
-    public const LAYOUTS = array('list', 'horizontal', 'tabs', 'carousel', 'slideshow');
+    public const LAYOUTS = array('list', 'horizontal', 'carousel', 'tabs');
     public const DISTINCT = array('highlight', 'veil', 'none');
     public const START_MODES = array('inline', 'tab', 'header', 'none');
     public const END_MODES = array('inline', 'tab', 'footer', 'none');
-    /** Place patterns of 27q1; star, pairs and change come with their own plan (§6.1). */
-    public const PATTERNS = array('points', 'path');
-    public const PATH_ROLES = array('begin', 'transition', 'end');
+    public const ORDERS = array('date', 'rule', 'manual');
+    public const PLACE_ROLES = array('begin', 'transition', 'end');
+    /** Most story elements read for one topic. */
+    public const MAX_LIMIT = 500;
 
     /**
      * Problems of the settings, empty when they are fine.
@@ -57,14 +59,13 @@ final class StoryMapSettings
         }else{
             self::mode('presentation.layout', $presentation['layout'] ?? null, self::LAYOUTS, $problems);
             self::mode('presentation.distinct', $presentation['distinct'] ?? null, self::DISTINCT, $problems);
-            self::number('presentation.interval', $presentation['interval'] ?? null, $problems);
-        }
-        $messages = $settings['messages'] ?? null;
-        if($messages !== null && !self::isObject($messages)){
-            $problems[] = 'messages must be an object';
-        }else{
-            self::texts('messages.intro', $messages['intro'] ?? null, $problems);
-            self::texts('messages.empty', $messages['empty'] ?? null, $problems);
+            $messages = $presentation['messages'] ?? null;
+            if($messages !== null && !self::isObject($messages)){
+                $problems[] = 'presentation.messages must be an object';
+            }else{
+                self::texts('presentation.messages.intro', $messages['intro'] ?? null, $problems);
+                self::texts('presentation.messages.empty', $messages['empty'] ?? null, $problems);
+            }
         }
         self::map($settings['map'] ?? null, $problems);
         $actions = $settings['actions'] ?? null;
@@ -74,7 +75,7 @@ final class StoryMapSettings
         return $problems;
     }
 
-    /** story: {rule: {query, levels}, order: {by, dir}}. */
+    /** story: {rule: {query, levels}, order: {by, dir, manual}, limit}. */
     private static function story($story, array &$problems): void
     {
         if($story === null){ return; }
@@ -90,6 +91,10 @@ final class StoryMapSettings
                 $problems[] = 'story.rule.levels must be a list';
             }
         }
+        $limit = $story['limit'] ?? null;
+        if($limit !== null && !(is_int($limit) && $limit > 0 && $limit <= self::MAX_LIMIT)){
+            $problems[] = 'story.limit must be a number from 1 to '.self::MAX_LIMIT;
+        }
         $order = $story['order'] ?? null;
         if($order === null){ return; }
         if(!self::isObject($order)){
@@ -97,10 +102,22 @@ final class StoryMapSettings
             return;
         }
         $by = $order['by'] ?? 'date';
-        if(!in_array($by, array('date', 'rule'), true) && !self::isField($by)){
-            $problems[] = 'story.order.by must be date, rule or a field';
+        if(!in_array($by, self::ORDERS, true) && !self::isField($by)){
+            $problems[] = 'story.order.by must be date, rule, manual or a field';
         }
         self::mode('story.order.dir', $order['dir'] ?? null, array('asc', 'desc'), $problems);
+        $manual = $order['manual'] ?? null;
+        if($manual === null){ return; }
+        $fine = self::isObject($manual);
+        foreach($fine ? $manual : array() as $topic => $ids){
+            if(!self::isId((string)$topic) || !is_array($ids) || !self::isList($ids)
+                || count(array_filter($ids, array(self::class, 'isId'))) !== count($ids)){
+                $fine = false;
+            }
+        }
+        if(!$fine){
+            $problems[] = 'story.order.manual must give a list of record ids per topic';
+        }
     }
 
     /** element / start / end: {template: report id or null}. */
@@ -117,7 +134,7 @@ final class StoryMapSettings
         }
     }
 
-    /** map: {overview, patterns, symbology, duration, keep, layers}. */
+    /** map: {background, places, symbology, duration, keep}. */
     private static function map($map, array &$problems): void
     {
         if($map === null){ return; }
@@ -125,18 +142,23 @@ final class StoryMapSettings
             $problems[] = 'map must be an object';
             return;
         }
-        $overview = $map['overview'] ?? null;
-        if($overview !== null && !(self::isObject($overview)
-            && ((isset($overview['querySource']) && self::isId($overview['querySource'])) || is_array($overview['query'] ?? null)))){
-            $problems[] = 'map.overview must be a query source or a query';
+        $background = $map['background'] ?? null;
+        if($background !== null && !(self::isObject($background) && self::isId($background['mapDocument'] ?? null)
+            && (!isset($background['timeFilter']) || is_bool($background['timeFilter'])))){
+            $problems[] = 'map.background must be a map document with an optional time filter';
         }
-        $patterns = $map['patterns'] ?? null;
-        if($patterns !== null){
-            if(!is_array($patterns) || !self::isList($patterns)){
-                $problems[] = 'map.patterns must be a list';
+        $places = $map['places'] ?? null;
+        if($places !== null){
+            if(!self::isObject($places)){
+                $problems[] = 'map.places must be an object';
             }else{
-                foreach($patterns as $index => $pattern){
-                    self::pattern('map.patterns['.$index.']', $pattern, $problems);
+                foreach(self::PLACE_ROLES as $role){
+                    if(isset($places[$role]) && !self::pathList($places[$role])){
+                        $problems[] = 'map.places.'.$role.' must be a list of geographic field paths';
+                    }
+                }
+                if(isset($places['connect']) && !is_bool($places['connect'])){
+                    $problems[] = 'map.places.connect must be true or false';
                 }
             }
         }
@@ -148,44 +170,6 @@ final class StoryMapSettings
         self::number('map.duration', $map['duration'] ?? null, $problems);
         if(isset($map['keep']) && !is_bool($map['keep'])){
             $problems[] = 'map.keep must be true or false';
-        }
-        $layers = $map['layers'] ?? null;
-        if($layers !== null && (!is_array($layers) || count(array_filter($layers, array(self::class, 'isId'))) !== count($layers))){
-            $problems[] = 'map.layers must be a list of map layer ids';
-        }
-    }
-
-    /** One place pattern: {type, rectypes?, filter? (points), begin/transition/end (path)}. */
-    private static function pattern(string $name, $pattern, array &$problems): void
-    {
-        if(!self::isObject($pattern)){
-            $problems[] = $name.' must be an object';
-            return;
-        }
-        $type = $pattern['type'] ?? null;
-        if(!in_array($type, self::PATTERNS, true)){
-            $problems[] = $name.'.type must be one of '.implode(', ', self::PATTERNS);
-            return;
-        }
-        if(isset($pattern['rectypes']) && !self::fieldList($pattern['rectypes'])){
-            $problems[] = $name.'.rectypes must be a list of record types';
-        }
-        if($type === 'points'){
-            if(isset($pattern['filter']) && !is_array($pattern['filter'])){
-                $problems[] = $name.'.filter must be a query';
-            }
-            return;
-        }
-        $given = 0;
-        foreach(self::PATH_ROLES as $role){
-            if(!isset($pattern[$role])){ continue; }
-            if(!self::fieldList($pattern[$role])){
-                $problems[] = $name.'.'.$role.' must be a list of fields';
-            }
-            $given += count((array)$pattern[$role]);
-        }
-        if($given === 0){
-            $problems[] = $name.' (path) needs begin, transition or end fields';
         }
     }
 
@@ -214,12 +198,14 @@ final class StoryMapSettings
         }
     }
 
-    /** A list of local ids or concept codes. */
-    private static function fieldList($value): bool
+    /** A list of geographic field paths as in Query sources (Records\Map\MapFieldSelector): rty:dty, rty:lt12:rty:dty. */
+    private static function pathList($value): bool
     {
         if(!is_array($value) || !self::isList($value)){ return false; }
         foreach($value as $item){
-            if(!self::isField($item)){ return false; }
+            if(!is_string($item) || preg_match('/^\d+(?::(?:lt|lf|rt|rf|r)\d*:\d+)*:\d+$/i', trim($item)) !== 1){
+                return false;
+            }
         }
         return true;
     }

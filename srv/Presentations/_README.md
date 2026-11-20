@@ -16,7 +16,8 @@ Entity `presentation` of `Records/Entity/RecordEntityRegistry`; only the generic
 
 - `PresentationEntityHandler.php` — hooks: the configuration is a JSON object; a story map is checked by
   `StoryMapSettings`. A PATCH of one of the two fields is checked with the stored other.
-- `StoryMapSettings.php` — form check of the story map settings (plan 27q1 §4). A draft without rule or template is
-  fine; a given value must have the right type. Place patterns: `points` and `path` only (§6.1).
+- `StoryMapSettings.php` — form check of the story map settings (plan 27q1 §4, §15). A draft without rule or template is
+  fine; a given value must have the right type. Places (§15): geographic field paths per role begin / transition /
+  end, as in Query sources; the background map is a map document.
 
 Test: `php tests/PresentationEntityTest.php`.
