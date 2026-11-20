@@ -144,9 +144,6 @@ class DbSysArchive extends DbEntityBase
         return $result;
     }
 
-    //
-    // extract data from arc_DataBeforeChange and converts resultset to Heurist records
-    //
     /**
      * Converts raw `sysArchive` search results into a Heurist-standard recordset format.
      *
@@ -292,526 +289,588 @@ own"0","viewable",NULL,NULL,NULL,NULL
      *    Expects `$this->data['revisions']` as an array mapping `dty_ID` to an array of `arc_ID`s
      *    representing the desired historical state for that field.
      *
-     * @global bool $useNewTemporalFormatInRecDetails Used when processing date values for reversion.
      * @return array|false|null For 'get_record_history', an array `['history' => ..., 'users' => ...]` or false on error.
-     *                          For 'revert_record_history', an array `['errors' => ..., 'issues' => ...]` detailing outcomes, or false on error.
+     *                          For 'revert_record_history', an array `['errors' => ...]` detailing outcomes, or false on error.
      *                          Null or false if action is not recognized or initial validation fails.
      */
     public function batch_action(){
 
-        global $useNewTemporalFormatInRecDetails;
+        $ret = true;
+
+        if(\array_key_exists('get_record_history', $this->data)){
+
+            $ret = $this->getRecordHistory();
+
+        }elseif(\array_key_exists('revert_record_history', $this->data)){
+
+            $ret = $this->revertRecordHistory();
+
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Retrieve field value, raw value for comparison
+     *
+     * @param string $value - arc_DataBeforeChange, archived recDetails row
+     * @param array $defStruct - record structure, used to check type
+     *
+     * @return array - [extracted value, detail type ID]
+     */
+    private function getFieldValue($value, $defStruct){
+
+        // Get recDetail values from arc_DataBeforeChange
+        $dtl_record = str_getcsv($value, ',', '"');
+
+        $value = !empty($dtl_record[3]) && $dtl_record[3] != "NULL" ? $dtl_record[3] : null; // dtl_Value
+        $value = !empty($dtl_record[5]) && $dtl_record[5] != "NULL" ? $dtl_record[5] : $value; // dtl_UploadedFileID
+        $value = !empty($dtl_record[6]) && $dtl_record[6] != "NULL" ? $dtl_record[6] : $value; // dtl_Geo - already WKT format
+
+        $dty_ID = !empty($dtl_record[2]) ? \intval($dtl_record[2]) : 0;
+
+        if(empty($value) || empty($dty_ID) || $dty_ID < 1){ // ? Unknown
+            return [null, null];
+        }
+
+        if($defStruct[$dty_ID] == 'date' && strpos($value, "}") !== false){
+            $dtl_record = explode(",", $value);
+
+            $value = [$dtl_record[3]];
+
+            $idx = 4;
+            while($idx < \count($dtl_record)){
+
+                if($dtl_record[$idx] == '"0"' || $dtl_record[$idx] == '"1"'){
+                    break;
+                }
+
+                array_push($value, $dtl_record[$idx]);
+
+                $idx ++;
+            }
+
+            $value = trim( implode(',', $value) , '"');
+        }elseif($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
+            $value = USanitize::cleanupSpaces($value);// remove extra spacing, avoid displaying extra historical values that are actually the same
+        }
+
+        return [$value, $dty_ID];
+    }
+
+    /**
+     * Perform extra processing, value to show the user
+     *
+     * @param mixed $value - field value, to be processed
+     * @param string $type - field type
+     *
+     * @return mixed - processed value, for user display
+     */
+    private function prepareValueForDisplay($value, $type){
 
         $mysqli = $this->system->getMysqli();
 
-        /**
-         * Retrieve field value, raw value for comparison
-         *
-         * @param string $value - arc_DataBeforeChange, archived recDetails row
-         * @param array $defStruct - record structure, used to check type
-         *
-         * @return array - [extracted value, detail type ID]
-         */
-        $__get_value = function($value, $defStruct){
+        switch ($type) {
 
-            // Get recDetail values from arc_DataBeforeChange
-            $dtl_record = str_getcsv($value, ',', '"');
+            case 'resource': // replace with simple record details (i.e. id, title, rectype id)
 
-            $value = !empty($dtl_record[3]) && $dtl_record[3] != "NULL" ? $dtl_record[3] : null; // dtl_Value
-            $value = !empty($dtl_record[5]) && $dtl_record[5] != "NULL" ? $dtl_record[5] : $value; // dtl_UploadedFileID
-            $value = !empty($dtl_record[6]) && $dtl_record[6] != "NULL" ? $dtl_record[6] : $value; // dtl_Geo - already WKT format
+                $id = \intval($value);
+                if($id < 1){
+                    return $value;
+                }
 
-            $dty_ID = !empty($dtl_record[2]) ? intval($dtl_record[2]) : 0;
+                [$title, $rectype] = mysql__select_row($mysqli, "SELECT rec_Title, rec_RecTypeID FROM Records WHERE rec_ID = $id");
 
-            if(empty($value) || empty($dty_ID) || $dty_ID < 1){ // ? Unknown
-                return [null, null];
-            }
+                $value = [
+                    'rec_ID' => $id,
+                    'rec_Title' => $title,
+                    'rec_RecTypeID' => \intval($rectype),
+                    'rec_IsChildRecord' => 0
+                ];
 
-            if($defStruct[$dty_ID] == 'date' && strpos($value, "}") !== false){
-                $dtl_record = explode(",", $value);
+                break;
 
-                $value = [$dtl_record[3]];
+            case 'enum': // replace with term label w/ hierarchy - vocab label
 
-                $idx = 4;
-                while($idx < count($dtl_record)){
+                $id = \intval($value);
+                if($id < 1){
+                    return $value;
+                }
+                $org_id = $id;
 
-                    if($dtl_record[$idx] == '"0"' || $dtl_record[$idx] == '"1"'){
+                $value = [];
+                while(true){
+
+                    [$lbl, $id] = mysql__select_row($mysqli, "SELECT trm_Label, trm_ParentTermID FROM defTerms WHERE trm_ID = $id");
+
+                    $id = \intval($id);
+                    if(empty($id) || $id < 1){
                         break;
                     }
 
-                    array_push($value, $dtl_record[$idx]);
-
-                    $idx ++;
+                    if(!empty($lbl)){
+                        array_unshift($value, $lbl);
+                    }
                 }
 
-                $value = trim( implode(',', $value) , '"');
-            }elseif($defStruct[$dty_ID] == 'freetext' || $defStruct[$dty_ID] == 'blocktext'){
-                $value = USanitize::cleanupSpaces($value);// remove extra spacing, avoid displaying extra historical values that are actually the same
-            }
+                $value = !empty($value) ? implode(' . ', $value) : "Unable to find term #$org_id";
 
+                break;
 
-            return [$value, $dty_ID];
-        };
+            case 'file': // replace with filename / website URL
 
-        /**
-         * Perform extra processing, value to show the user
-         *
-         * @param mixed $value - field value, to be processed
-         * @param string $type - field type
-         *
-         * @return mixed - processed value, for user display
-         */
-        $__process_value = function($value, $type) use ($mysqli){
+                [$filename, $url] = mysql__select_row($mysqli, "SELECT ulf_FileName, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID = $value");
 
-            switch ($type) {
+                $value = !$filename || empty($filename) ? "Unable to find file #$value" : $filename;
+                $value = !$url || empty($url) ? $value : $url;
 
-                case 'resource': // replace with simple record details (i.e. id, title, rectype id)
+                break;
 
-                    $id = intval($value);
-                    if($id < 1){
-                        return $value;
-                    }
+            case 'date': // replace with simple string
 
-                    list($title, $rectype) = mysql__select_row($mysqli, "SELECT rec_Title, rec_RecTypeID FROM Records WHERE rec_ID = $id");
+                $json_value = json_decode($value, true);
 
-                    $value = [
-                        'rec_ID' => $id,
-                        'rec_Title' => $title,
-                        'rec_RecTypeID' => intval($rectype),
-                        'rec_IsChildRecord' => 0
-                    ];
-
-                    break;
-
-                case 'enum': // replace with term label w/ hierarchy - vocab label
-
-                    $id = intval($value);
-                    if($id < 1){
-                        return $value;
-                    }
-                    $org_id = $id;
-
-                    $value = [];
-                    while(true){
-
-                        list($lbl, $id) = mysql__select_row($mysqli, "SELECT trm_Label, trm_ParentTermID FROM defTerms WHERE trm_ID = $id");
-
-                        $id = intval($id);
-                        if(empty($id) || $id < 1){
-                            break;
-                        }
-
-                        if(!empty($lbl)){
-                            array_unshift($value, $lbl);
-                        }
-                    }
-
-                    $value = !empty($value) ? implode(' . ', $value) : "Unable to find term #$org_id";
-
-                    break;
-
-                case 'file': // replace with filename / website URL
-
-                    list($filename, $url) = mysql__select_row($mysqli, "SELECT ulf_FileName, ulf_ExternalFileReference FROM recUploadedFiles WHERE ulf_ID = $value");
-
-                    $value = !$filename || empty($filename) ? "Unable to find file #$value" : $filename;
-                    $value = !$url || empty($url) ? $value : $url;
-
-                    break;
-
-                case 'date': // replace with simple string
-
-                    $json_value = json_decode($value, true);
-
-                    if(json_last_error() === JSON_ERROR_NONE){
-                        $value = $json_value;
-                    }
-
-                    $value = Temporal::toHumanReadable($value, true, 1);
-
-                    $value = USanitize::cleanupSpaces($value);
-
-                    break;
-
-                case 'freetext':
-                case 'blocktext':
-                    // clean up strings
-
-                    $value = USanitize::sanitizeString($value);
-
-                    break;
-
-                default:
-                    break;
-            }
-
-            return $value;
-        };
-
-        $ret = true;
-
-        if(array_key_exists('get_record_history', $this->data)){
-
-            $rec_ID = intval($this->data['rec_ID']);
-
-            if(!$rec_ID || $rec_ID < 1){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record ID provided');
-                return false;
-            }
-
-            // Check that rec_ID is a record
-            $record_type = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_FlagTemporary != 1 AND rec_ID = $rec_ID");
-            if($mysqli->error){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
-                return false;
-            }elseif(!$record_type){
-                return [];
-            }
-            $record_type = intval($record_type);
-
-            // Get record structure
-            $record_fields = mysql__select_assoc2($mysqli, "SELECT dty_ID, dty_Type FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE rst_RecTypeID = $record_type");
-            if($mysqli->error){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query defDetailTypes table for the selected record\'s base fields', $mysqli->error);
-                return false;
-            }elseif(empty($record_fields)){
-                $this->system->addError(HEURIST_DB_ERROR, "The provided record type #$record_type does not have any usable fields");
-                return false;
-            }
-
-            // Get set of datetime changes
-            $query_date = "SELECT DISTINCT arc_TimeOfChange FROM sysArchive WHERE arc_Table = 'dtl' AND arc_RecID = $rec_ID ORDER BY arc_TimeOfChange";
-            $res_date = $mysqli->query($query_date);
-
-            if(!$res_date){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for dates of changes', $mysqli->error);
-                return false;
-            }
-
-            /*
-                arc_PriKey => dtl_ID
-                arc_ChangedByUGrpID => ugr_ID
-                arc_TimeOfChange => timestamp of action
-                arc_Value => Value extracted from arc_DataBeforeChange {dtl_DetailTypeID [2], dtl_Value [3], dtl_UploadedFileID [5], or dtl_Geo [6]}
-                arc_Compare => For comparing indexes (Move to separate structure, so it's not returned)
-                arc_Action => 'added', 'modified', 'deleted'
-             */
-            $complete_history = [];
-            $last_editor = [];
-            $user_list = [];
-
-            while($row_date = $res_date->fetch_row()){
-
-                $query_changes = "SELECT arc_PriKey, arc_ID, arc_ChangedByUGrpID, arc_TimeOfChange, arc_DataBeforeChange " .
-                                 "FROM sysArchive " .
-                                 "WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? " .
-                                 "ORDER BY arc_ID";
-
-                $res_changes = mysql__select_param_query($mysqli, $query_changes, ['is', $rec_ID, $row_date[0]]);
-
-                if(!$res_changes){
-                    $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at '
-                                        . $row_date[0], $mysqli->error);
-                    return false;
+                if(json_last_error() === JSON_ERROR_NONE){
+                    $value = $json_value;
                 }
 
-                $cur_set = [];
+                $value = Temporal::toHumanReadable($value, true, 1);
 
-                while($row_changes = $res_changes->fetch_assoc()){
+                $value = USanitize::cleanupSpaces($value);
 
-                    $arc_ID = intval($row_changes['arc_ID']);
-                    $ugr_ID = intval($row_changes['arc_ChangedByUGrpID']);
+                break;
 
-                    $res_row = [
-                        'arc_ID' => $arc_ID,
-                        'arc_ChangedByUGrpID' => 0,
-                        'arc_TimeOfChange' => $row_changes['arc_TimeOfChange'],
-                        'arc_Value' => '',
-                        'arc_Compare' => '',
-                        'arc_Action' => 'revert'
-                    ];
+            case 'freetext':
+            case 'blocktext':
+                // clean up strings
 
-                    list($value, $dty_ID) = $__get_value($row_changes['arc_DataBeforeChange'], $record_fields);
-                    if(!$value || !$dty_ID){
-                        continue;
-                    }
+                $value = USanitize::sanitizeString($value);
 
-                    if(!array_key_exists($dty_ID, $complete_history)){
-                        $complete_history[$dty_ID] = [];
-                        $last_editor[$dty_ID] = [];
-                    }
-                    if(!array_key_exists($dty_ID, $cur_set)){
-                        $cur_set[$dty_ID] = [];
-                    }
+                break;
 
-                    // Replace certain values, for display to user
-                    $display_value = $__process_value($value, $record_fields[$dty_ID]);
+            default:
+                break;
+        }
 
-                    $res_row['arc_Compare'] = $value;
-                    $res_row['arc_Value'] = $display_value;
-                    $cur_set[$dty_ID][] = 1;
+        return $value;
+    }
 
-                    // Determine whether the value was added or modified
-                    $dty_idx = count($cur_set[$dty_ID]) - 1;
-                    $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ?
-                                        $complete_history[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
+    /**
+     * Retrieve and prepare the record ID and record fields.
+     *
+     * @param bool $forHistoryRevert - whether to include the field display name
+     * @return array<int|array>|bool
+     */
+    private function getRecordFields(bool $forHistoryRevert = false){
 
-                    if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip
-                        continue;
-                    }
+        $mysqli = $this->system->getMysqli();
 
-                    //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
+        $rec_ID = \intval($this->data['rec_ID']);
 
-                    if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
-                        $complete_history[$dty_ID][$dty_idx] = [];
-                    }
+        if(!isPositiveInt($rec_ID)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record ID provided');
+            return false;
+        }
 
-                    if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
-                        $res_row['arc_ChangedByUGrpID'] = $last_editor[$dty_ID][$dty_idx];
-                    }elseif(mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_ID = " . intval($row_changes['arc_PriKey'])) > 0){
-                        // was updated outside of standard record editor
-                        $res_row['arc_ChangedByUGrpID'] = $ugr_ID;
-                    }else{
+        // Check that rec_ID is a record
+        $rec_RecTypeID = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_FlagTemporary != 1 AND rec_ID = $rec_ID");
+        if($mysqli->error){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
+            return false;
+        }elseif(!isPositiveInt($rec_RecTypeID)){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to retrieve the record type of current record');
+            return false;
+        }
+        $rec_RecTypeID = \intval($rec_RecTypeID);
 
-                        $query_arc_rec = "SELECT arc_ChangedByUGrpID FROM sysArchive WHERE arc_ID < $arc_ID AND arc_Table = 'rec' AND arc_RecID = $rec_ID ORDER BY arc_ID DESC LIMIT 1";
-                        $intial_ugr_ID = mysql__select_value($mysqli, $query_arc_rec);
+        // Get record structure
+        $fieldQuery = $forHistoryRevert
+            ? "SELECT dty_ID, dty_Type AS type, rst_DisplayName AS name FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE rst_RecTypeID = $rec_RecTypeID"
+            : "SELECT dty_ID, dty_Type FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE rst_RecTypeID = $rec_RecTypeID";
 
-                        $res_row['arc_ChangedByUGrpID'] = intval($intial_ugr_ID) > 0 ? intval($intial_ugr_ID) : 0;
-                    }
+        $recordFields = mysql__select_assoc2($mysqli, $fieldQuery);
+        if($mysqli->error){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to query defDetailTypes table for the selected record\'s base fields', $mysqli->error);
+            return false;
+        }elseif(empty($recordFields)){
+            $this->system->addError(HEURIST_DB_ERROR, "The provided record type #$rec_RecTypeID does not have any usable fields");
+            return false;
+        }
 
-                    $last_editor[$dty_ID][$dty_idx] = $ugr_ID;
-                    array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
-                    $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
-                }
+        return [$rec_ID, $recordFields];
+    }
 
-                $res_changes->close();
-            }
+    /**
+     * Retrieves the change history for a specific record (`rec_ID`).
+     * It reconstructs the timeline of changes for each field of the record by querying
+     * `sysArchive` for entries where `arc_Table = 'dtl'`.
+     * The result includes the historical values, timestamps, and users who made changes.
+     * Anonymous functions `__get_value` (extracts and normalizes raw archived value) and
+     * `__process_value` (formats value for display, e.g., term labels, resource titles) are used internally.
+     *
+     * @return array{history: array, users: array}|false
+     */
+    private function getRecordHistory(){
 
-            $res_date->close();
+        $mysqli = $this->system->getMysqli();
 
-            // Retrieve current values
-            $query_existing = "SELECT dtl_ID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, ST_AsText(dtl_Geo) AS dtl_Geo, dtl_Modified FROM recDetails WHERE dtl_RecID = $rec_ID ORDER BY dtl_ID";
-            $res_existing = $mysqli->query($query_existing);
+        $recordDetails = $this->getRecordFields();
+        if(!$recordDetails){
+            return false;
+        }
+        [$rec_ID, $recordFields] = $recordDetails;
 
-            if(!$res_existing){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query recDetails table for existing record details', $mysqli->error);
+        // Get set of datetime changes
+        $query_date = "SELECT DISTINCT arc_TimeOfChange FROM sysArchive WHERE arc_Table = 'dtl' AND arc_RecID = $rec_ID ORDER BY arc_TimeOfChange";
+        $res_date = $mysqli->query($query_date);
+
+        if(!$res_date){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for dates of changes', $mysqli->error);
+            return false;
+        }
+
+        /*
+            arc_PriKey => dtl_ID
+            arc_ChangedByUGrpID => ugr_ID
+            arc_TimeOfChange => timestamp of action
+            arc_Value => Value extracted from arc_DataBeforeChange {dtl_DetailTypeID [2], dtl_Value [3], dtl_UploadedFileID [5], or dtl_Geo [6]}
+            arc_Compare => For comparing indexes (Move to separate structure, so it's not returned)
+            arc_Action => 'added', 'modified', 'deleted'
+        */
+        $completeHistory = [];
+        $lastEditor = [];
+        $userList = [];
+
+        while($row_date = $res_date->fetch_row()){
+
+            $query_changes = <<<QUERY
+            SELECT arc_PriKey, arc_ID, arc_ChangedByUGrpID, arc_TimeOfChange, arc_DataBeforeChange 
+            FROM sysArchive 
+            WHERE arc_Table = 'dtl' AND arc_RecID = ? AND arc_TimeOfChange = ? 
+            ORDER BY arc_ID
+            QUERY;
+
+            $res_changes = mysql__select_param_query($mysqli, $query_changes, ['is', $rec_ID, $row_date[0]]);
+
+            if(!$res_changes){
+                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query sysArchive table for list of changes made at '
+                                    . $row_date[0], $mysqli->error);
                 return false;
             }
 
-            $final_set = [];
+            $cur_set = [];
 
-            while($row_current = $res_existing->fetch_assoc()){
+            while($row_changes = $res_changes->fetch_assoc()){
 
-                $dtl_ID = intval($row_current['dtl_ID']);
-                $dty_ID = intval($row_current['dtl_DetailTypeID']);
+                $arc_ID = \intval($row_changes['arc_ID']);
+                $ugr_ID = \intval($row_changes['arc_ChangedByUGrpID']);
 
                 $res_row = [
-                    'dtl_ID' => $dtl_ID,
+                    'arc_ID' => $arc_ID,
                     'arc_ChangedByUGrpID' => 0,
-                    'arc_TimeOfChange' => $row_current['dtl_Modified'],
+                    'arc_TimeOfChange' => $row_changes['arc_TimeOfChange'],
                     'arc_Value' => '',
                     'arc_Compare' => '',
-                    'arc_Action' => 'current'
+                    'arc_Action' => 'revert'
                 ];
 
-                $value = !empty($row_current['dtl_Value']) ? $row_current['dtl_Value'] : null;
-                $value = !empty($row_current['dtl_UploadedFileID']) ? $row_current['dtl_UploadedFileID'] : $value;
-                $value = !empty($row_current['dtl_Geo']) ? $row_current['dtl_Geo'] : $value;
-
-                if(empty($value) || $dty_ID < 1){ // ? Unknown
+                [$value, $dty_ID] = $this->getFieldValue($row_changes['arc_DataBeforeChange'], $recordFields);
+                if(!$value || !$dty_ID){
                     continue;
                 }
 
-                if(!array_key_exists($dty_ID, $complete_history)){
-                    $complete_history[$dty_ID] = [];
+                if(!\array_key_exists($dty_ID, $completeHistory)){
+                    $completeHistory[$dty_ID] = [];
+                    $lastEditor[$dty_ID] = [];
                 }
-                if(!array_key_exists($dty_ID, $final_set)){
-                    $final_set[$dty_ID] = [];
+                if(!\array_key_exists($dty_ID, $cur_set)){
+                    $cur_set[$dty_ID] = [];
                 }
 
-                $display_value = $__process_value($value, $record_fields[$dty_ID]);
+                // Replace certain values, for display to user
+                $display_value = $this->prepareValueForDisplay($value, $recordFields[$dty_ID]);
 
                 $res_row['arc_Compare'] = $value;
                 $res_row['arc_Value'] = $display_value;
-                $final_set[$dty_ID][] = 1;
+                $cur_set[$dty_ID][] = 1;
 
                 // Determine whether the value was added or modified
-                $dty_idx = count($final_set[$dty_ID]) - 1;
-                $last_value = array_key_exists($dty_ID, $complete_history) && array_key_exists($dty_idx, $complete_history[$dty_ID]) ?
-                                    $complete_history[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
+                $dty_idx = \count($cur_set[$dty_ID]) - 1;
+                $last_value = \array_key_exists($dty_ID, $completeHistory) && \array_key_exists($dty_idx, $completeHistory[$dty_ID]) ?
+                                    $completeHistory[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
 
-                if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip, add dtl_ID
-                    $complete_history[$dty_ID][$dty_idx][0]['dtl_ID'] = $dtl_ID;
-                    $complete_history[$dty_ID][$dty_idx][0]['arc_Action'] = 'current';
+                if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip
                     continue;
                 }
 
                 //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
 
-                if(!array_key_exists($dty_idx, $complete_history[$dty_ID])){
-                    $complete_history[$dty_ID][$dty_idx] = [];
+                if(!\array_key_exists($dty_idx, $completeHistory[$dty_ID])){
+                    $completeHistory[$dty_ID][$dty_idx] = [];
                 }
 
-                if(array_key_exists($dty_idx, $last_editor[$dty_ID]) && !empty($last_editor[$dty_ID][$dty_idx])){
-                    $res_row['arc_ChangedByUGrpID'] = $last_editor[$dty_ID][$dty_idx];
+                $arc_PriKey = \intval($row_changes['arc_PriKey']);
+                if(\array_key_exists($dty_idx, $lastEditor[$dty_ID]) && !empty($lastEditor[$dty_ID][$dty_idx])){
+                    $res_row['arc_ChangedByUGrpID'] = $lastEditor[$dty_ID][$dty_idx];
+                }elseif(mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_ID = $arc_PriKey") > 0){
+                    // was updated outside of standard record editor
+                    $res_row['arc_ChangedByUGrpID'] = $ugr_ID;
+                }else{
+
+                    $query_arc_rec = "SELECT arc_ChangedByUGrpID FROM sysArchive WHERE arc_ID < $arc_ID AND arc_Table = 'rec' AND arc_RecID = $rec_ID ORDER BY arc_ID DESC LIMIT 1";
+                    $intial_ugr_ID = mysql__select_value($mysqli, $query_arc_rec);
+
+                    $res_row['arc_ChangedByUGrpID'] = isPositiveInt($intial_ugr_ID) ? \intval($intial_ugr_ID) : 0;
                 }
 
-                $user_list[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
-                array_unshift($complete_history[$dty_ID][$dty_idx], $res_row);// newest first
+                $lastEditor[$dty_ID][$dty_idx] = $ugr_ID;
+
+                array_unshift($completeHistory[$dty_ID][$dty_idx], $res_row); // newest first
+
+                $userList[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
             }
 
-            if(!empty($user_list)){
+            $res_changes->close();
+        }
 
-                foreach($user_list as $ugr_ID => $name){
-                    $ugr_ID = intval($ugr_ID);
-                    if($ugr_ID < 1){
-                        continue;
-                    }
+        $res_date->close();
 
-                    $user_row = mysql__select_row_assoc($mysqli, "SELECT ugr_Type, ugr_Name, CONCAT(ugr_FirstName, ' ', ugr_LastName) AS ugr_FullName FROM sysUGrps WHERE ugr_ID = $ugr_ID");
-                    if(empty($user_row)){
-                        continue;
-                    }
+        if(!$this->getCurrentRecordValues($rec_ID, $recordFields, $lastEditor, $completeHistory, $userList)){
+            return false;
+        }
 
-                    $user_list[$ugr_ID] = $user_row['ugr_Type'] == 'user' && !empty($user_row['ugr_FullName']) ? $user_row['ugr_FullName'] : $user_row['ugr_Name'];
-                }
-            }
+        if(!empty($userList)){
 
-            $res_existing->close();
-
-            $ret = ['history' => $complete_history, 'users' => $user_list];
-
-        }elseif(array_key_exists('revert_record_history', $this->data)){
-
-            $ret = ['errors' => [], 'issues' => []];
-
-            // Validate record id
-            $rec_ID = intval($this->data['rec_ID']);
-            if(!$rec_ID || $rec_ID < 1){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid record ID provided');
-                return false;
-            }
-
-            // Validate revisions
-            $revisions = $this->data['revisions'];
-            if(!empty($revisions) && !is_array($revisions)){
-                $revisions = json_decode($revisions, true);
-            }
-
-            if(!$revisions || empty($revisions)){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'No record revisions provided');
-                return false;
-            }
-
-            // Check that rec_ID is a record
-            $record_type = mysql__select_value($mysqli, "SELECT rec_RecTypeID FROM Records WHERE rec_FlagTemporary != 1 AND rec_ID = $rec_ID");
-            if($mysqli->error){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query Records table for the selected record\'s entity type', $mysqli->error);
-                return false;
-            }elseif(!$record_type){
-                $this->system->addError(HEURIST_INVALID_REQUEST, 'Unable to retrieve the record type of current record');
-                return false;
-            }
-            $record_type = intval($record_type);
-
-            // Get record structure
-            $record_fields = mysql__select_assoc($mysqli, "SELECT dty_ID, dty_Type AS type, rst_DisplayName AS name FROM defDetailTypes INNER JOIN defRecStructure ON rst_DetailTypeID = dty_ID WHERE rst_RecTypeID = $record_type");
-            if($mysqli->error){
-                $this->system->addError(HEURIST_DB_ERROR, 'Unable to query defDetailTypes table for the selected record\'s base fields', $mysqli->error);
-                return false;
-            }elseif(empty($record_fields)){
-                $this->system->addError(HEURIST_DB_ERROR, "The provided record type #$record_type does not have any usable fields");
-                return false;
-            }
-
-            foreach($revisions as $dty_ID => $fld_changes){
-
-                $dty_ID = intval($dty_ID);
-
-                if($dty_ID <= 0 || !is_array($fld_changes) || !array_key_exists($dty_ID, $record_fields)){
-                    if($dty_ID <= 0){
-                        $ret['errors'][] = "Invalid detail type ID provided #$dty_ID";
-                    }elseif(!array_key_exists($dty_ID, $record_fields)){
-                        $ret['errors'][] = "Field ID #$dty_ID is not part of the record's structure";
-                    }
+            foreach($userList as $ugr_ID => $name){
+                $ugr_ID = \intval($ugr_ID);
+                if($ugr_ID < 1){
                     continue;
                 }
 
-                foreach ($fld_changes as $fld_idx => $arc_ID) {
+                $user_row = mysql__select_row_assoc($mysqli, "SELECT ugr_Type, ugr_Name, CONCAT(ugr_FirstName, ' ', ugr_LastName) AS ugr_FullName FROM sysUGrps WHERE ugr_ID = $ugr_ID");
+                if(empty($user_row)){
+                    continue;
+                }
 
-                    // Validate archive ID and Field index
-                    $arc_ID = intval($arc_ID);
-                    $fld_idx = intval($fld_idx);
+                $userList[$ugr_ID] = $user_row['ugr_Type'] == 'user' && !empty($user_row['ugr_FullName']) ? $user_row['ugr_FullName'] : $user_row['ugr_Name'];
+            }
+        }
 
-                    if($fld_idx < 0 || $arc_ID <= 0){
-                        $ret['errors'][] = $fld_idx < 0 ? "Invalid field index provided #$fld_idx" : "Invalid archive ID provided #$arc_ID";
-                        continue;
-                    }
+        return ['history' => $completeHistory, 'users' => $userList];
+    }
 
-                    // Get archived value
-                    $arc_Value = mysql__select_value($mysqli, "SELECT arc_DataBeforeChange FROM sysArchive WHERE arc_ID = $arc_ID");
-                    if(!$arc_Value){
-                        $ret['errors'][] = "Unable to retrieve the archived value for #$arc_ID";
-                        continue;
-                    }
+    /**
+     * Rolls back specific field values of a record (`rec_ID`) to
+     * states captured in specified `sysArchive` entries (`arc_ID`s).
+     * Expects `$this->data['revisions']` as an array mapping `dty_ID` to an array of `arc_ID`s
+     * representing the desired historical state for that field.
+     *
+     * @global bool $useNewTemporalFormatInRecDetails Used when processing date values for reversion.
+     * @return array[]|array{errors: array}|false
+     */
+    private function revertRecordHistory(){
 
-                    list($arc_Value, ) = $__get_value($arc_Value, $record_fields);
+        global $useNewTemporalFormatInRecDetails;
 
-                    if(!$arc_Value){
+        $mysqli = $this->system->getMysqli();
+        $ret = ['errors' => []];
 
-                        $type = $record_fields[$dty_ID]['type'] == 'enum' ? 'term' : 'record';
-                        $type = $record_fields[$dty_ID]['type'] == 'file' ? 'file' : $type;
+        $recordDetails = $this->getRecordFields(true);
+        if(!$recordDetails){
+            return false;
+        }
+        [$rec_ID, $recordFields] = $recordDetails;
 
-                        $ret['errors'][] = "Couldn't update value #$fld_idx for the field {$record_fields[$dty_ID]['name']}, missing the $type with ID #$arc_ID";
-                        continue;
-                    }
+        // Validate revisions
+        $revisions = $this->data['revisions'];
+        if(!empty($revisions) && !\is_array($revisions)){
+            $revisions = json_decode($revisions, true);
+        }
 
-                    // Check if updating existing record, or creating a record
-                    $existing_dtl_id = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID = $dty_ID ORDER BY dtl_ID LIMIT $fld_idx, 1");
-                    $existing_dtl_id = intval($existing_dtl_id);
+        if(!$revisions || empty($revisions)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'No record revisions provided');
+            return false;
+        }
 
-                    $record = [];
+        foreach($revisions as $dty_ID => $fld_changes){
 
-                    // Set value index
-                    switch ($record_fields[$dty_ID]['type']) {
+            $dty_ID = \intval($dty_ID);
 
-                        case 'geo':
-                            list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $arc_Value);// recordModify.php
-                            $record['dtl_Value'] = $dtl_Value === false ? $arc_Value : $dtl_Value;
-                            $record['dtl_Geo'] = $dtl_Value === false ? null : $dtl_Geo;
-                            break;
+            if($dty_ID <= 0 || !\is_array($fld_changes) || !\array_key_exists($dty_ID, $recordFields)){
+                if($dty_ID <= 0){
+                    $ret['errors'][] = "Invalid detail type ID provided #$dty_ID";
+                }elseif(!\array_key_exists($dty_ID, $recordFields)){
+                    $ret['errors'][] = "Field ID #$dty_ID is not part of the record's structure";
+                }
+                continue;
+            }
 
-                        case 'date':
-                            $arc_Value = Temporal::getValueForRecDetails( $arc_Value, $useNewTemporalFormatInRecDetails );
-                            break;
+            foreach ($fld_changes as $fld_idx => $arc_ID) {
 
-                        case 'file':
-                            $record['dtl_UploadedFileID'] = $arc_Value;
-                            break;
+                // Validate archive ID and Field index
+                $arc_ID = \intval($arc_ID);
+                $fld_idx = \intval($fld_idx);
 
-                        default:
-                            $record['dtl_Value'] = $arc_Value;
-                            break;
-                    }
+                if($fld_idx < 0 || $arc_ID <= 0){
+                    $ret['errors'][] = $fld_idx < 0 ? "Invalid field index provided #$fld_idx" : "Invalid archive ID provided #$arc_ID";
+                    continue;
+                }
 
-                    if($existing_dtl_id > 0){ // update existing value
-                        $record['dtl_ID'] = $existing_dtl_id;
-                    }else{ // create new value
-                        $record['dtl_DetailTypeID'] = $dty_ID;
-                        $record['dtl_RecID'] = $rec_ID;
-                    }
+                // Get archived value
+                $arc_Value = mysql__select_value($mysqli, "SELECT arc_DataBeforeChange FROM sysArchive WHERE arc_ID = $arc_ID");
+                if(!$arc_Value){
+                    $ret['errors'][] = "Unable to retrieve the archived value for #$arc_ID";
+                    continue;
+                }
 
-                    // Update/create recDetails record
-                    $res_ID = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $record);
-                    if($res_ID <= 0){
+                [$arc_Value, ] = $this->getFieldValue($arc_Value, $recordFields);
 
-                        $fld_idx ++;
-                        $ret['errors'][] = "Couldn't update value #$fld_idx for the field {$record_fields[$dty_ID]['name']}";
-                    }
+                if(!$arc_Value){
+
+                    $type = $recordFields[$dty_ID]['type'] == 'enum' ? 'term' : 'record';
+                    $type = $recordFields[$dty_ID]['type'] == 'file' ? 'file' : $type;
+
+                    $ret['errors'][] = "Couldn't update value #$fld_idx for the field {$recordFields[$dty_ID]['name']}, missing the $type with ID #$arc_ID";
+                    continue;
+                }
+
+                // Check if updating existing record, or creating a record
+                $existing_dtl_id = mysql__select_value($mysqli, "SELECT dtl_ID FROM recDetails WHERE dtl_RecID = $rec_ID AND dtl_DetailTypeID = $dty_ID ORDER BY dtl_ID LIMIT $fld_idx, 1");
+                $existing_dtl_id = \intval($existing_dtl_id);
+
+                $record = [];
+
+                // Set value index
+                switch ($recordFields[$dty_ID]['type']) {
+
+                    case 'geo':
+                        [$dtl_Value, $dtl_Geo] = prepareGeoValue($mysqli, $arc_Value);// recordModify.php
+                        $record['dtl_Value'] = $dtl_Value === false ? $arc_Value : $dtl_Value;
+                        $record['dtl_Geo'] = $dtl_Value === false ? null : $dtl_Geo;
+                        break;
+
+                    case 'date':
+                        $arc_Value = Temporal::getValueForRecDetails( $arc_Value, $useNewTemporalFormatInRecDetails );
+                        break;
+
+                    case 'file':
+                        $record['dtl_UploadedFileID'] = $arc_Value;
+                        break;
+
+                    default:
+                        $record['dtl_Value'] = $arc_Value;
+                        break;
+                }
+
+                if($existing_dtl_id > 0){ // update existing value
+                    $record['dtl_ID'] = $existing_dtl_id;
+                }else{ // create new value
+                    $record['dtl_DetailTypeID'] = $dty_ID;
+                    $record['dtl_RecID'] = $rec_ID;
+                }
+
+                // Update/create recDetails record
+                $res_ID = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $record);
+                if($res_ID <= 0){
+
+                    $fld_idx ++;
+                    $ret['errors'][] = "Couldn't update value #$fld_idx for the field {$recordFields[$dty_ID]['name']}";
                 }
             }
         }
 
         return $ret;
+    }
+
+    /**
+     * Add the record's current values to the record history array.
+     *
+     * @param int $rec_ID - Current record ID
+     * @param array $recordFields - List of record fields IDs mapped to field type
+     * @param array $lastEditor - Last user to make edits per record field
+     * @param array $completeHistory - Complete list of record changes
+     * @param array $userList - List of users who have edited the record
+     * @return bool Success state
+     */
+    private function getCurrentRecordValues(int $rec_ID, array $recordFields, array $lastEditor, array &$completeHistory, array &$userList) : bool{
+
+        $mysqli = $this->system->getMysqli();
+
+        // Retrieve current values
+        $query_existing = "SELECT dtl_ID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, ST_AsText(dtl_Geo) AS dtl_Geo, dtl_Modified FROM recDetails WHERE dtl_RecID = $rec_ID ORDER BY dtl_ID";
+        $res_existing = $mysqli->query($query_existing);
+
+        if(!$res_existing){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to query recDetails table for existing record details', $mysqli->error);
+            return false;
+        }
+
+        $final_set = [];
+
+        while($row_current = $res_existing->fetch_assoc()){
+
+            $dtl_ID = \intval($row_current['dtl_ID']);
+            $dty_ID = \intval($row_current['dtl_DetailTypeID']);
+
+            $res_row = [
+                'dtl_ID' => $dtl_ID,
+                'arc_ChangedByUGrpID' => 0,
+                'arc_TimeOfChange' => $row_current['dtl_Modified'],
+                'arc_Value' => '',
+                'arc_Compare' => '',
+                'arc_Action' => 'current'
+            ];
+
+            $value = !empty($row_current['dtl_Value']) ? $row_current['dtl_Value'] : null;
+            $value = !empty($row_current['dtl_UploadedFileID']) ? $row_current['dtl_UploadedFileID'] : $value;
+            $value = !empty($row_current['dtl_Geo']) ? $row_current['dtl_Geo'] : $value;
+
+            if(empty($value) || $dty_ID < 1){ // ? Unknown
+                continue;
+            }
+
+            if(!\array_key_exists($dty_ID, $completeHistory)){
+                $completeHistory[$dty_ID] = [];
+            }
+            if(!\array_key_exists($dty_ID, $final_set)){
+                $final_set[$dty_ID] = [];
+            }
+
+            $display_value = $this->prepareValueForDisplay($value, $recordFields[$dty_ID]);
+
+            $res_row['arc_Compare'] = $value;
+            $res_row['arc_Value'] = $display_value;
+            $final_set[$dty_ID][] = 1;
+
+            // Determine whether the value was added or modified
+            $dty_idx = \count($final_set[$dty_ID]) - 1;
+            $last_value = \array_key_exists($dty_ID, $completeHistory) && \array_key_exists($dty_idx, $completeHistory[$dty_ID]) ?
+                                $completeHistory[$dty_ID][$dty_idx][0]['arc_Compare'] : null;
+
+            if(mb_strcasecmp($last_value, $value) == 0){ // no change, skip, add dtl_ID
+                $completeHistory[$dty_ID][$dty_idx][0]['dtl_ID'] = $dtl_ID;
+                $completeHistory[$dty_ID][$dty_idx][0]['arc_Action'] = 'current';
+                continue;
+            }
+
+            //$res_row['arc_Action'] = empty($last_value) ? 'add' : 'mod';
+
+            if(!\array_key_exists($dty_idx, $completeHistory[$dty_ID])){
+                $completeHistory[$dty_ID][$dty_idx] = [];
+            }
+
+            if(\array_key_exists($dty_idx, $lastEditor[$dty_ID]) && !empty($lastEditor[$dty_ID][$dty_idx])){
+                $res_row['arc_ChangedByUGrpID'] = $lastEditor[$dty_ID][$dty_idx];
+            }
+
+            $userList[$res_row['arc_ChangedByUGrpID']] = 'Unknown';
+
+            array_unshift($completeHistory[$dty_ID][$dty_idx], $res_row);// newest first
+        }
+
+        $res_existing->close();
+
+        return true;
     }
 }
 ?>
