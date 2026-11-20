@@ -969,6 +969,41 @@ class DbUtils {
         return $error_msg;
     }
 
+    /** Resolve the filename selected by the Restore archive browser. */
+    public static function databaseArchivePath($archive_file, $archive_folder): ?string
+    {
+        self::initialize();
+
+        $upload_root = self::$system->getFileStoreRootFolder();
+
+        if (!is_string($archive_file) || $archive_file === '' || $archive_file === '.'
+            || $archive_file === '..' || strpbrk($archive_file, "/\\\0") !== false) {
+            return null;
+        }
+
+        //only from limited list of folders
+        $source = intval($archive_folder);
+        if($source==2){
+            $lib_path = '/srv/BACKUP/';
+        }elseif($source==3){
+            if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
+                $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
+            }else{
+                $lib_path = '/srv/BACKUP/ARCHIVE/';
+            }
+        }elseif($source==4){
+            $lib_path = $upload_root.'_DBS_TO_RESTORE/';
+        }elseif($source == 5){
+            $base = "{$upload_root}_DBS_FROM_REMOTES/{$archive_file}/backup/{$archive_file}";
+            return is_file($base.'.zip') ? $base.'.zip' : $base.'_sql.zip';
+        }else{
+            //default
+            $lib_path = $upload_root.'_DELETED_DATABASES/';
+        }
+
+        return $lib_path.$archive_file;
+    }
+
     /**
      * Restores a database from an archive file.
      *
@@ -987,33 +1022,10 @@ class DbUtils {
         self::initialize();
 
         $upload_root = self::$system->getFileStoreRootFolder();
-
-        //only from limited list of folders
-        $source = intval($archive_folder);
-        if($source==2){
-            $lib_path = '/srv/BACKUP/';
-        }elseif($source==3){
-            if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
-                $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
-            }else{
-                $lib_path = '/srv/BACKUP/ARCHIVE/';
-            }
-        }elseif($source==4){
-            $lib_path = $upload_root.'_DBS_TO_RESTORE/';
-        }elseif($source == 5){
-            $archive_file = "{$upload_root}_DBS_FROM_REMOTES/{$archive_file}/backup/{$archive_file}.zip";
-            $archive_file = !file_exists($archive_file) ? "{$upload_root}_DBS_FROM_REMOTES/{$archive_file}/backup/{$archive_file}_sql.zip" : $archive_file;
-        }else{
-            //default
-            $lib_path = $upload_root.'_DELETED_DATABASES/';
-        }
-
-        if($source != 5){
-            $archive_file = $lib_path.basename($archive_file);
-        }
+        $archive_file = self::databaseArchivePath($archive_file, $archive_folder);
 
         //check archive
-        if(!file_exists($archive_file)){
+        if($archive_file === null || !is_file($archive_file)){
             self::$system->addError(HEURIST_ACTION_BLOCKED, 'Database archive file not found');
             return false;
         }
