@@ -1074,7 +1074,7 @@ class DbUtils {
                 }
             }else{
                 $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);
-                $needCopyCurrentDbFolder = $fileCount == 1 && $source != 5;
+                $needCopyCurrentDbFolder = $fileCount == 1 && $archive_folder != 5;
             }
 
         }catch(\Exception $e){
