@@ -131,7 +131,7 @@ final class OutputSanitizer
                 $close = '</body></html>';
             }
             if($hasThumbs){
-                $head .= $script.'external/jquery/jquery-3.7.1.js"></script>'
+                $head .= $script.'hclient/bundles/external/jquery/jquery.min.js"></script>'
                     .$script.'external/jquery/jquery-ui.js"></script>'
                     .$script.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                     .$script.'hclient/core/detectHeurist.js"></script>'
@@ -149,7 +149,7 @@ final class OutputSanitizer
 
         $head = $styles;
         if($hasThumbs){
-            $head = $script.'external/jquery/jquery-3.7.1.js"></script>'
+            $head = $script.'hclient/bundles/external/jquery/jquery.min.js"></script>'
                 .$script.'external/jquery/jquery-ui.js"></script>'
                 .$script.'external/jquery.fancybox/jquery.fancybox.js"></script>'
                 .$script.'hclient/core/detectHeurist.js"></script>'

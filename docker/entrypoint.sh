@@ -66,11 +66,9 @@ fi
 #     includeJQuery() loads when the server is accessed via localhost
 #     (localhost mode uses local files; remote hosts get CDN links).
 EXT="$BASE/HEURIST_SUPPORT/external_h5"
-if [[ -d "$EXT" && ! -f "$EXT/jquery/jquery-3.7.1.js" ]]; then
-    echo "==> Downloading missing external libraries (jquery, jquery-ui, bootstrap)..."
+if [[ -d "$EXT" && ! -f "$EXT/bootstrap/bootstrap.bundle.min.js" ]]; then
+    echo "==> Downloading missing external libraries (jquery-ui, bootstrap)..."
     mkdir -p "$EXT/jquery" "$EXT/bootstrap"
-    download_https -o "$EXT/jquery/jquery-3.7.1.js" \
-        https://code.jquery.com/jquery-3.7.1.js || true
     download_https -o "$EXT/jquery/jquery-ui.js" \
         https://code.jquery.com/ui/1.14.0/jquery-ui.js || true
     download_https -o "$EXT/jquery/jquery-ui.css" \

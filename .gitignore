@@ -246,6 +246,7 @@ external
 #############
 .zed/
 .devcontainer/
+.phpactor.json
 
 #############
 ## Docker

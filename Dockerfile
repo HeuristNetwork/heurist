@@ -88,6 +88,14 @@ RUN a2enconf servername \
     && chown -R www-data:www-data /var/run/apache2 /var/lock/apache2 /var/log/apache2 \
         /var/www/html/HEURIST/HEURIST_FILESTORE /var/www/html/HEURIST/HEURIST_SUPPORT
 
+# External JS libs handled by NPM
+WORKDIR /var/www/html/HEURIST/heurist
+COPY --from=node:26-slim /usr/local/bin /usr/local/bin
+COPY --from=node:26-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
+COPY package.json package-lock.json ./
+RUN npm clean-install --ignore-scripts \
+    && npm run build:js
+
 WORKDIR /var/www/html/HEURIST/heurist
 USER www-data
 EXPOSE 8080
