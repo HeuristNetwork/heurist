@@ -25,7 +25,7 @@ final class SearchRequest
      * Operations of /{domain}/aggregate (plan 20 Phase 3). Internally they are still
      * detail values; the public search refuses them as detail.
      */
-    public const AGGREGATE_OPS = array('count', 'rectypes', 'values', 'minmax', 'ranges');
+    public const AGGREGATE_OPS = array('count', 'rectypes', 'values', 'minmax', 'ranges', 'crosstab');
 
     public array $query;
     public int $limit;
@@ -49,6 +49,8 @@ final class SearchRequest
     public array $valueRanges = array();
     /** op=values: link predicates from the main records to the records carrying the field. */
     public array $valueVia = array();
+    /** op=crosstab: the dimensions and the measure (CrossTabulator::describe, plan 27q2). */
+    public $crosstab = null;
     /** False: a full page does not run the count query; `total` is then -1 (unknown). */
     public bool $countTotal = true;
 
@@ -76,6 +78,7 @@ final class SearchRequest
         foreach(array('groupby','ranges','match') as $key){
             if(isset($options[$key]) && is_scalar($options[$key])){ $this->valueRanges[$key] = (string)$options[$key]; }
         }
+        $this->crosstab = $options['crosstab'] ?? null;
         if($this->detail === 'values'){
             $this->limit = min(FieldValueCounter::MAX_LIMIT, $this->limit);
         }

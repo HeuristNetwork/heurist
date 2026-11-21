@@ -15,7 +15,10 @@ Entity `presentation` of `Records/Entity/RecordEntityRegistry`; only the generic
 ## Files
 
 - `PresentationEntityHandler.php` — hooks: the configuration is a JSON object; a story map is checked by
-  `StoryMapSettings`. A PATCH of one of the two fields is checked with the stored other.
+  `StoryMapSettings`, crosstabs by `CrosstabSettings`. A PATCH of one of the two fields is checked with the stored other.
+- `CrosstabSettings.php` — form check of the crosstab settings (plan 27q2 §5): rows / columns / pages in the form of
+  the `crosstab` parameter of `/records/aggregate?op=crosstab` (field path code + buckets) with a caption; measure,
+  display, chart, visitor level. A draft without rows is fine.
 - `StoryMapSettings.php` — form check of the story map settings (plan 27q1 §4, §15). A draft without rule or template is
   fine; a given value must have the right type. Places (§15): geographic field paths per role begin / transition /
   end, as in Query sources; the background map is a map document.

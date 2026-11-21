@@ -32,8 +32,9 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        // storymap: a Presentation set of kind StoryMap (plan 27q1)
-        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs', 'filter', 'storymap')
+        // storymap, crosstabs: a Presentation set of kind StoryMap / Crosstab (plans 27q1, 27q2)
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs', 'filter', 'storymap',
+            'crosstabs')
     );
     public const CONFIG_VERSION = 1;
 
