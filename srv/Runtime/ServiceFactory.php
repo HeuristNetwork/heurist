@@ -54,6 +54,7 @@ use Heurist\Records\Edit\RecordDuplicateService;
 use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
 use Heurist\Records\Entity\RecordEntityRegistry;
+use Heurist\Presentations\PresentationEntityHandler;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Records\Store\RecordSchema;
@@ -561,7 +562,12 @@ final class ServiceFactory
             'website' => static function() use ($website) { return $website('website'); },
             'page' => static function() use ($website) { return $website('page'); },
             'report' => static function() use ($report) { return $report('report'); },
-            'output' => static function() use ($report) { return $report('output'); }
+            'output' => static function() use ($report) { return $report('output'); },
+            'presentation' => function(): PresentationEntityHandler {
+                return new PresentationEntityHandler($this->codes, function(int $id, array $fields): array {
+                    return RecordRepository::shared($this->database)->values(array($id), $fields)[$id] ?? array();
+                }, function(int $id): int { return $this->pagesUsingPresentation($id); });
+            }
         ));
     }
 
@@ -696,6 +702,33 @@ final class ServiceFactory
                 $found = $this->recordQueryController()->execute(array('query' => $query, 'detail' => 'ids', 'limit' => 1));
                 return intval($found['ids'][0] ?? $found['records'][0] ?? 0);
             });
+    }
+
+    /**
+     * Website pages (and websites) whose configuration has a story map of a Presentation set (plan 27q1 §3): the
+     * candidates by a text search in the configuration, then the JSON of each one.
+     */
+    private function pagesUsingPresentation(int $id): int
+    {
+        $field = $this->codes->id('DT_CONFIGURATION');
+        $types = array_filter(array($this->codes->id('RT_CMS_HOME'), $this->codes->id('RT_CMS_PAGE')));
+        if($id < 1 || $field < 1 || empty($types)){ return 0; }
+        $found = $this->recordQueryController()->execute(array(
+            'query' => array(array('t' => implode(',', $types)), array('f:'.$field => '"preset":'.$id)),
+            'detail' => 'ids', 'limit' => 1000
+        ));
+        $ids = array_map('intval', (array)($found['ids'] ?? array()));
+        if(empty($ids)){ return 0; }
+        $count = 0;
+        foreach(RecordRepository::shared($this->database)->values($ids, array($field)) as $values){
+            foreach($values[$field] ?? array() as $configuration){
+                if(PresentationEntityHandler::configurationUses((string)$configuration, $id)){
+                    $count++;
+                    break;
+                }
+            }
+        }
+        return $count;
     }
 
     /** Registration id of this database (concept codes of its records). */

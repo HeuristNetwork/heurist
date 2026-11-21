@@ -16,6 +16,7 @@
 ignore_user_abort(true);
 set_time_limit(0);
 
+use hserv\utilities\DbArchiveComparison;
 use hserv\utilities\DbUtils;
 use hserv\utilities\DbVerify;
 use hserv\utilities\DbVerifyURLs;
@@ -173,6 +174,28 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
                 }
             }
 
+        }
+        elseif ($action === 'compare_archive')
+        {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                $system->addError(HEURIST_INVALID_REQUEST, 'Archive comparison requires a POST request.');
+            } elseif (is_array($sysadmin_pwd)) {
+                $system->addError(HEURIST_INVALID_REQUEST, 'Invalid system administrator password parameter.');
+            } elseif (!$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions)) {
+                $archive = DbUtils::databaseArchivePath($req_params['file'] ?? null, $req_params['folder'] ?? 1);
+                if ($archive === null || !is_file($archive) || !is_readable($archive)) {
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'Database archive file not found.');
+                } else {
+                    try {
+                        DbArchiveComparison::download($mysqli, $system->dbname(), $archive);
+                        exit;
+                    } catch (\mysqli_sql_exception $e) {
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot read the current database records.');
+                    } catch (\RuntimeException $e) {
+                        $system->addError(HEURIST_ACTION_BLOCKED, $e->getMessage());
+                    }
+                }
+            }
         }
         elseif($action=='restore')
         {

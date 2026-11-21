@@ -9,6 +9,7 @@
 *   report    Generated report widget, `settings.files{language: output id}`
 *   cards     Record cards widget with manual records, `settings.query[0].ids`
 *   gallery   Media gallery widget, `settings.ids`
+*   storymap  Story map widget, `settings.preset` (a Presentation set, plan 27q1)
 *   filter    the query source of a Saved filter (plan 27j): a Record field link `filter:<page>:<source>`, a media element,
 *             Record cards / Media gallery with the action, an action menu item; visitors must be able to read it
 * The card template (a report record) is not listed: it is read without the visitor's rights.
@@ -122,6 +123,8 @@ final class CmsRecordReferences
                 return array('cards' => self::ids(is_string($text) || is_int($text) ? explode(',', (string)$text) : array()));
             case 'gallery':
                 return array('gallery' => self::ids(is_array($settings['ids'] ?? null) ? $settings['ids'] : array()));
+            case 'storymap':
+                return array('storymap' => self::ids(array($settings['preset'] ?? 0)));
         }
         return array();
     }

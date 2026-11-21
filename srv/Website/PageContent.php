@@ -101,8 +101,8 @@ final class PageContent
     {
         $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
         $language = strtolower((string)($context['language'] ?? 'eng'));
-        // one visible: slideshow (`slider`) or carousel (plan 27e §29)
-        $list = !in_array((string)($settings['presentation'] ?? 'list'), array('slider', 'carousel'), true);
+        // one visible: slideshow (`slider`), carousel (plan 27e §29) or tabs (plan 27q1 §5)
+        $list = !in_array((string)($settings['presentation'] ?? 'list'), array('slider', 'carousel', 'tabs'), true);
         switch((string)($instance['type'] ?? '')){
             case 'report':
                 $html = $this->report($settings, $language, $context);
@@ -270,11 +270,14 @@ final class PageContent
         }
         // the link of each card (plan 27g §6): rec_URL or the record page, a stretched link over the card
         $links = $this->recordLinks($ids, $settings, $context);
+        // tabs (plan 27q1 §5): the title of the record is the label of its tab
+        $heads = ($settings['presentation'] ?? '') === 'tabs' ? $this->repository->recordHeads($ids) : array();
         $html = '';
         foreach($ids as $id){
             $card = call_user_func($this->services['render'], $file, $id, $language);
             if(!is_string($card) || $card === ''){ continue; }
-            $html .= '<div class="h-site-card" data-h-rec="'.$id.'">'.$card.($links[$id] ?? '').'</div>';
+            $label = isset($heads[$id]) && $heads[$id]['title'] !== '' ? ' data-h-label="'.self::attribute($heads[$id]['title']).'"' : '';
+            $html .= '<div class="h-site-card" data-h-rec="'.$id.'"'.$label.'>'.$card.($links[$id] ?? '').'</div>';
         }
         return $html;
     }

@@ -97,7 +97,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _icon_timer_suffix: ('&t='+window.hWin.HEURIST4.util.random()),
 
     // Record history
-    _record_history: null,
+    _record_history: {},
     _check_history: true, // check for record history
 
     // Record type information
@@ -2167,11 +2167,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             {    
                 if(panel.text()!='') return;
 
-                sContent = '<div id="record-history">Click the <a href="#">history button</a> to retrieve this record\'s history</div>';
+                sContent = '<div id="record-history">Click the <span style="text-decoration: underline; cursor: pointer;">history button</span> to retrieve this record\'s history</div>';
 
                 $(sContent).appendTo(panel);
 
-                this._on($(sContent).find('a'), {
+                this._on(panel.find('#record-history span'), {
                     click: function(){
                         this._getRecordHistory();
                     }
@@ -7396,6 +7396,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         });
     },
 
+    /**
+     * @brief Retrieve the current record's field value history.
+     * @memberof heurist.manageRecords
+     */
     _getRecordHistory: function(){
 
         if(!this._check_history){
@@ -7405,7 +7409,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         const that = this;
-        const rectype = this._getField('rec_RecTypeID');
 
         let request = {
             entity: 'sysArchive',
@@ -7421,229 +7424,405 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
 
-            that._record_history = response.data.history;
-            
-            if(window.hWin.HEURIST4.util.isempty(that._record_history)){
+            that._record_history = {
+                'byField': response.data.history,
+                'users': response.data.users
+            };
+
+            if(window.hWin.HEURIST4.util.isempty(that._record_history['byField'])){
                 that._check_history = false;
                 that._getRecordHistory();
                 return;
             }
 
-            let rst_fields = [];
-            let fld_name_css = "font-size: 14px;";
-            let smaller_text_css = "font-size: 10px;";
-            let row_css = "cursor: default; display: grid; grid-template-columns: 25px 45px 15px 15px 125px 20px 60%; align-items: center;";
-            let container_css = "margin: 10px 5px;";
+            that._showRecordHistory();
+        });
+    },
 
-            $Db.rst(rectype).each2(function(dty_ID, rst){
+    /**
+     * @brief Build record history by date, based on the default by field format.
+     * @memberof heurist.manageRecords
+     */
+    _setupRecordHistoryByDate: function(){
 
-                if($Db.dty(dty_ID, 'dty_Type') == 'separator') return;
+        let byDate = {};
 
-                let name = rst['rst_DisplayName'];
-                let rec = {
-                    id: dty_ID,
-                    name: name,
-                    t_name: name.length > 25 ? name.substring(0, 25) + '...' : name,
-                    order: rst['rst_DisplayOrder']
-                };
-                
-                rst_fields.push(rec);
-            });
+        for(const dtyID in this._record_history['byField']){
 
-            rst_fields.sort( (a,b) => a.order < b.order ? -1 : 1 );
-
-            let rec_ids = {};
-
-            let content = "";
-            for(const field of rst_fields){
-
-                let fld = that._editing.getFieldByName(field.id);
-                let type = $Db.dty(field.id, 'dty_Type');
-
-                let cur_values = fld.editing_input('getValues');
-                let fld_history = that._record_history[field.id];
-
-                if(window.hWin.HEURIST4.util.isempty(fld_history)) continue;
-                
-                for(let fld_idx in cur_values){
-
-                    if(fld_history[fld_idx].length < 2) continue; // no history to display, skip
-
-                    let history_head = '';
-                    let history_log = '';
-                    let cur_value = cur_values[fld_idx];
-
-                    if(type == 'resource' || type == 'relmarker'){
-                        rec_ids[`${field.id}-${fld_idx}-0`] = fld_history[fld_idx][0].arc_Value;
-                        cur_value = '';
-                    }else if(type == 'freetext' || type == 'blocktext'){ // remove html
-                        cur_value = window.hWin.HEURIST4.util.stripTags(cur_value, 'u, i, b, strong, em');
-                    }else if(type == 'date'){ // translate value
-                        cur_value = temporalToHumanReadableString(cur_value);
-                    }else if(type == 'enum'){ // grab label from dropdown
-                        cur_value = fld_history[fld_idx][0].arc_Value;
-                    }else if(type == 'file'){ // set value to filename / url
-                        cur_value = !window.hWin.HEURIST4.util.isempty(cur_value.ulf_OrigFileName) ? 
-                                        cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
-                    }
-
-                    history_head = `<div id="${field.id}-${fld_idx}" style="padding-bottom: 5px;">`
-                                    + `<strong title="${field.name}" style="${fld_name_css}">${field.t_name}</strong>`
-                                 + `</div>`;
-
-                    for(let idx = 0; idx < fld_history[fld_idx].length; idx++){
-    
-                        let cur_history = fld_history[fld_idx][idx];
-                        let prev_value = cur_history.arc_Value;
-
-                        if(type == 'resource' || type == 'relmarker'){
-                            rec_ids[`${field.id}-${fld_idx}-${idx}`] = cur_history.arc_Value;
-                            prev_value = '';
-                        }else if(type == 'freetext' || type == 'blocktext'){
-                            prev_value = window.hWin.HEURIST4.util.stripTags(prev_value, 'u, i, b, strong, em');
-                        }
-    
-                        let date_stamp = cur_history['arc_TimeOfChange'];
-                        date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('H:m d  MMMM y');
-
-                        let is_revert = cur_history.arc_Action == 'revert';
-                        let chkbx_attr = !is_revert ? 
-                                            'disabled="disabled" class="ui-state-disabled"' : `name="revert-change" value="${field.id}-${fld_idx}-${idx}"`;
-                        let chkbx_style = `cursor: pointer;${!is_revert ? 'visibility: hidden;' : ''}`
-
-                        history_log += `<div id="${field.id}-${fld_idx}-${idx}" style="${row_css}" ${is_revert ? 'class="record_history_value"' : ''}>`
-                                        + '<span>'
-                                            + `<input type="checkbox" ${chkbx_attr} style="${chkbx_style}"> `
-                                        + '</span>'
-                                        + `<span>${cur_history.arc_Action}</span> `
-                                        + `<span style="${smaller_text_css}">${cur_history.arc_ChangedByUGrpID}</span> <span style="${smaller_text_css}">@</span>`
-                                        + `<span class="record_history_datestamp" style="${smaller_text_css}">${date_stamp}</span> <span style="${smaller_text_css}">&nbsp;>> </span>`
-                                        + `<span class="truncate" data-idx="${field.id}-${fld_idx}-${idx}" title="${prev_value}">${prev_value}</span>`
-                                    + `</div>`;
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(history_log)){
-                        content += `<div data-dtyid="${field.id}" style="${container_css}">${history_head}${history_log}</div>`;
-                    }
-                }
+            if(!Object.hasOwn(this._record_history['byField'], dtyID)){
+                continue;
             }
 
-            // String of users
-            let users = `<div style="${container_css}">Users:&nbsp;&nbsp;`;
-            for(let id in response.data.users){
-                users += `${id} = ${response.data.users[id]}&nbsp;&nbsp;&nbsp;&nbsp;`;
-            }
-            users += '</div>';
+            const fields = this._record_history['byField'][dtyID];
 
-            if(!window.hWin.HEURIST4.util.isempty(content)){
+            for(const fieldIndex in fields){
 
-                let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
+                for(const archiveIndex in fields[fieldIndex]){
 
-                content = `Check values to be restored, then click <button id="btn-history-revert" style="margin: 0px 10px">Revert changes</button> or <button id="btn-history-cancel" style="margin: 0px 10px">Cancel</button>`
-                        + '<br><label for="record_history_setby_group">Bulk check by modification date <input type="checkbox" id="record_history_setby_group" /></label>'
-                        + users
-                        + content;
-                $acc_ele.children('div').html(content);
-
-                that._on($acc_ele.find('#btn-history-revert').button(), {
-                    click: function(){
-                        that._revertRecordHistory();
-                    }
-                });
-                that._on($acc_ele.find('#btn-history-cancel').button(), {
-                    click: function(){
-                        $acc_ele.find('input[type="checkbox"][name="revert-change"]').prop('checked', false);
-                    }
-                });
-                that._on($acc_ele.find('#record_history_setby_group'), {
-                    click: function(){
-                        $acc_ele.find(`input[name="revert-change"]`).prop('checked', false); // reset checks
-                    }
-                });
-                // Check checkbox on clicking row
-                that._on($acc_ele.find('div.record_history_value'), {
-                    click: function(event){
-
-                        let $ele = $(event.target);
-                        let org_target_checkbox = $ele.is('input[type="checkbox"]');
-                        if(!$ele.hasClass('record_history_value') && !org_target_checkbox){
-                            $ele = $ele.closest('.record_history_value');
-                        }
-
-                        $ele = org_target_checkbox || $ele.is('input[type="checkbox"]') ? $ele : $ele.find('input[type="checkbox"]');
-                        if($ele.length == 0){
-                            return;
-                        }
-
-                        let val = $ele.val().split('-'); // get base of value
-                        let date = that._record_history[val[0]][val[1]][val[2]]['arc_TimeOfChange'];
-
-                        val.pop();
-
-                        let new_status = $ele.is(':checked');
-                        new_status = org_target_checkbox ? new_status : !new_status; // invert status if the checkbox was not clicked
-
-                        if($acc_ele.find('#record_history_setby_group').is(':checked')){
-
-                            date = TDate.parse(date).toString('H:m d  MMMM y');
-                            let $dates = $acc_ele.find(`.record_history_datestamp:contains("${date}")`);
-
-                            $dates.each((idx, date) => {
-                                let $parent = $(date).closest('.record_history_value');
-                                if($parent.length == 0){
-                                    return;
-                                }
-
-                                $parent.parent().find('input[type="checkbox"]').prop('checked', false);
-
-                                $ele = $ele.add($parent.find('input[type="checkbox"]'));
-                            });
-                        }
-
-                        val = `${val.join('-')}-`;
-
-                        $acc_ele.find(`input[value^="${val}"]`).prop('checked', false); // remove all selections for this field
-
-                        $ele.prop('checked', new_status); // now, set clicked row's check status
-                    }
-                });
-
-                that.editFormPopup.layout().open('east'); // Expand layout panel
-
-                // Expand accordion header
-                if($acc_ele.accordion('instance') != undefined){
-                    $acc_ele.accordion('option', 'active', 0);
-                }
-
-                // Enlarge layout panel
-                let width = $(document).width() * 0.4;
-                if(that.editFormPopup.layout().state['east']['outerWidth'] < width){
-                    that.editFormPopup.layout().sizePane('east', width);
-                }
-            }else{
-                that._check_history = false;
-                that._getRecordHistory();
-            }
-
-            if(Object.keys(rec_ids).length > 0){
-
-                let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
-
-                for(const fld_idx in rec_ids){
-
-                    let $ele = $acc_ele.find(`span[data-idx="${fld_idx}"]`);
-                    if($ele.length < 1){
+                    if(!Object.hasOwn(fields[fieldIndex], archiveIndex)){
                         continue;
                     }
 
-                    window.hWin.HEURIST4.ui.createRecordLinkInfo($ele, rec_ids[fld_idx], false);
-                    if($ele.find('.btn-edit').length > 0){
-                        $ele.find('.btn-edit').parent().css('padding-left', '');
-                        $ele.find('.btn-edit').remove();
+                    const archiveRecord = fields[fieldIndex][archiveIndex];
+
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(archiveRecord.arc_ID)
+                    || archiveRecord.arc_Action === 'current'
+                    || !archiveRecord.arc_TimeOfChange){
+
+                        continue;
                     }
+
+                    if(!Object.hasOwn(byDate, archiveRecord.arc_TimeOfChange)){
+                        byDate[archiveRecord.arc_TimeOfChange] = [];
+                    }
+
+                    byDate[archiveRecord.arc_TimeOfChange].push(`${dtyID}-${fieldIndex}-${archiveIndex}`);
                 }
             }
+        }
+
+        this._record_history['byDate'] = byDate;
+    },
+
+    /**
+     * @brief Display the record history to record summary panel.
+     * @memberof heurist.manageRecords
+     */
+    _showRecordHistory: function(){
+
+        this._setupRecordHistoryByDate();
+
+        const rectype = this._getField('rec_RecTypeID');
+
+        let rst_fields = [];
+        const container_css = "margin: 10px 5px;";
+
+        $Db.rst(rectype).each2(function(dty_ID, rst){
+
+            if($Db.dty(dty_ID, 'dty_Type') == 'separator') return;
+
+            let name = rst['rst_DisplayName'];
+            let rec = {
+                id: dty_ID,
+                name: name,
+                t_name: name.length > 25 ? name.substring(0, 25) + '...' : name,
+                order: rst['rst_DisplayOrder'],
+                type: $Db.dty(dty_ID, 'dty_Type')
+            };
+            
+            rst_fields.push(rec);
         });
+
+        rst_fields.sort( (a,b) => a.order < b.order ? -1 : 1 );
+
+        let recordPointers = {};
+        let byDateContent = this._constructRecordHistoryByDate(rst_fields, recordPointers);
+        let byFieldContent = this._constructRecordHistoryByField(rst_fields, recordPointers);
+
+        // String of users
+        let users = `<div style="${container_css}">Users:&nbsp;&nbsp;`;
+        for(let id in this._record_history['users']){
+            users += `${id} = ${this._record_history['users'][id]}&nbsp;&nbsp;&nbsp;&nbsp;`;
+        }
+        users += '</div>';
+
+        if(window.hWin.HEURIST4.util.isempty(byFieldContent)){
+            this._check_history = false;
+            this._getRecordHistory();
+            return;
+        }
+
+        let $accordionElement = $(this.editFormSummary.find('.summary-accordion').get(6));
+
+        let content = `Check values to be restored, then click <button id="btn-history-revert" style="margin: 0px 10px">Revert changes</button> or <button id="btn-history-cancel" style="margin: 0px 10px">Cancel</button>
+                <br><label for="displayByDate"><input type="radio" name="historyDisplayType" value="historyByDate" id="displayByDate" checked="checked" /> By Date</label>
+                <label for="displayByField"><input type="radio" name="historyDisplayType" value="historyByField" id="displayByField" /> By Field</label>
+                ${users}
+                <div class="historyList" id="historyByDate"><br>${byDateContent}</div>
+                <div class="historyList" id="historyByField" style="display: none;">
+                    <label for="record_history_setby_group">Bulk check by modification date <input type="checkbox" id="record_history_setby_group" /></label>
+                    ${byFieldContent}
+                </div>`;
+        $accordionElement.children('div').html(content);
+
+        this._on($accordionElement.find('[name="historyDisplayType"]'), {
+            change: () => {
+                let displayType = $accordionElement.find('[name="historyDisplayType"]:checked').val();
+                $accordionElement.find('.historyList').hide();
+                $accordionElement.find(`#${displayType}`).show();
+            }
+        });
+        this._on($accordionElement.find('#btn-history-revert').button(), {
+            click: () => {
+                this._revertRecordHistory();
+            }
+        });
+        this._on($accordionElement.find('#btn-history-cancel').button(), {
+            click: function(){
+                $accordionElement.find('input[type="checkbox"][name="revert-change"]').prop('checked', false);
+            }
+        });
+        this._on($accordionElement.find('#record_history_setby_group'), {
+            click: function(){
+                $accordionElement.find(`input[name="revert-change"]`).prop('checked', false); // reset checks
+            }
+        });
+        // Check checkbox on clicking row
+        this._on($accordionElement.find('div.record_history_value'), {
+            click: (event) => {
+
+                let $ele = $(event.target);
+                let org_target_checkbox = $ele.is('input[type="checkbox"]');
+                if(!$ele.hasClass('record_history_value') && !org_target_checkbox){
+                    $ele = $ele.closest('.record_history_value');
+                }
+
+                $ele = org_target_checkbox || $ele.is('input[type="checkbox"]') ? $ele : $ele.find('input[type="checkbox"]');
+                if($ele.length == 0){
+                    return;
+                }
+
+                let val = $ele.val().split('-'); // get base of value
+                $ele = $accordionElement.find(`input[type="checkbox"][value="${$ele.val()}"]`);
+
+                let date = this._record_history['byField'][val[0]][val[1]][val[2]]['arc_TimeOfChange'];
+
+                val.pop();
+
+                let new_status = $ele.is(':checked');
+                new_status = org_target_checkbox ? new_status : !new_status; // invert status if the checkbox was not clicked
+
+                let isByField = $accordionElement.find('#historyByField').is(':visible');
+                if(isByField && $accordionElement.find('#record_history_setby_group').is(':checked')){
+
+                    date = TDate.parse(date).toString('H:m d MMMM y');
+                    let $dates = $accordionElement.find(`.record_history_datestamp:contains("${date}")`);
+
+                    $dates.each((idx, date) => {
+                        let $parent = $(date).closest('.record_history_value');
+                        if($parent.length == 0){
+                            return;
+                        }
+
+                        $parent.parent().find('input[type="checkbox"]').prop('checked', false);
+
+                        let checkboxValue = $parent.find('input[type="checkbox"]').val();
+                        $ele = $ele.add($accordionElement.find(`input[type="checkbox"][value="${checkboxValue}"]`));
+                    });
+                }
+
+                val = `${val.join('-')}-`;
+
+                $accordionElement.find(`input[value^="${val}"]`).prop('checked', false); // remove all selections for this field
+
+                $ele.prop('checked', new_status); // now, set clicked row's check status
+            }
+        });
+        this._on($accordionElement.find('.checkallInDate'), {
+            click: (event) => {
+                let $ele = $(event.target);
+                let $checkboxes = $ele.closest('div[data-date]').find('input[type="checkbox"]');
+                $accordionElement.find('input[type="checkbox"]').prop('checked', false);
+                $checkboxes.prop('checked', true);
+            }
+        });
+
+        this.editFormPopup.layout().open('east'); // Expand layout panel
+
+        // Expand accordion header
+        if($accordionElement.accordion('instance') != undefined){
+            $accordionElement.accordion('option', 'active', 0);
+        }
+
+        // Enlarge layout panel
+        let width = $(document).width() * 0.4;
+        if(this.editFormPopup.layout().state['east']['outerWidth'] < width){
+            this.editFormPopup.layout().sizePane('east', width);
+        }
+
+        if(Object.keys(recordPointers).length > 0){
+
+            let $accordionElement = $(this.editFormSummary.find('.summary-accordion').get(6));
+
+            for(const fieldIndex in recordPointers){
+
+                let $ele = $accordionElement.find(`span[data-idx="${fieldIndex}"]`);
+                if($ele.length < 1){
+                    continue;
+                }
+
+                window.hWin.HEURIST4.ui.createRecordLinkInfo($ele, recordPointers[fieldIndex], false);
+                if($ele.find('.btn-edit').length > 0){
+                    $ele.find('.btn-edit').parent().css('padding-left', '');
+                    $ele.find('.btn-edit').remove();
+                }
+            }
+        }
+    },
+
+    _constructRecordHistoryByDate: function(rstFields, recordPointers){
+
+        //return '';
+        let content = '';
+
+        const fldNameCSS = "font-size: 14px;";
+        const smallerTextCSS = "font-size: 10px;";
+        const rowCSS = "cursor: default; display: grid; grid-template-columns: 25px 25px 20px 125px 20px 60%; align-items: center;";
+
+        const languageCode = window.hWin.HAPI4.sysinfo.common_languages[window.hWin.HAPI4.getLocale()]?.['a2'] ?? 'en';
+        const formatter = Intl.DateTimeFormat(languageCode, {dateStyle: 'medium', timeStyle: 'short'});
+
+        for(const date in this._record_history['byDate']){
+
+            if(!Object.hasOwn(this._record_history['byDate'], date)){
+                continue;
+            }
+
+            let fields = this._record_history['byDate'][date];
+
+            if(window.hWin.HEURIST4.util.isempty(fields)) continue;
+
+            let formattedDate = new Date(date);
+            formattedDate = formatter.format(formattedDate);
+
+            let historyHead = `<div style="padding: 10px 0px 5px; border-top: 1px solid;">
+                <strong title="${formattedDate}" style="${fldNameCSS}">${formattedDate}</strong>
+                <span class="fake_link checkallInDate" style="vertical-align: 2px; padding-inline-start: 10px;">check all</span>
+            </div>`;
+            let historyLog = '';
+
+            for(let field of fields){
+
+                [dtyID, fieldIndex, archiveIndex] = field.split('-');
+
+                if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !Number.isInteger(Number.parseInt(fieldIndex)) || !Number.isInteger(Number.parseInt(archiveIndex))){
+                    continue;
+                }
+
+                const defField = rstFields.find(def => def.id === dtyID)
+                if(!defField){
+                    continue;
+                }
+
+                const type = defField.type;
+                let value = this._record_history['byField'][dtyID][fieldIndex][archiveIndex];
+                let orgValue = value;
+
+                if(type == 'resource' || type == 'relmarker'){
+                    recordPointers[field] = value.arc_Value;
+                    value = '';
+                }else if(type == 'freetext' || type == 'blocktext'){ // remove html
+                    value = window.hWin.HEURIST4.util.stripTags(value.arc_Value, 'u, i, b, strong, em');
+                }else if(type == 'date'){ // translate value
+                    value = temporalToHumanReadableString(value.arc_Value);
+                }else if(type == 'enum'){ // grab label from dropdown
+                    value = value.arc_Value;
+                }else if(type == 'file'){ // set value to filename / url
+                    value = !window.hWin.HEURIST4.util.isempty(value.ulf_OrigFileName) ? 
+                                    value.ulf_OrigFileName : value.ulf_ExternalFileReference;
+                    value ??= orgValue.arc_Value;
+                }
+
+                historyLog += `<div id="${field}" style="${rowCSS}" class="record_history_value">
+                    <span>
+                        <input type="checkbox" name="revert-change" value="${field}" style="cursor: pointer;">
+                    </span>
+                    <span style="${smallerTextCSS}">${orgValue.arc_ChangedByUGrpID}</span> <span style="${smallerTextCSS}">for</span>
+                    <span class="truncate" style="${smallerTextCSS}font-weight: bold;" title="${defField.name}">${defField.t_name}</span> <span style="${smallerTextCSS}">&nbsp;>> </span>
+                    <span class="truncate" data-idx="${field}" title="${value}">${value}</span>
+                </div>`;
+            }
+
+            if(!window.hWin.HEURIST4.util.isempty(historyLog)){
+                content += `<div data-date="${date}" style="margin: 10px 5px;">${historyHead}${historyLog}</div>`;
+            }
+        }
+
+        return content;
+    },
+
+    _constructRecordHistoryByField: function(rstFields, recordPointers){
+
+        let content = '';
+
+        const fldNameCSS = "font-size: 14px;";
+        const smallerTextCSS = "font-size: 10px;";
+        const rowCSS = "cursor: default; display: grid; grid-template-columns: 25px 45px 15px 15px 125px 20px 60%; align-items: center;";
+
+        for(const field of rstFields){
+
+            let fld = this._editing.getFieldByName(field.id);
+            let type = field.type;
+
+            let fieldValues = fld.editing_input('getValues');
+            let fieldHistory = this._record_history['byField'][field.id];
+
+            if(window.hWin.HEURIST4.util.isempty(fieldHistory)) continue;
+            
+            for(let fieldIndex in fieldValues){
+
+                if(fieldHistory[fieldIndex].length < 2) continue; // no history to display, skip
+
+                let historyHead = '';
+                let historyLog = '';
+                let cur_value = fieldValues[fieldIndex];
+
+                if(type == 'resource' || type == 'relmarker'){
+                    recordPointers[`${field.id}-${fieldIndex}-0`] = fieldHistory[fieldIndex][0].arc_Value;
+                    cur_value = '';
+                }else if(type == 'freetext' || type == 'blocktext'){ // remove html
+                    cur_value = window.hWin.HEURIST4.util.stripTags(cur_value, 'u, i, b, strong, em');
+                }else if(type == 'date'){ // translate value
+                    cur_value = temporalToHumanReadableString(cur_value);
+                }else if(type == 'enum'){ // grab label from dropdown
+                    cur_value = fieldHistory[fld_idx][0].arc_Value;
+                }else if(type == 'file'){ // set value to filename / url
+                    cur_value = !window.hWin.HEURIST4.util.isempty(cur_value.ulf_OrigFileName) ? 
+                                    cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
+                }
+
+                historyHead = `<div id="${field.id}-${fieldIndex}" style="padding: 10px 0px 5px; border-top: 1px solid;">`
+                                + `<strong title="${field.name}" style="${fldNameCSS}">${field.t_name}</strong>`
+                                + `</div>`;
+
+                for(let idx = 0; idx < fieldHistory[fieldIndex].length; idx++){
+
+                    let cur_history = fieldHistory[fieldIndex][idx];
+                    let prev_value = cur_history.arc_Value;
+
+                    if(type == 'resource' || type == 'relmarker'){
+                        recordPointers[`${field.id}-${fieldIndex}-${idx}`] = cur_history.arc_Value;
+                        prev_value = '';
+                    }else if(type == 'freetext' || type == 'blocktext'){
+                        prev_value = window.hWin.HEURIST4.util.stripTags(prev_value, 'u, i, b, strong, em');
+                    }
+
+                    let date_stamp = cur_history['arc_TimeOfChange'];
+                    date_stamp = window.hWin.HEURIST4.util.isempty(date_stamp) ? '...' : TDate.parse(date_stamp).toString('H:m d  MMMM y');
+
+                    let is_revert = cur_history.arc_Action == 'revert';
+                    let chkbx_attr = !is_revert ? 
+                                        'disabled="disabled" class="ui-state-disabled"' : `name="revert-change" value="${field.id}-${fieldIndex}-${idx}"`;
+                    let chkbx_style = `cursor: pointer;${!is_revert ? 'visibility: hidden;' : ''}`
+
+                    historyLog += `<div id="${field.id}-${fieldIndex}-${idx}" style="${rowCSS}" ${is_revert ? 'class="record_history_value"' : ''}>`
+                                    + '<span>'
+                                        + `<input type="checkbox" ${chkbx_attr} style="${chkbx_style}"> `
+                                    + '</span>'
+                                    + `<span>${cur_history.arc_Action}</span> `
+                                    + `<span style="${smallerTextCSS}">${cur_history.arc_ChangedByUGrpID}</span> <span style="${smallerTextCSS}">@</span>`
+                                    + `<span class="record_history_datestamp" style="${smallerTextCSS}">${date_stamp}</span> <span style="${smallerTextCSS}">&nbsp;>> </span>`
+                                    + `<span class="truncate" data-idx="${field.id}-${fieldIndex}-${idx}" title="${prev_value}">${prev_value}</span>`
+                                + `</div>`;
+                }
+
+                if(!window.hWin.HEURIST4.util.isempty(historyLog)){
+                    content += `<div data-dtyid="${field.id}" style="margin: 10px 5px;">${historyHead}${historyLog}</div>`;
+                }
+            }
+        }
+
+        return content;
     },
 
     _revertRecordHistory: function(){
@@ -7651,7 +7830,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         const that = this;
         const rectype = this._getField('rec_RecTypeID');
 
-        let $checked_options = that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked');
+        let $accordionElement = $(this.editFormSummary.find('.summary-accordion').get(6));
+
+        let byType = $accordionElement.find('[name="historyDisplayType"]:checked').val();
+        let $parent = $accordionElement.find(`#${byType}`);
+        let $checked_options = $parent.find('input[type="checkbox"][name="revert-change"]:checked');
 
         if($checked_options.length <= 0){
             return;
@@ -7673,8 +7856,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 return;
             }
 
-            let archive_row = that._record_history[dty_ID][fld_idx][arc_idx];
-            let existing_val = that._record_history[dty_ID][fld_idx][0]['arc_Value'];
+            let archive_row = that._record_history['byField'][dty_ID][fld_idx][arc_idx];
+            let existing_val = that._record_history['byField'][dty_ID][fld_idx][0]['arc_Value'];
 
             if(!Object.hasOwn(changes, dty_ID)){
                 changes[dty_ID] = {};
@@ -7688,8 +7871,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             // prep values for display
-            let escaped_val = window.hWin.HEURIST4.util.htmlEscape(existing_val);
-            let old_val = window.hWin.HEURIST4.util.htmlEscape(archive_row['arc_Value']);
+            let escaped_val = typeof existing_val !== 'object'
+                ? window.hWin.HEURIST4.util.htmlEscape(existing_val)
+                : existing_val.rec_Title;
+
+            let old_val = typeof archive_row['arc_Value'] !== 'object'
+                ? window.hWin.HEURIST4.util.htmlEscape(archive_row['arc_Value'])
+                : archive_row.arc_Value.rec_Title;
 
             changes_txt += `<div style="${row_css}">`
                 + `<span class="truncate" title="${existing_val}">${escaped_val}</span>`

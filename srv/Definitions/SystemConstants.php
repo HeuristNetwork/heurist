@@ -92,6 +92,7 @@ final class SystemConstants
         'RT_REGISTERED_FILE' => array('rty', '2-1106'),
         'RT_USER_BOOKMARKS' => array('rty', '2-1110'),
         'RT_USER_REMINDERS' => array('rty', '2-1111'),
+        'RT_PRESENTATION_SET' => array('rty', '2-1112'), // story map, crosstabs or export settings (plan 27q1)
         // Fields (ported from hserv/consts.php $dtDefines)
         'DT_NAME' => array('dty', '2-1'),
         'DT_SHORT_NAME' => array('dty', '2-2'),
@@ -231,9 +232,13 @@ final class SystemConstants
         'DT_REGISTERED_FILE_TYPE' => array('dty', '2-1186'),
         'DT_CONFIGURATION' => array('dty', '2-1187'),
         'DT_CMS_PAGE_TRANSLATIONS' => array('dty', '2-1202'), // translated text blocks of a v4 website page (plan 27a)
+        'DT_PRESENTATION_TYPE' => array('dty', '2-1203'), // kind of a Presentation set (plan 27q1)
         // Terms (ported from hserv/consts.php $trmDefines)
         'TRM_PAGETYPE_WEBPAGE' => array('trm', '2-6254'),
         'TRM_PAGETYPE_MENUITEM' => array('trm', '2-6253'),
+        'TRM_PRESENTATION_CROSSTABS' => array('trm', '2-10642'), // kinds of a Presentation set (plan 27q1)
+        'TRM_PRESENTATION_EXPORT' => array('trm', '2-10643'),
+        'TRM_PRESENTATION_STORYMAP' => array('trm', '2-10644'),
         'TRM_NO' => array('trm', '2-531'), // General 'No' term
         'TRM_NO_OLD' => array('trm', '99-5447'), // Older 'No' term, potentially from a specific DB context
         'TRM_SWF' => array('trm', '2-9453'), // Workflow stages vocabulary root/identifier
