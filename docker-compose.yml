@@ -34,6 +34,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${HEURIST_MYSQL_ROOT_PASSWORD:-heurist_root}
       MYSQL_USER: heurist
       MYSQL_PASSWORD: ${HEURIST_DB_ADMIN_PASSWORD:-heurist}
+    ports:
+      - "127.0.0.1:3306:3306" # Useful for PHPUnit on host machine
     command:
       # Heurist creates stored functions/triggers in its databases;
       # without this flag MySQL 8 binary logging blocks that for non-SUPER users.
