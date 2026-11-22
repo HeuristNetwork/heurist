@@ -4481,29 +4481,19 @@ $.widget( "heurist.mapping", {
                         }
                         
 
-                        if(coords.length>0 && coords[0] instanceof L.LatLng ){
-                            //simple polygon
-                            if(__isRect( coords )){
-                                __addDrawItem(new L.Rectangle(coords));
+                        // Normalize to polygons -> rings -> LatLngs, preserving holes.
+                        // Leaflet closes rings itself when exporting to GeoJSON.
+                        if(coords.length>0 && coords[0] instanceof L.LatLng){
+                            coords = [[coords]];
+                        }else if(coords.length>0 && coords[0][0] instanceof L.LatLng){
+                            coords = [coords];
+                        }
+                        for(let i=0;i<coords.length;i++){
+                            let rings = coords[i];
+                            if(rings.length==1 && __isRect(rings[0])){
+                                __addDrawItem(new L.Rectangle(rings[0]));
                             }else{
-                                coords.push(coords[0]); //add last
-                                __addDrawItem(new L.Polygon(coords));
-                            }
-                        }else{
-                            //multipolygon
-                            if(Array.isArray(coords) && coords.length==1) coords = coords[0];
-                            if(coords.length>0 && coords[0] instanceof L.LatLng ){
-                                if(__isRect( coords )){
-                                    __addDrawItem(new L.Rectangle(coords));
-                                }else{
-                                    coords.push(coords[0]);
-                                    __addDrawItem(new L.Polygon(coords));
-                                }
-                            }else{
-                                for(let i=0;i<coords.length;i++){
-                                      coords[i].push(coords[i][0]);
-                                      __addDrawItem(new L.Polygon(coords[i]));
-                                }
+                                __addDrawItem(new L.Polygon(rings));
                             }
                         }
                         

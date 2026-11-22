@@ -7,7 +7,7 @@
 * /presentation/{id}, /presentation/{id}/duplicate and /sys?q=[{"t":"presentation"}] of plan 28.
 *
 * Before a save the configuration must be a JSON object; the settings of a story map are checked by
-* StoryMapSettings. A Presentation set used by website pages (element `storymap`, plan 27q1 §8) is not deleted (409).
+* StoryMapSettings, those of crosstabs by CrosstabSettings (plan 27q2). A Presentation set used by website pages (element `storymap`, plan 27q1 §8) is not deleted (409).
 * The pages are those the user can read.
 *
 * @project     Heurist academic knowledge management system
@@ -67,7 +67,7 @@ final class PresentationEntityHandler extends RecordEntityHandler
     }
 
     /**
-     * Whether a page configuration (JSON of 2-1187) has a story map element of a Presentation set.
+     * Whether a page configuration (JSON of 2-1187) has a story map or crosstabs element of a Presentation set.
      *
      * @param string $configuration
      * @param int $presetId
@@ -77,7 +77,7 @@ final class PresentationEntityHandler extends RecordEntityHandler
         $config = json_decode($configuration, true);
         $instances = is_array($config['instances'] ?? null) ? $config['instances'] : array();
         foreach($instances as $instance){
-            if(is_array($instance) && ($instance['type'] ?? '') === 'storymap'
+            if(is_array($instance) && in_array($instance['type'] ?? '', array('storymap', 'crosstabs'), true)
                 && intval($instance['settings']['preset'] ?? 0) === $presetId){
                 return true;
             }
@@ -107,6 +107,11 @@ final class PresentationEntityHandler extends RecordEntityHandler
             $problems = StoryMapSettings::problems($settings);
             if($problems){
                 throw self::refused($configField, 'Story map: '.implode('; ', $problems));
+            }
+        }elseif($kind === 'crosstabs'){
+            $problems = CrosstabSettings::problems($settings);
+            if($problems){
+                throw self::refused($configField, 'Crosstabs: '.implode('; ', $problems));
             }
         }
         return $body;

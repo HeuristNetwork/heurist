@@ -181,24 +181,10 @@ final class FieldValueCounter
             foreach($targets as $target){ $rootsOf[intval($target)][intval($root)] = true; }
         }
         $byValue = array();
-        foreach(array_chunk(array_keys($rootsOf), self::ID_CHUNK_SIZE) as $chunk){
-            $state = new SqlBuildContext($context);
-            $parts = $this->sourceParts($field, $state, $context);
-            $where = $parts['where'];
-            foreach($chunk as $id){ $state->bind($id, 'i'); }
-            $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
-            $where = array_merge($where, $this->targetConditions($field, $state, $context));
-            $this->appendText($where, $parts, $state, $options['text']);
-            $rows = $this->executeRows(
-                'SELECT DISTINCT r.rec_ID, '.$parts['value'].', '.$parts['label'].', '.$parts['rty'].', '.$parts['kind']
-                    .' FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
-                $state->types(), $state->values()
-            );
-            foreach($rows as $row){
-                $key = (string)$row[1];
-                if(!isset($byValue[$key])){ $byValue[$key] = array('row'=>array($row[1], 0, $row[2], $row[3], $row[4]), 'roots'=>array()); }
-                $byValue[$key]['roots'] += $rootsOf[intval($row[0])] ?? array();
-            }
+        foreach($this->recordValues(array_keys($rootsOf), $context, $field, $options['text']) as $row){
+            $key = (string)$row[1];
+            if(!isset($byValue[$key])){ $byValue[$key] = array('row'=>array($row[1], 0, $row[2], $row[3], $row[4]), 'roots'=>array()); }
+            $byValue[$key]['roots'] += $rootsOf[intval($row[0])] ?? array();
         }
         $values = array();
         foreach($byValue as $entry){
@@ -211,6 +197,41 @@ final class FieldValueCounter
             'total'=>count($values),
             'values'=>array_slice($values, $options['offset'], $options['limit'])
         );
+    }
+
+    /**
+     * The distinct values of a field per record, for records already found (and so already checked for access):
+     * the source of countThroughLinks and of the crosstabs (CrossTabulator, plan 27q2). Linked records of resource and
+     * relmarker fields are checked for access here.
+     *
+     * @param int[] $ids Record ids.
+     * @param array $context Search context.
+     * @param array $field describeField() result.
+     * @param string $text Only values whose text matches (as the picker filter); '' = all.
+     * @return array<int,array{0:int|string,1:mixed,2:mixed,3:mixed,4:mixed}> Rows: record id, value, label, record type
+     *         of the target, kind.
+     */
+    public function recordValues(array $ids, array $context, array $field, string $text = ''): array
+    {
+        if(!$this->hasVisibleSource($field, $context)){ return array(); }
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        $result = array();
+        foreach(array_chunk($ids, self::ID_CHUNK_SIZE) as $chunk){
+            $state = new SqlBuildContext($context);
+            $parts = $this->sourceParts($field, $state, $context);
+            $where = $parts['where'];
+            foreach($chunk as $id){ $state->bind($id, 'i'); }
+            $where[] = 'r.rec_ID IN ('.implode(',', array_fill(0, count($chunk), '?')).')';
+            $where = array_merge($where, $this->targetConditions($field, $state, $context));
+            $this->appendText($where, $parts, $state, $text);
+            $rows = $this->executeRows(
+                'SELECT DISTINCT r.rec_ID, '.$parts['value'].', '.$parts['label'].', '.$parts['rty'].', '.$parts['kind']
+                    .' FROM {records} r '.$parts['joins'].' WHERE '.implode(' AND ', $where),
+                $state->types(), $state->values()
+            );
+            foreach($rows as $row){ $result[] = $row; }
+        }
+        return $result;
     }
 
     /** Tags need a logged-in user; every other field is visible to guests too. */

@@ -153,6 +153,31 @@ final class FieldValueBuckets
     }
 
     /**
+     * The ranges between two bounds in the field's SQL representation (the min / max of rawForQuery): every year /
+     * decade / century / month of a date field, or the round number ranges — the same ranges as op=ranges, also the
+     * empty ones. Used by the crosstabs (plan 27q2) for a dimension grouped by `groupby` / `ranges`.
+     *
+     * @param array $field describe() result.
+     * @param mixed $min Smallest value (number, date index decimal or header datetime).
+     * @param mixed $max Largest value.
+     * @return array<int,array{from:mixed,to:mixed,label:string,lo:mixed,hi:mixed}>
+     * @throws QueryValidationException When a date grouping gives more than MAX_BUCKETS ranges.
+     */
+    public function specsForBounds(array $field, $min, $max): array
+    {
+        if($min === null || $max === null){ return array(); }
+        if($field['type'] === 'number'){
+            return $this->numberSpecs($field, (float)$min, (float)$max);
+        }
+        $keys = $this->denseDateKeys($field, $min, $max);
+        if($keys === null){
+            throw new QueryValidationException('The dates of the field need more than '.self::MAX_BUCKETS
+                .' ranges by '.$field['groupby'].': choose a larger grouping or define the ranges');
+        }
+        return array_map(function($key) use ($field){ return $this->dateSpec($field, $key); }, $keys);
+    }
+
+    /**
      * Number of distinct records per range: the ranges are a derived table
      * joined on the search's comparison.
      *

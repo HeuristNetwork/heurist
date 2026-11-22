@@ -47,8 +47,8 @@ use function in_array;
 class DbExportROCrate{
 
     private const RO_CRATE_VERSION = '1.2';
-    private const RO_CRATE_CONTEXT = 'https://w3id.org/ro/crate/1.2/context';
-    private const RO_CRATE_SPECIFICATION = 'https://w3id.org/ro/crate/1.2';
+    private const RO_CRATE_CONTEXT = 'https://w3id.org/ro/crate/' . self::RO_CRATE_VERSION . '/context';
+    private const RO_CRATE_SPECIFICATION = 'https://w3id.org/ro/crate/' . self::RO_CRATE_VERSION;
     private const MYSQL_DUMP_OPTIONS = [
         'skip-triggers' => true,
         'single-transaction' => true,
@@ -109,37 +109,7 @@ class DbExportROCrate{
     public function export(string $crateDirectory, array $options = []) : string{
 
         $this->getDatabaseDetails();
-        $databaseOwner = user_getDbOwner($this->mysqli);
-        $ownerName = null;
-
-        if($databaseOwner){
-            $ownerName = $databaseOwner['ugr_FirstName'] && $databaseOwner['ugr_LastName'] ? "{$databaseOwner['ugr_FirstName']} {$databaseOwner['ugr_LastName']}" : null;
-        }
-
-        $databaseName = $this->system->dbname() ?? $this->databaseDetails['sys_dbName'];
-        $description = $this->databaseDetails['sys_dbDescription'] ?? null;
-        $ownerName ??= $this->databaseDetails['sys_dbOwner'];
-        $license = $this->databaseDetails['sys_dbRights'] ?? null;
-        $creationDate = $this->databaseDetails['firstRecord'] ?? null;
-
-        $creator = [
-            'name' => $ownerName,
-            'email' => $databaseOwner['ugr_eMail'],
-            'orcid' => $databaseOwner['ugr_ORCID'] ?? null
-        ];
-
-        $this->databaseFilestoreDir = $this->system->getSysDir(null, $databaseName);
-        $this->databaseFilestoreDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->databaseFilestoreDir), DIRECTORY_SEPARATOR);
-
-        $this->baseDirectory = $options['parentDir'] ?? $this->databaseFilestoreDir;
-        $this->baseDirectory = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->baseDirectory), DIRECTORY_SEPARATOR);
-
-        $crateDirectory = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, trim($crateDirectory, '/\\'));
-        $this->crateDirectory = $this->baseDirectory . DIRECTORY_SEPARATOR . $crateDirectory;
-
-        if(!folderCreate($this->crateDirectory, true)){
-            throw new RuntimeException('Unable to create RO-Crate directory.');
-        }
+        $this->setupDirectories($options['parentDir'], $crateDirectory);
 
         $includeSqlDump = (bool)($options['includeSqlDump'] ?? false);
         $includeFiles = (bool)($options['includeFiles'] ?? false);
@@ -147,92 +117,19 @@ class DbExportROCrate{
         $sqlDump = $options['sqlDump'] ?? null;
         $hmlDump = $options['hmlDump'] ?? null;
 
-        $this->databaseDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'database';
-
-        if(!folderCreate($this->databaseDirectory, true)){
-            throw new RuntimeException('Unable to create /database within the RO-Crate directory.');
-        }
-
-        $this->sqlFile = '';
-        $this->hmlFile = '';
-        $this->tsvFiles = [
-            'tables' => [],
-            'records' => []
-        ];
-
         // Export database content as TSV
-        if($options['tsvFiles']){
-            $this->processTSVFiles($options['tsvFiles']);
-        }else if(in_array('TSV', $recordOutputs)){
-
-            $TSVExporter = new DbExportTSV();
-            $TSVExporter->setSession($this->system, '{RTYNAME}');
-            $TSVExporter->setBackupFolder($this->databaseDirectory, 'tables', 'records');
-
-            [$warnings, $this->tsvFiles] = $TSVExporter->output();
-
-            if(!empty($warnings)){
-                $warnings = implode('<br>', $warnings);
-                throw new RuntimeException("Encountered the following errors during TSV exporting:<br>{$warnings}");
-            }
+        if($options['tsvFiles'] || in_array('TSV', $recordOutputs)){
+            $this->addTSVFiles($options['tsvFiles']);
         }
 
         // Export HML dump
         if($hmlDump || in_array('HML', $recordOutputs)){
-
-            $hmlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.hml";
-
-            $hmlFileStatus = false;
-            if(file_exists($hmlDump)){
-                $hmlFileStatus = fileCopy($hmlDump, $hmlFile);
-            }
-
-            if(!$hmlFileStatus){
-
-                $_REQUEST['w'] = 'all';
-                $_REQUEST['a'] = '1';
-                $_REQUEST['q'] = 'sortby:-m';
-                $_REQUEST['rev'] = 'no';
-                $_REQUEST['depth'] = '0';
-                $_REQUEST['linkmode'] = 'none';
-                $_REQUEST['filename'] = '1';
-
-                $hmlFileOutput = '';
-                if(!defined('DIR_BACKUP')){
-                    define('DIR_BACKUP', "{$crateDirectory}/database");
-                    $hmlFileOutput = $this->databaseFilestoreDir . DIR_BACKUP;
-                }else{
-                    $hmlFileOutput = $hmlDump;
-                }
-
-                $to_include = __DIR__ . '/../../export/xml/flathml.php';
-                if(is_file($to_include)){
-                    include_once $to_include; // Execute HML export script
-                }
-
-                if(file_exists($hmlFileOutput)){
-                    $hmlFileStatus = fileCopy($hmlFileOutput, $hmlFile);
-                    fileDelete($hmlFileOutput);
-                }
-            }
-
-            if($hmlFileStatus){
-                $this->hmlFile = $hmlFile;
-            }
+            $this->addHML($crateDirectory, $hmlDump);
         }
 
         // Export SQL dump
         if($includeSqlDump){
-
-            $sqlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.sql";
-
-            $sqlFileStatus = $sqlDump && file_exists($sqlDump)
-                ? fileCopy($sqlDump, $sqlFile)
-                : DbUtils::databaseDump($databaseName, $sqlFile, self::MYSQL_DUMP_OPTIONS);
-
-            if($sqlFileStatus){
-                $this->sqlFile = $sqlFile;
-            }
+            $this->addSQL($sqlDump);
         }
 
         // Copy loose files into the crate, if supplied
@@ -247,7 +144,7 @@ class DbExportROCrate{
         $contributors = $this->getAllUsers();
 
         // Build the RO-Crate metadata after all files have been created
-        $metadata = $this->buildMetadata($databaseName, $description, $creator, $license, $creationDate, $contributors);
+        $metadata = $this->buildMetadata($contributors);
 
         $metadataPath = $this->crateDirectory . DIRECTORY_SEPARATOR . 'ro-crate-metadata.json';
 
@@ -268,17 +165,18 @@ class DbExportROCrate{
     /**
      * Construct the RO-Crate metadata graph
      *
-     * @param string $databaseName
-     * @param ?string $description
-     * @param ?array $creator
-     * @param ?string $license
-     * @param ?string $creationDate
      * @param ?array $contributors
      * @return array<string,mixed> RO-Crate metadata as JSON
      */
-    private function buildMetadata(string $databaseName, ?string $description, ?array $creator, ?string $license, ?string $creationDate, ?array $contributors) : array{
+    private function buildMetadata(?array $contributors) : array{
 
         $graph = [];
+
+        $databaseName = $this->databaseDetails['sys_dbName'];
+        $description = $this->databaseDetails['sys_dbDescription'];
+        $creator = $this->databaseDetails['sys_dbOwner'];
+        $license = $this->databaseDetails['sys_dbRights'];
+        $creationDate = $this->databaseDetails['firstRecord'];
 
         // RO-Crate metadata descriptor
         $roCrateMetadata = [
@@ -531,6 +429,25 @@ class DbExportROCrate{
         }
 
         $this->databaseDetails = $sysInfoRow;
+
+        $databaseOwner = user_getDbOwner($this->mysqli);
+        $ownerName = null;
+
+        if($databaseOwner){
+            $ownerName = $databaseOwner['ugr_FirstName'] && $databaseOwner['ugr_LastName'] ? "{$databaseOwner['ugr_FirstName']} {$databaseOwner['ugr_LastName']}" : null;
+        }
+
+        $this->databaseDetails['sys_dbName'] = $this->system->dbname() ?? $this->databaseDetails['sys_dbName'];
+        $this->databaseDetails['sys_dbDescription'] ??= null;
+        $ownerName ??= $this->databaseDetails['sys_dbOwner'];
+        $this->databaseDetails['sys_dbRights'] ??= null;
+        $this->databaseDetails['firstRecord'] ??= null;
+
+        $this->databaseDetails['sys_dbOwner'] = [
+            'name' => $ownerName,
+            'email' => $databaseOwner['ugr_eMail'],
+            'orcid' => $databaseOwner['ugr_ORCID'] ?? null
+        ];
     }
 
     /**
@@ -716,7 +633,7 @@ class DbExportROCrate{
 
         $type = finfo_file($finfo, $file);
 
-        finfo_close($finfo);
+        unset($finfo);
 
         return is_string($type) ? $type : null;
     }
@@ -788,5 +705,150 @@ class DbExportROCrate{
         $entity['url'] = rtrim(HEURIST_BASE_URL_PRO ?? HEURIST_BASE_URL, '/\\') . DIRECTORY_SEPARATOR . "?db={$this->system->dbname()}&rty={$rtyID}";
 
         $results->free();
+    }
+
+    /**
+     * Setup crate folder structure
+     *
+     * @param string $crateDirectory
+     * @throws RuntimeException
+     */
+    private function setupDirectories(?string $parentDirectory, string $crateDirectory){
+
+        // Database filestore
+        $this->databaseFilestoreDir = $this->system->getSysDir(null, $this->databaseDetails['sys_dbName']);
+        $this->databaseFilestoreDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->databaseFilestoreDir), DIRECTORY_SEPARATOR);
+
+        // Parent directory
+        $this->baseDirectory = $parentDirectory ?? $this->databaseFilestoreDir;
+        $this->baseDirectory = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $this->baseDirectory), DIRECTORY_SEPARATOR);
+
+        // Crate root
+        $crateDirectory = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, trim($crateDirectory, '/\\'));
+        $this->crateDirectory = $this->baseDirectory . DIRECTORY_SEPARATOR . $crateDirectory;
+
+        $this->cleanup(); // clean up existing crate
+
+        if(!folderCreate($this->crateDirectory, true)){
+            throw new RuntimeException('Unable to create RO-Crate directory.');
+        }
+
+        // Database related files
+        $this->databaseDirectory = $this->crateDirectory . DIRECTORY_SEPARATOR . 'database';
+
+        if(!folderCreate($this->databaseDirectory, true)){
+            throw new RuntimeException('Unable to create /database within the RO-Crate directory.');
+        }
+    }
+
+    /**
+     * Generate and add TSV files into the crate
+     *
+     * @param ?array $TSVFiles
+     * @throws RuntimeException
+     */
+    private function addTSVFiles(?array $TSVFiles){
+
+        if($TSVFiles){
+            $this->processTSVFiles($TSVFiles);
+            return;
+        }
+
+        $TSVExporter = new DbExportTSV();
+        $TSVExporter->setSession($this->system, '{RTYNAME}');
+        $TSVExporter->setBackupFolder($this->databaseDirectory, 'tables', 'records');
+
+        [$warnings, $this->tsvFiles] = $TSVExporter->output();
+
+        if(!empty($warnings)){
+            $warnings = implode('<br>', $warnings);
+            throw new RuntimeException("Encountered the following errors during TSV exporting:<br>{$warnings}");
+        }
+    }
+
+    /**
+     * Generate and add HML dump file into the crate
+     *
+     * @param string $crateDirectory
+     * @param ?string $HMLDump
+     */
+    private function addHML(string $crateDirectory, ?string $HMLDump){
+
+        $hmlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$this->databaseDetails['sys_dbName']}.hml";
+
+        $hmlFileStatus = false;
+        if(file_exists($HMLDump)){
+            $hmlFileStatus = fileCopy($HMLDump, $hmlFile);
+        }
+
+        if(!$hmlFileStatus){
+
+            $_REQUEST['w'] = 'all';
+            $_REQUEST['a'] = '1';
+            $_REQUEST['q'] = 'sortby:-m';
+            $_REQUEST['rev'] = 'no';
+            $_REQUEST['depth'] = '0';
+            $_REQUEST['linkmode'] = 'none';
+            $_REQUEST['filename'] = '1';
+
+            $hmlFileOutput = '';
+            if(!defined('DIR_BACKUP')){
+                define('DIR_BACKUP', "{$crateDirectory}/database");
+                $hmlFileOutput = $this->databaseFilestoreDir . DIR_BACKUP;
+            }else{
+                $hmlFileOutput = $HMLDump;
+            }
+
+            $to_include = __DIR__ . '/../../export/xml/flathml.php';
+            if(is_file($to_include)){
+                include_once $to_include; // Execute HML export script
+            }
+
+            if(file_exists($hmlFileOutput)){
+                $hmlFileStatus = fileCopy($hmlFileOutput, $hmlFile);
+                fileDelete($hmlFileOutput);
+            }
+        }
+
+        if($hmlFileStatus){
+            $this->hmlFile = $hmlFile;
+        }
+    }
+
+    /**
+     * Generate and add SQL dump file into the crate
+     *
+     * @param ?string $SQLDump
+     */
+    private function addSQL(?string $SQLDump){
+
+        $databaseName = $this->databaseDetails['sys_dbName'];
+
+        $sqlFile = $this->databaseDirectory . DIRECTORY_SEPARATOR . "{$databaseName}.sql";
+
+        $sqlFileStatus = $SQLDump && file_exists($SQLDump)
+            ? fileCopy($SQLDump, $sqlFile)
+            : DbUtils::databaseDump($databaseName, $sqlFile, self::MYSQL_DUMP_OPTIONS);
+
+        if($sqlFileStatus){
+            $this->sqlFile = $sqlFile;
+        }
+    }
+
+    /**
+     * Cleanup export
+     */
+    public function cleanup($resetDirectory = false){
+
+        if(folderExists($this->crateDirectory, false)){
+            folderDelete($this->crateDirectory, true);
+        }
+
+        $this->sqlFile = '';
+        $this->hmlFile = '';
+        $this->tsvFiles = [
+            'tables' => [],
+            'records' => []
+        ];
     }
 }

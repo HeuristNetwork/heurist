@@ -951,9 +951,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     }
                 }catch(Throwable $error){
                     echo_flush2("RO-Crate error: {$error->getMessage()}");
-                    if(folderExists(FOLDER_BACKUP . '/ro-crate', false)){ // cleanup folder
-                        folderDelete2(FOLDER_BACKUP . '/ro-crate');
-                    }
+                    $dbExportCrate->cleanup();
                     $separate_crate_zip = false;
                 }
             }

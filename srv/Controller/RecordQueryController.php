@@ -136,6 +136,11 @@ final class RecordQueryController
             }
             return new SearchRequest($normalized, $options);
         }
+        if(strtolower(trim((string)($params['detail'] ?? ''))) === 'crosstab'){
+            // op=crosstab (aggregate, plan 27q2): dimensions and measure as JSON
+            $options['crosstab'] = $this->structuredParameter($params['crosstab'] ?? null);
+            return new SearchRequest($normalized, $options);
+        }
         if(strtolower(trim((string)($params['detail'] ?? ''))) === 'values'){
             // op=values (aggregate): field + text; "sort" orders the values (count|value), not records
             $options['field'] = $params['field'] ?? null;
@@ -190,10 +195,10 @@ final class RecordQueryController
     }
 
     /**
-     * GET|POST /{domain}/aggregate?op=count|rectypes|values|minmax|ranges (plan 20 Phase 3):
+     * GET|POST /{domain}/aggregate?op=count|rectypes|values|minmax|ranges|crosstab (plan 20 Phase 3, crosstab plan 27q2):
      * the same query parameters as search, plus the parameters of the operation
      * (field, text, sort, via, limit, offset for values; field, groupby, ranges, match
-     * for ranges; field for minmax).
+     * for ranges; field for minmax; crosstab = {rows, columns, pages, measure} for crosstab).
      *
      * @return array count {query, total}; rectypes {query, total, rectypes};
      *         values {query, total, values}; ranges and minmax as their services give them.
@@ -204,13 +209,13 @@ final class RecordQueryController
         $op = strtolower(trim((string)($params['op'] ?? '')));
         if(!in_array($op, SearchRequest::AGGREGATE_OPS, true)){
             throw new QueryValidationException(
-                $op === '' ? 'op is required (count, rectypes, values, minmax or ranges)'
-                    : 'Unknown aggregate op: '.$op.' (count, rectypes, values, minmax or ranges)'
+                $op === '' ? 'op is required (count, rectypes, values, minmax, ranges or crosstab)'
+                    : 'Unknown aggregate op: '.$op.' (count, rectypes, values, minmax, ranges or crosstab)'
             );
         }
         $params['detail'] = $op;
         $request = $this->buildRequest($params);
-        $methods = array('values'=>'countValues', 'ranges'=>'valueBuckets', 'minmax'=>'valueRange');
+        $methods = array('values'=>'countValues', 'ranges'=>'valueBuckets', 'minmax'=>'valueRange', 'crosstab'=>'crossTab');
         if(isset($methods[$op])){
             if(!method_exists($this->service, $methods[$op])){
                 throw new UnsupportedQueryException('op='.$op.' is not supported by this search service');
