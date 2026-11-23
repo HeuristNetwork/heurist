@@ -238,12 +238,16 @@ final class WebsiteEditService
         }
     }
 
+    /** Widgets that Explorer publishes as a standalone page, as the modules (presentation-sources.md §6, plan 27q2 §17). */
+    public const PUBLISHED_WIDGETS = array('crosstabs');
+
     /**
      * Import a module (or Explorer) configuration into a standalone page (plan 27b §6, 27d): a
      * new page (id 0), or the module's instance replaced in a page published before (its other
-     * content is kept).
+     * content is kept). A widget of PUBLISHED_WIDGETS (crosstabs with the query shown in Explorer)
+     * is published the same way.
      *
-     * @param array $input type (module), settings, state (bootstrap envelope of the module), title.
+     * @param array $input type (module or published widget), settings, state (bootstrap envelope of the module), title.
      * @return array{id:int,url:string,title:string,created:bool,issues:array}
      * @throws WebsiteException|RecordEditException
      */
@@ -251,14 +255,18 @@ final class WebsiteEditService
     {
         $codes = $this->repository->codes();
         $type = strtolower(trim((string)($input['type'] ?? '')));
-        if(!in_array($type, CmsValidator::TYPES['module'], true)){
+        if(in_array($type, CmsValidator::TYPES['module'], true)){
+            $kind = 'module';
+        }elseif(in_array($type, self::PUBLISHED_WIDGETS, true)){
+            $kind = 'widget';
+        }else{
             throw new WebsiteException(400, 'Unknown module type "'.$type.'"');
         }
         if(!$this->status()['installed']){
             throw new WebsiteException(409, 'The website definitions are not installed in this database');
         }
         $instance = array(
-            'kind' => 'module',
+            'kind' => $kind,
             'type' => $type,
             'configVersion' => CmsValidator::CONFIG_VERSION,
             'settings' => is_array($input['settings'] ?? null) && !empty($input['settings']) ? $input['settings'] : new \stdClass(),
@@ -300,7 +308,7 @@ final class WebsiteEditService
         // the first instance of this module that still has its host
         $instanceId = null;
         foreach($config['instances'] as $id => $existing){
-            if(is_array($existing) && ($existing['kind'] ?? '') === 'module' && ($existing['type'] ?? '') === $type
+            if(is_array($existing) && ($existing['kind'] ?? '') === $kind && ($existing['type'] ?? '') === $type
                 && strpos($html, 'data-h-instance="'.$id.'"') !== false){
                 $instanceId = (string)$id;
                 if(isset($existing['mount'])){ $instance['mount'] = $existing['mount']; }

@@ -91,6 +91,11 @@ final class CrosstabSettings
             }
         }
         self::visitor($settings['visitor'] ?? null, $problems);
+        // the Filter Form of the parameters of the query (plan 27q2 §17)
+        $filterForm = $settings['filterForm'] ?? null;
+        if($filterForm !== null && !self::isObject($filterForm)){
+            $problems[] = 'filterForm must be an object';
+        }
         return $problems;
     }
 

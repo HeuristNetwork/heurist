@@ -461,11 +461,12 @@ $rtDefines = array(
     'RT_IIIF_MANIFEST' => array(2, 110),
     'RT_IIIF_CANVAS' => array(2, 111),
     
-    // Smarty reports (plan 12)
-    'RT_REPORT_TEMPLATE' => array(2, 1104),
-    'RT_REPORT_OUTPUT' => array(2, 1105),
+    //System record type
+    'RT_REPORT_TEMPLATE' => array(2, 1104),  // Smarty report template
+    'RT_REPORT_OUTPUT' => array(2, 1105),    // Smarty report output - generated report
     
-    'RT_REGISTERED_FILE' => array(2, 1106)
+    'RT_REGISTERED_FILE' => array(2, 1106)  //registered file - virtual system record type 
+    
 );
 
 /** DETAIL TYPE DEFINITIONS */
