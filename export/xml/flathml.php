@@ -65,7 +65,7 @@ $INCLUDE_FILE_CONTENT fc default NOT expand xml file content
 *
 */
 
-if (@$argv) {
+if (isset($argv)) {
     // handle command-line queries
     $ARGV = array();
     for ($i = 0;$i < count($argv);++$i) {
@@ -2079,7 +2079,7 @@ function retrieveParameters2($type, &$parameters){
 //  Turn off output buffering
 //----------------------------------------------------------------------------//
 
-if (!@$ARGV) {
+if (!isset($ARGV)) {
     if(function_exists('apache_setenv')){
         @apache_setenv('no-gzip', 1);
     }
