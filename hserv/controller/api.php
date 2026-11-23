@@ -130,6 +130,7 @@ $entities = array(
 
 'fieldgroups'=>'DefDetailTypeGroups',
 'rectypegroups'=>'DefRecTypeGroups',
+'vocabularygroups'=>'DefVocabularyGroups',
 'rectypes'=>'DefRecTypes',
 'fields'=>'DefDetailTypes',
 'terms'=>'DefTerms',
@@ -686,10 +687,13 @@ if($method === 'search'){
     $publicSearchResources = array(
         'records', 'graph', 'dbs', 'databases',
         'rty', 'rectypes',
-        'dty', 'fields',
+        'dty', 'fields', 
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
         'def',
+        'fieldgroups', 'dtg',
+        'rectypegroups', 'rtg',        
+        'vocabularygroups', 'vcg',        
         'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);
