@@ -215,6 +215,33 @@ final class RecordSearchService
     }
 
     /**
+     * op=crosstab (plan 27q2): record counts (or a measure) by the buckets of up to three fields over the query's
+     * records; fields of linked records through linkedPathTargets (see CrossTabulator).
+     *
+     * @return array{total:int,rows:array,columns:?array,pages:?array,measure:array,cells:array,totals:array}
+     */
+    public function crossTab(SearchRequest $request): array
+    {
+        $tabulator = new CrossTabulator($this->builder, $this->executor);
+        $spec = $tabulator->describe($request->crosstab);
+        $query = $this->builder->normalize($request->query);
+        if($request->filter !== null && $request->filter !== '' && $request->filter !== array()){
+            $query[] = array('all'=>$this->builder->normalize($request->filter));
+        }
+        $context = $this->searchContext($request, array());
+        $candidateCache = array();
+        $query = $this->resolveSelectiveAnyFields($query, $context, $candidateCache);
+        QueryTrace::begin('crosstab records');
+        $ids = $this->builder->supportsSqlExecution($query)
+            ? $this->executor->executeIds($this->builder->buildIdSet($query, $context))
+            : $this->evaluateGroup($query, null, 'all', $context, 0);
+        QueryTrace::end(count($ids));
+        return $tabulator->tabulate($ids, $context, $spec, function(array $roots, array $via) use ($context){
+            return $this->linkedPathTargets($roots, $via, $context);
+        });
+    }
+
+    /**
      * detail=values: distinct values of one field over the query's records,
      * with record counts (see FieldValueCounter).
      *

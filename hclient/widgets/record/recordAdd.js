@@ -518,7 +518,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     _handleDefaultValueField: function(dtyID, container){
 
         const rtyID = this.options.currentRecType;
-        if(!container instanceof jQuery || container.length === 0 || !window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+        if(!(container instanceof jQuery) || container.length === 0 || !window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
             return;
         }
 

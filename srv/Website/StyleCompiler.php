@@ -54,7 +54,9 @@ final class StyleCompiler
         'grid-template-rows', 'grid-column', 'grid-row', 'order',
         'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'overflow',
         'border-radius', 'box-shadow', 'text-shadow',
-        'color', 'background-color', 'background-image', 'background-position', 'background-repeat', 'background-size', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align'
+        'color', 'background-color', 'background-image', 'background-position', 'background-repeat', 'background-size', 'font-family', 'font-size', 'font-weight', 'line-height', 'text-align',
+        // the item colours of menus, action menus and tabs (plan 27n §7, colours Own)
+        '--h-item-text', '--h-item-accent', '--h-item-accent-text'
     );
 
     /** Kinds of `styles.kinds` and their selectors. */

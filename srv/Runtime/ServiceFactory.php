@@ -54,6 +54,7 @@ use Heurist\Records\Edit\RecordDuplicateService;
 use Heurist\Records\Edit\RecordPermissionService;
 use Heurist\Records\Edit\RecordSaveService;
 use Heurist\Records\Entity\RecordEntityRegistry;
+use Heurist\Presentations\PresentationEntityHandler;
 use Heurist\Records\Store\RecordAccess;
 use Heurist\Records\Store\RecordRepository;
 use Heurist\Records\Store\RecordSchema;
@@ -113,6 +114,8 @@ use Heurist\System\Tags\TagWriteService;
 use Heurist\Controller\WebsiteController;
 use Heurist\Website\CmsRecordCheck;
 use Heurist\Website\PageContent;
+use Heurist\Website\Build\GeneratedPages;
+use Heurist\Website\Build\GeneratedSites;
 use Heurist\Website\PageRenderer;
 use Heurist\Website\SiteUrls;
 use Heurist\Website\Build\WebsiteBuilder;
@@ -192,6 +195,8 @@ final class ServiceFactory
             array(
                 'templates' => (string)$system->getSysDir('smarty-templates'),
                 'generated' => (string)$system->getSysDir('generated-reports'),
+                // generated websites (plan 27m §2)
+                'sites' => (string)$system->getSysDir('generated-sites'),
                 'jobs' => (string)$system->getSysDir('scratch').'jobs/',
                 'settings' => is_array($reportSettings) ? $reportSettings : array(),
                 'exportSettings' => is_array($exportSettings) ? $exportSettings : array(),
@@ -548,7 +553,8 @@ final class ServiceFactory
                 $kind,
                 $this->websiteEditService(),
                 new WebsiteService($repository, $parts['languages'], $this->runtime->baseUrl),
-                $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null
+                $websiteDefinitions !== null ? new WebsiteSetup($websiteDefinitions, $this->runtime) : null,
+                $this->generatedSites()
             );
         };
         $report = function(string $kind): ReportEntityHandler { return $this->reportHandler($kind); };
@@ -556,7 +562,12 @@ final class ServiceFactory
             'website' => static function() use ($website) { return $website('website'); },
             'page' => static function() use ($website) { return $website('page'); },
             'report' => static function() use ($report) { return $report('report'); },
-            'output' => static function() use ($report) { return $report('output'); }
+            'output' => static function() use ($report) { return $report('output'); },
+            'presentation' => function(): PresentationEntityHandler {
+                return new PresentationEntityHandler($this->codes, function(int $id, array $fields): array {
+                    return RecordRepository::shared($this->database)->values(array($id), $fields)[$id] ?? array();
+                }, function(int $id): int { return $this->pagesUsingPresentation($id); });
+            }
         ));
     }
 
@@ -693,6 +704,33 @@ final class ServiceFactory
             });
     }
 
+    /**
+     * Website pages (and websites) whose configuration has a story map of a Presentation set (plan 27q1 §3): the
+     * candidates by a text search in the configuration, then the JSON of each one.
+     */
+    private function pagesUsingPresentation(int $id): int
+    {
+        $field = $this->codes->id('DT_CONFIGURATION');
+        $types = array_filter(array($this->codes->id('RT_CMS_HOME'), $this->codes->id('RT_CMS_PAGE')));
+        if($id < 1 || $field < 1 || empty($types)){ return 0; }
+        $found = $this->recordQueryController()->execute(array(
+            'query' => array(array('t' => implode(',', $types)), array('f:'.$field => '"preset":'.$id)),
+            'detail' => 'ids', 'limit' => 1000
+        ));
+        $ids = array_map('intval', (array)($found['ids'] ?? array()));
+        if(empty($ids)){ return 0; }
+        $count = 0;
+        foreach(RecordRepository::shared($this->database)->values($ids, array($field)) as $values){
+            foreach($values[$field] ?? array() as $configuration){
+                if(PresentationEntityHandler::configurationUses((string)$configuration, $id)){
+                    $count++;
+                    break;
+                }
+            }
+        }
+        return $count;
+    }
+
     /** Registration id of this database (concept codes of its records). */
     public function registeredDatabaseId(): int
     {
@@ -787,15 +825,33 @@ final class ServiceFactory
         $languages = new LanguageCodes(self::languageCodesFile());
         $environment = $this->websiteEnvironment();
         $content = $this->pageContent($repository, $languages, $this->runtime);
-        $renderer = static function(bool $pretty) use ($repository, $languages, $environment, $content): PageRenderer {
-            return new PageRenderer($repository->codes(), $languages, $environment
-                + array('urls' => new SiteUrls($environment['database'], $environment['baseUrl'], $pretty)), $content);
+        $renderer = static function(SiteUrls $urls) use ($repository, $languages, $environment, $content): PageRenderer {
+            return new PageRenderer($repository->codes(), $languages, $environment + array('urls' => $urls), $content);
         };
+        // the sitemap and robots.txt (plan 27m §5) and the check of a generated page list what a visitor sees
+        $guest = new RuntimeContext($this->runtime->databaseName, $this->runtime->databaseNameFull, 0, $this->runtime->baseUrl);
+        $guestRepository = new WebsiteRepository($this->database, $guest);
+        $guestService = new WebsiteService($guestRepository, $languages, $environment['baseUrl']);
         return new WebsiteController(
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
             $renderer,
-            $this->runtime
+            $this->runtime,
+            null,
+            null,
+            array(
+                'context' => static function(int $id) use ($guestService): array { return $guestService->context($id, $id); },
+                'renderer' => static function(SiteUrls $urls) use ($guestRepository, $languages, $environment): PageRenderer {
+                    return new PageRenderer($guestRepository->codes(), $languages, $environment + array('urls' => $urls));
+                }
+            ),
+            new GeneratedPages($this->generatedSites(), $guestRepository, $languages)
         );
+    }
+
+    /** The generated websites of the database (plan 27m §2): `generated-sites/{site id}/`. */
+    public function generatedSites(): GeneratedSites
+    {
+        return new GeneratedSites((string)($this->reportEnvironment['sites'] ?? ''));
     }
 
     /** Website operations of the entities "website" and "page" (plans 27b, 27d) with the rights of the current user. */
@@ -826,14 +882,21 @@ final class ServiceFactory
         $languages = new LanguageCodes(self::languageCodesFile());
         $environment = $this->websiteEnvironment();
         $content = $this->pageContent($repository, $languages, $guest);
+        $database = $this->database;
         $builder = new WebsiteBuilder(
             new WebsiteService($repository, $languages, $this->runtime->baseUrl),
-            static function(string $defaultLanguage) use ($repository, $languages, $environment, $content): PageRenderer {
-                return new PageRenderer($repository->codes(), $languages, $environment
-                    + array('urls' => SiteUrls::files($environment['database'], $environment['baseUrl'], $defaultLanguage)), $content);
+            static function(SiteUrls $urls) use ($repository, $languages, $environment, $content): PageRenderer {
+                return new PageRenderer($repository->codes(), $languages, $environment + array('urls' => $urls), $content);
+            },
+            $environment['database'],
+            $environment['baseUrl'],
+            // the records of the record pages (plan 27m §2.1), searched as a guest
+            static function(array $query, int $limit) use ($database, $guest): array {
+                $service = new RecordSearchService($database, $guest, new QueryBuilder($database));
+                return $service->search(new SearchRequest($query, array('limit' => $limit)))->ids;
             }
         );
-        return array(new WebsiteBuildJob($this->websiteEditService(), $builder));
+        return array(new WebsiteBuildJob($this->websiteEditService(), $builder, $this->generatedSites(), $this->runtime->userId));
     }
 
     /**
@@ -844,7 +907,17 @@ final class ServiceFactory
     {
         $database = $this->database;
         $runner = null;
+        $querySources = new QuerySourcePresentationService($this->presentations);
         return new PageContent($repository, $languages, array(
+            // the query of a public query source (Record cards, plan 27l §11.4); null when it can not be read
+            'querySource' => static function(int $id) use ($querySources): ?array {
+                try {
+                    $query = $querySources->getQuerySource($id)['source']['query'] ?? null;
+                } catch (\Throwable $error) {
+                    return null;
+                }
+                return is_array($query) ? $query : null;
+            },
             'search' => static function(array $query, int $limit) use ($database, $runtime): array {
                 $service = new RecordSearchService($database, $runtime, new QueryBuilder($database));
                 return $service->search(new SearchRequest($query, array('limit' => $limit)))->ids;

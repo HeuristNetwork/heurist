@@ -92,7 +92,7 @@ final class StoredText
                 .'section[aria-labelledby],article,aside,nav,header,footer,main,details[open],summary,'
                 .'*[id|class|title|lang|dir|data-heurist-rec|data-heurist-app-id|data-inited'
                 .'|data-h-node|data-h-instance|data-h-text|data-h-control|data-h-style|data-h-media|data-h-field|data-h-link|data-h-link-values|data-h-bg-video'
-                .'|data-h-orientation|data-h-item-style|data-h-multiple|data-h-first-open|data-h-reveal]';
+                .'|data-h-orientation|data-h-item-style|data-h-multiple|data-h-first-open|data-h-reveal|data-h-name|data-h-colors|data-h-hidden]';
             $config->set('HTML.SafeIframe', true);
             $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%');
             $config->set('HTML.Allowed', $allowed);
@@ -119,7 +119,8 @@ final class StoredText
                 'details', 'summary', 'figure', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'table', 'img');
             // data-h-style: a style preset of the website or page (plan 27c §6a)
             // data-h-media: a media element (plan 27c §33)
-            foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style', 'data-h-media') as $attribute){
+            // data-h-name: the name of an element (plan 27n §9; CmsValidator checks the mask and duplicates)
+            foreach(array('data-h-node', 'data-h-instance', 'data-h-control', 'data-h-style', 'data-h-media', 'data-h-name') as $attribute){
                 foreach($blocks as $element){ $def->addAttribute($element, $attribute, 'Text'); }
             }
             // a gallery figure (plan 27e §18): what the action Player / Viewer opens; a checked URL, no scripts
@@ -148,11 +149,15 @@ final class StoredText
             foreach($blocks as $element){
                 $def->addAttribute($element, 'data-h-orientation', 'Enum#vertical');
                 $def->addAttribute($element, 'data-h-item-style', 'Enum#links,underline,pills,buttons,outline');
+                // colours of the tabs (plan 27n §7): inverted (over a banner) or own (Own style); none = the colours of the site
+                $def->addAttribute($element, 'data-h-colors', 'Enum#inverted,own');
                 // accordions (plan 27k §6): several sections open at a time, the first one open at start
                 $def->addAttribute($element, 'data-h-multiple', 'Enum#true');
                 $def->addAttribute($element, 'data-h-first-open', 'Enum#true');
-                // reveal on scroll (plan 27k §6): an element fades in or slides up when it comes into the window
-                $def->addAttribute($element, 'data-h-reveal', 'Enum#fade,up');
+                // reveal on scroll (plan 27k §6, 27n §8): fade / slide / zoom when it comes into the window; hidden = shown by an action
+                $def->addAttribute($element, 'data-h-reveal', 'Enum#fade,up,down,left,right,zoom');
+                // initially hidden (plan 27n §18.2b): shown by a Show / hide action, with its reveal effect
+                $def->addAttribute($element, 'data-h-hidden', 'Enum#true');
             }
             $def->addAttribute('img', 'data-id', 'Number');
             $def->addAttribute('a', 'data-ref', 'Text');
@@ -204,7 +209,7 @@ final class StoredText
 
     /**
      * `data-h-link` of a Record field element (plan 27g §6): `url` or `page:<page id>`; `goto:<id>|goto:home` (Go to a
-     * page); `filter:<page id>:<query source id>` (Saved filter, plan 27j).
+     * page); `filter:<page id>:<query source id>` (Saved filter, plan 27j), `filter:<page id>:f<saved filter id>` (plan 27l).
      */
     private static function fieldLink(): \HTMLPurifier_AttrDef
     {
@@ -212,7 +217,7 @@ final class StoredText
             public function validate($string, $config, $context)
             {
                 $string = trim((string)$string);
-                return preg_match('/^(url|page:\d+|goto:(\d+|home)|filter:\d+:\d+)$/', $string) === 1 ? $string : false;
+                return preg_match('/^(url|page:\d+|goto:(\d+|home)|filter:\d+:f?\d+)$/', $string) === 1 ? $string : false;
             }
         };
     }

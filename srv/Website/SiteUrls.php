@@ -7,7 +7,11 @@
 * without the router. The form of the current request is kept.
 * A built site (plan 27b §7, `files()`) links its pages as files
 * `../{lang}/{page id}.html` (`index.html` for the home or a standalone page);
-* instance frames stay on the live server.
+* instance frames stay on the live server. The sitemap of a site (plan 27m §5):
+* `/{db}/site/{id}/sitemap.xml` (`&sitemap=1`).
+* Plan 27m: a built site links its generated record pages as files `{lang}/{page}/{record}.html` (a file one folder
+* deeper: `../../`); with the public base URL of a ZIP (§4) absolute() gives the URLs of canonical, alternates and
+* sitemap. An own domain (§5, `domain()`): the pages of its website are `https://host/[{page}[/{record}]]`.
 *
 * @project     Heurist academic knowledge management system
 * @package     Website
@@ -32,6 +36,15 @@ final class SiteUrls
     private string $prettyRoot;
     /** Built site: folder of the default language ('' = live URLs). */
     private string $fileLanguage = '';
+    /** Built site: folders between the written file and the site root (1: `{lang}/x.html`, 2: a record page). */
+    private int $fileDepth = 1;
+    /** Built site: its public URL (ends with "/"), '' = not known (no absolute URLs). */
+    private string $fileBase = '';
+    /** @var array<int,array<int,bool>> Built site: generated record pages, page id => record id => true. */
+    private array $fileRecords = array();
+    /** Own domain: its root ("https://host") and its website, '' / 0 = none. */
+    private string $domainRoot = '';
+    private int $domainSite = 0;
 
     /**
      * @param string $database Database name (without prefix).
@@ -62,11 +75,54 @@ final class SiteUrls
      *
      * @param string $defaultLanguage Folder of the default language (3 letters).
      */
-    public static function files(string $database, string $baseUrl, string $defaultLanguage): self
+    public static function files(string $database, string $baseUrl, string $defaultLanguage, string $publicBase = '',
+        array $records = array()): self
     {
         $urls = new self($database, $baseUrl, true);
         $urls->fileLanguage = strtolower($defaultLanguage !== '' ? $defaultLanguage : 'eng');
+        $urls->fileBase = $publicBase !== '' ? rtrim($publicBase, '/').'/' : '';
+        $urls->fileRecords = $records;
         return $urls;
+    }
+
+    /**
+     * URLs of the website of an own domain (plan 27m §5, domainWebsites.json `site`): `https://host/` the home page,
+     * `/{page}`, `/{page}/{record}`; other sites and frames as `https://host/site/{id}/...` (the own-domain route).
+     *
+     * @param string $domainRoot "https://host" of the request.
+     * @param int $siteId The website of the domain.
+     */
+    public static function domain(string $database, string $baseUrl, string $domainRoot, int $siteId): self
+    {
+        $urls = new self($database, $baseUrl, true);
+        $urls->domainRoot = rtrim($domainRoot, '/');
+        $urls->domainSite = $siteId;
+        return $urls;
+    }
+
+    /** The same URLs for a file `$depth` folders below the site root (a record page of a built site: 2). */
+    public function withDepth(int $depth): self
+    {
+        $urls = clone $this;
+        $urls->fileDepth = max(1, $depth);
+        return $urls;
+    }
+
+    /**
+     * An absolute URL for canonical, alternates and the sitemap: a live URL as it is; a file of a built site with its
+     * public base URL; '' when the base URL is not known (plan 27m §4).
+     */
+    public function absolute(string $url): string
+    {
+        if($this->fileLanguage === '' || preg_match('#^https?://#i', $url) === 1){ return $url; }
+        if($this->fileBase === ''){ return ''; }
+        return $this->fileBase.preg_replace('#^(?:\.\./)+#', '', $url);
+    }
+
+    /** Whether a built site has its public base URL. */
+    public function hasPublicBase(): bool
+    {
+        return $this->fileBase !== '';
     }
 
     /**
@@ -76,6 +132,19 @@ final class SiteUrls
     public function page(int $id, int $pageId = 0, string $language = '', int $recordId = 0): string
     {
         $lang = $language !== '' ? strtolower($language) : '';
+        $up = str_repeat('../', $this->fileDepth);
+        if($this->domainRoot !== '' && $id === $this->domainSite){
+            return $this->domainRoot.'/'.($pageId > 0 ? $pageId.($recordId > 0 ? '/'.$recordId : '') : '')
+                .($lang !== '' ? '?lang='.rawurlencode($lang) : '');
+        }
+        if($this->domainRoot !== ''){
+            return $this->domainRoot.'/site/'.$id.($pageId > 0 ? '/'.$pageId.($recordId > 0 ? '/'.$recordId : '') : '')
+                .($lang !== '' ? '?lang='.rawurlencode($lang) : '');
+        }
+        if($recordId > 0 && $pageId > 0 && $this->fileLanguage !== '' && !empty($this->fileRecords[$pageId][$recordId])){
+            // a generated record page of a built site (plan 27m §2.1)
+            return $up.rawurlencode($lang !== '' ? $lang : $this->fileLanguage).'/'.$pageId.'/'.$recordId.'.html';
+        }
         if($recordId > 0 && $pageId > 0){
             if($this->prettyRoot !== ''){
                 return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.'/'.$pageId.'/'.$recordId
@@ -85,7 +154,7 @@ final class SiteUrls
                 .($lang !== '' ? '&lang='.rawurlencode($lang) : '');
         }
         if($this->fileLanguage !== ''){
-            return '../'.rawurlencode($lang !== '' ? $lang : $this->fileLanguage).'/'.($pageId > 0 ? $pageId : 'index').'.html';
+            return $up.rawurlencode($lang !== '' ? $lang : $this->fileLanguage).'/'.($pageId > 0 ? $pageId : 'index').'.html';
         }
         if($this->prettyRoot !== ''){
             return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.($pageId > 0 ? '/'.$pageId : '')
@@ -95,9 +164,34 @@ final class SiteUrls
             .($lang !== '' ? '&lang='.rawurlencode($lang) : '');
     }
 
+    /**
+     * Whether the URLs are the relative files of a built site (SiteUrls::files()): no canonical, alternates or sitemap
+     * without the final base URL (plan 27m §4).
+     */
+    public function isFiles(): bool
+    {
+        return $this->fileLanguage !== '';
+    }
+
+    /** URL of the sitemap of a website or standalone page (plan 27m §5): `/{db}/site/{id}/sitemap.xml` or `&sitemap=1`. */
+    public function sitemap(int $id): string
+    {
+        // an own domain: /site/{id}/sitemap.xml (a sitemap.xml file of the web root would hide /sitemap.xml)
+        if($this->domainRoot !== ''){
+            return $this->domainRoot.'/site/'.$id.'/sitemap.xml';
+        }
+        if($this->prettyRoot !== ''){
+            return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.'/sitemap.xml';
+        }
+        return $this->baseUrl.'?db='.rawurlencode($this->database).'&site='.$id.'&sitemap=1';
+    }
+
     /** Start of the URL of an instance frame; the instance id is appended. */
     public function frame(int $id, int $pageId = 0): string
     {
+        if($this->domainRoot !== ''){
+            return $this->domainRoot.($id === $this->domainSite ? '' : '/site/'.$id).($pageId > 0 ? '/'.$pageId : '').'/frame/';
+        }
         if($this->prettyRoot !== ''){
             return $this->prettyRoot.'/'.rawurlencode($this->database).'/site/'.$id.($pageId > 0 ? '/'.$pageId : '').'/frame/';
         }

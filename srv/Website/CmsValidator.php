@@ -32,9 +32,18 @@ final class CmsValidator
     /** Known instance types by kind, and the newest configuration version of each kind. */
     public const TYPES = array(
         'module' => array('explorer', 'data', 'map', 'timeline', 'graph', 'recordview'),
-        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs')
+        // storymap, crosstabs: a Presentation set of kind StoryMap / Crosstab (plans 27q1, 27q2)
+        'widget' => array('menu', 'report', 'cards', 'gallery', 'language', 'actionmenu', 'badges', 'email', 'breadcrumbs', 'filter', 'storymap',
+            'crosstabs')
     );
     public const CONFIG_VERSION = 1;
+
+    /** Page sync of a module instance (plan 27l §2.4; SYNC_MODES of shared/src/sync/SyncEngine.js). */
+    public const SYNC_MODES = array('all', 'selection', 'none');
+    /** A source of the records of a module (plan 27l §12; CMS_RECORDS_TOKEN of cmsDocument.js). */
+    public const RECORDS_TOKEN = '/^(own|links|filter:[A-Za-z0-9_-]+|module:[A-Za-z0-9_-]+)$/';
+    /** Record modules with their own records on a page (plan 27l §11.3; CMS_SOURCE_MODULES of cmsDocument.js). */
+    public const SOURCE_MODULES = array('data', 'map', 'timeline', 'graph', 'recordview');
     /** Actions of a media element (CMS_MEDIA_ACTIONS of cmsDocument.js). */
     public const MEDIA_ACTIONS = array('none', 'viewer', 'url', 'recordPage', 'page', 'savedFilter');
 
@@ -60,6 +69,12 @@ final class CmsValidator
     public const LAYOUT_CACHE = array('default' => 8, 'min' => 1, 'max' => 50);
 
     /** An image of assets/cms of the website bundle: placeholders of media elements (plan 27i §9, CMS_ASSET_NAME). */
+    /** Name of an element (plan 27n §9, `data-h-name`; CMS_NAME of cmsDocument.js). */
+    public const NAME = '/^[A-Za-z0-9_-]{1,64}$/';
+
+    /** Colours of menus, action menus and tabs (plan 27n §7; ITEM_COLORS of cmsMenu.js): none = the colours of the site. */
+    public const ITEM_COLORS = array('inverted', 'own');
+
     public const ASSET_NAME = '/^cms\/(?:[A-Za-z0-9_-]+\/)?[A-Za-z0-9_-]+\.(?:png|jpe?g)$/';
 
     /**
@@ -116,12 +131,22 @@ final class CmsValidator
             foreach(CmsHtml::nodes((string)$html) as $node){ $nodes[] = $node; }
         }
         $seenNodes = array();
+        $seenNames = array();
         $seenHosts = array();
         $seenMedia = array();
         $media = is_array($config['media'] ?? null) ? $config['media'] : array();
         $texts = array();
         foreach($nodes as $node){
             $id = $node['node'];
+            // the name of an element (plan 27n §9): letters, digits, _ and -, unique
+            if($node['name'] !== null){
+                if(preg_match(self::NAME, $node['name']) !== 1){
+                    $issues[] = self::issue('warning', 'element_name', 'Name "'.$node['name'].'" may contain only letters, digits, _ and -', $id !== '' ? $id : null);
+                }elseif(isset($seenNames[$node['name']])){
+                    $issues[] = self::issue('warning', 'duplicate_name', 'Name "'.$node['name'].'" is used more than once', $id !== '' ? $id : null);
+                }
+                $seenNames[$node['name']] = true;
+            }
             if($id !== ''){
                 if(isset($seenNodes[$id])){
                     $issues[] = self::issue('warning', 'duplicate_node', 'Node id "'.$id.'" is used more than once', $id);
@@ -139,6 +164,9 @@ final class CmsValidator
                     $issues[] = self::issue('warning', 'duplicate_media', 'Media "'.$node['media'].'" has more than one element', $id);
                 }elseif(!isset($media[$node['media']])){
                     $issues[] = self::issue('warning', 'media_without_config', 'Media "'.$node['media'].'" has no settings', $id);
+                }elseif(self::isPlaceholder($media[$node['media']])){
+                    // a placeholder image of a page template stands in for the file (2026-11-17)
+                    $issues[] = self::issue('warning', 'media_placeholder', 'Replace placeholder image', $id);
                 }
                 $seenMedia[$node['media']] = true;
             }
@@ -199,6 +227,14 @@ final class CmsValidator
                 }
             }
         }
+        // the name of the element of an issue (plan 27n §9): the Check report shows `name (node id)`
+        $names = array();
+        foreach($nodes as $node){
+            if($node['name'] !== null && $node['node'] !== ''){ $names[$node['node']] = $node['name']; }
+        }
+        foreach($issues as $index => $issue){
+            if($issue['node'] !== null && isset($names[$issue['node']])){ $issues[$index]['name'] = $names[$issue['node']]; }
+        }
         return $issues;
     }
 
@@ -238,7 +274,57 @@ final class CmsValidator
         if(isset($settings['mount']) && !in_array($settings['mount'], array('direct', 'iframe'), true)){
             return array('mount', 'mount must be "direct" or "iframe"');
         }
+        // page sync of a module (plan 27l §2.4)
+        if(isset($settings['sync']) && !in_array($settings['sync'], self::SYNC_MODES, true)){
+            return array('sync', 'sync must be "all", "selection" or "none"');
+        }
+        // the own records of a module (plan 27l §11.3)
+        if(isset($settings['dataSource'])
+            && (!in_array($type, self::SOURCE_MODULES, true) || self::instanceDataSource($settings['dataSource'], $type) === null)){
+            return array('data_source', 'dataSource must be {source}, {filter}, {query} without parameters or {record} (Record View)');
+        }
+        // records and selection (plan 27l §12)
+        if((isset($settings['records']) || isset($settings['selection'])) && ($kind !== 'module' || !self::recordsValid($settings))){
+            return array('records', 'records must be {from: [own | links | filter:<id> | module:<id>]} and selection true or false');
+        }
         return null;
+    }
+
+    /** Whether `records` / `selection` of an instance have the stored form (plan 27l §12; cmsRecordsValid of cmsDocument.js). */
+    public static function recordsValid(array $settings): bool
+    {
+        if(isset($settings['records'])){
+            $from = is_array($settings['records']) ? ($settings['records']['from'] ?? null) : null;
+            if(!is_array($from) || isset($settings['records'][0])){ return false; }
+            foreach($from as $token){
+                if(!is_string($token) || preg_match(self::RECORDS_TOKEN, $token) !== 1){ return false; }
+            }
+        }
+        return !isset($settings['selection']) || is_bool($settings['selection']);
+    }
+
+    /**
+     * The own records of a module that does not take the results of the page (plan 27l §11.3; cmsInstanceDataSource of
+     * cmsDocument.js): {source: id} | {filter: id} | {query: [...]} without parameters | {record: id} (Record View).
+     *
+     * @param mixed $value The stored `dataSource`.
+     * @param string $type Module type.
+     * @return array|null
+     */
+    public static function instanceDataSource($value, string $type = ''): ?array
+    {
+        if(!is_array($value) || count($value) !== 1 || isset($value[0])){ return null; }
+        $key = (string)array_key_first($value);
+        if(in_array($key, array('source', 'filter'), true) || ($key === 'record' && $type === 'recordview')){
+            $id = $value[$key];
+            return (is_int($id) || (is_string($id) && ctype_digit($id))) && intval($id) > 0 ? array($key => intval($id)) : null;
+        }
+        if($key !== 'query'){ return null; }
+        $query = $value['query'];
+        if(!is_array($query) || empty($query)){ return null; }
+        if(array_keys($query) !== range(0, count($query) - 1)){ $query = array($query); }
+        if(preg_match('/\$[A-Za-z][A-Za-z0-9_]*\$/', (string)json_encode($query)) === 1){ return null; }
+        return array('query' => $query);
     }
 
     /** A size of the header or footer (LAYOUT_SIZE). */
@@ -261,8 +347,8 @@ final class CmsValidator
 
     /**
      * Problems of the layout settings (cmsLayoutProblems of cmsDocument.js): unknown keys and values not in LAYOUT;
-     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page) and `backToTop` (the button of plan
-     * 27k §6) true or false; `startPage` the id of
+     * `cache` a whole number in LAYOUT_CACHE; `hideHeader` / `hideFooter` (a page), `backToTop` (the button of plan
+     * 27k §6) and `searchEngines` (plan 27m §5: false = noindex, not given = index) true or false; `startPage` the id of
      * the page shown by the website URL without a page (2026-11-14; not given: the home page).
      *
      * @return array<int,string>
@@ -282,7 +368,7 @@ final class CmsValidator
                 }
             }elseif($key === 'startPage'){
                 if(!is_int($value) || $value < 1){ $problems[] = 'startPage must be a page id'; }
-            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop'){
+            }elseif($key === 'hideHeader' || $key === 'hideFooter' || $key === 'backToTop' || $key === 'searchEngines'){
                 if(!is_bool($value)){ $problems[] = $key.' must be true or false'; }
             }elseif($key === 'header' || $key === 'footer'){
                 if(!is_array($value) || (!empty($value) && array_keys($value) === range(0, count($value) - 1))){
@@ -310,6 +396,14 @@ final class CmsValidator
             }
         }
         return $problems;
+    }
+
+    /** A media element that shows a placeholder image of assets/cms instead of a file (as cmsIsPlaceholder). */
+    public static function isPlaceholder($settings): bool
+    {
+        return is_array($settings) && is_string($settings['placeholder'] ?? null)
+            && preg_match(self::ASSET_NAME, $settings['placeholder']) === 1
+            && !preg_match('/^[A-Za-z0-9]+$/', (string)($settings['file'] ?? ''));
     }
 
     /**

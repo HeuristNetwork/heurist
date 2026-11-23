@@ -78,6 +78,8 @@ final class RequestRouter
 
         $mappedDb      = $hostMap['db'] ?? null;
         $mappedWebsite = $hostMap['website'] ?? null;
+        // a website of format v4 (plan 27m §5): { "db": ..., "site": <website id> }
+        $mappedSite    = $hostMap['site'] ?? null;
         $mappedVersion = $hostMap['version'] ?? null;
 
         // Detect installation/version prefix
@@ -193,6 +195,9 @@ final class RequestRouter
                 $segments = $substitution['segments'];
             }
 
+            if ($mappedDb && $mappedSite !== null && ctype_digit((string)$mappedSite) && (int)$mappedSite > 0) {
+                return self::routeOwnDomainSite($activeVersion, (string)$mappedDb, (int)$mappedSite, $segments, $query);
+            }
             return self::routeOwnDomain($activeVersion, $mappedDb, $mappedWebsite, $segments, $query);
         }
 
@@ -528,6 +533,43 @@ final class RequestRouter
         return self::resultFile($realFile);
     }
 
+    /**
+     * Own domain of a v4 website (plan 27m §5, domainWebsites.json "site"): the pages of the website without
+     * /<db>/site/<id>: "/" home, "/<pageId>[/<recordId>]", "[/<pageId>[/<recordId>]]/frame/<instance>",
+     * "/sitemap.xml", "/robots.txt"; other v4 pages of the database as "/site/<id>/...". Param "domain" = 1:
+     * the page links keep this form.
+     */
+    private static function routeOwnDomainSite(string $version, string $db, int $site, array $segments, array $query = []): array
+    {
+        $params = ['db' => $db, 'site' => $site, 'domain' => 1];
+        if (count($segments) === 1 && in_array($segments[0], ['sitemap.xml', 'robots.txt'], true)) {
+            $params[$segments[0] === 'robots.txt' ? 'robots' : 'sitemap'] = 1;
+            return self::resultInternal($version, array_merge($query, $params));
+        }
+        if (($segments[0] ?? '') === 'site') {
+            $params = self::paramsFromPrettyRoute($db, 'site', array_slice($segments, 1)) + ['domain' => 1];
+            return self::resultInternal($version, array_merge($query, $params));
+        }
+        $next = 0;
+        if (isset($segments[0]) && ctype_digit($segments[0])) {
+            $params['pageid'] = (int)$segments[0];
+            $next = 1;
+            if (isset($segments[1]) && ctype_digit($segments[1])) {
+                $params['rec'] = (int)$segments[1];
+                $next = 2;
+            }
+        }
+        if (($segments[$next] ?? '') === 'frame' && isset($segments[$next + 1])
+            && preg_match('/^[A-Za-z][A-Za-z0-9_-]{0,63}$/', $segments[$next + 1])) {
+            $params['frame'] = $segments[$next + 1];
+            $next += 2;
+        }
+        if ($next < count($segments)) {
+            return self::result404();
+        }
+        return self::resultInternal($version, array_merge($query, $params));
+    }
+
     private static function routeOwnDomain(string $version, ?string $db, $website, array $segments, array $query = []): array
     {
         if (!$db) return self::result404();
@@ -665,9 +707,13 @@ final class RequestRouter
 
             case 'site':
                 // website format v4 (plan 27a): /<db>/site/<id>[/<pageId>[/<recordId>]][/frame/<instance>]
-                // (recordId: the record shown by a record page, plan 27g)
+                // (recordId: the record shown by a record page, plan 27g); /<db>/site/<id>/sitemap.xml (plan 27m)
                 if (isset($rest[0]) && ctype_digit($rest[0])) {
                     $params['site'] = (int)$rest[0];
+                    if (($rest[1] ?? '') === 'sitemap.xml') {
+                        $params['sitemap'] = 1;
+                        break;
+                    }
                     $next = 1;
                     if (isset($rest[1]) && ctype_digit($rest[1])) {
                         $params['pageid'] = (int)$rest[1];

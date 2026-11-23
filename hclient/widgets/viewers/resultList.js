@@ -72,12 +72,8 @@ $.widget( "heurist.resultList", {
         title: null,  //see show_inner_header
         //searchsource: null,
 
-        emptyMessageURL: null, //url of page to be loaded on empty result set 
-        empty_remark: 'def', //html content for empty message (search returns no result)
-        blank_empty_remark: false, // leave empty remark blank
         pagesize: -1,
-        
-        
+
         groupByMode: null, //[null|'none','tab','accordion'],
         groupByField:null,
         groupByRecordset: null,
@@ -140,8 +136,9 @@ $.widget( "heurist.resultList", {
         auto_select_first: false,   //automatically select first record within result list
         placeholder_text: null,     //text to display while no recordset is loaded (search is not prefromed yet)
         blank_placeholder: false,   // leave placeholder blank
-        empty_remark: 'resultList_empty_remark',
-        blank_empty_remark: false,   // leave empty remark blank
+        emptyMessageURL: null,      //url of page to be loaded on empty result set
+        empty_remark: 'def', //html content for empty message (search returns no result)
+        blank_empty_remark: false,  // leave empty remark blank
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
@@ -271,7 +268,8 @@ $.widget( "heurist.resultList", {
                                       || this.options.placeholder_option === 'provided' && this.options.placeholder_text === '';
 
         this.options.empty_remark = this.options.blank_empty_remark ? '' : this.options.empty_remark;
-        this.options.empty_remark = this.options.empty_remark == 'def' || this.options.empty_remark_option == 'def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
+        this.options.empty_remark = this.options.empty_remark === 'resultList_empty_remark' || this.options.empty_remark == 'def' || this.options.empty_remark_option == 'def'
+            ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
         this.options.placeholder_text = this.options.blank_placeholder ? '' : this.options.placeholder_text;
 
         this._is_publication = !window.hWin.HAPI4.isAdminInterface;

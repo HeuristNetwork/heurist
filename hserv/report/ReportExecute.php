@@ -624,7 +624,7 @@ class ReportExecute
      * @param string $content The template string (used only if a temporary template needs to be created from `template_body`).
      *                        If `$this->templateFile` is already set, this parameter's value for content isn't directly used for fetch.
      * @param array $results The array of record IDs.
-     * @return bool True on successful completion, false if a Smarty exception occurs.
+     * @return bool True on successful completion, false if rendering fails.
      */
     private function executeTemplateContinue($content, $results)
     {
@@ -667,13 +667,16 @@ class ReportExecute
         } catch (ReportTerminatedException $e) {
             $msg = $e->getMessage();
             if ($msg === 'timeout') {
-                $this->outputError('Report execution timed out.');
+                $this->outputError('Report execution timed out.', false);
             } else {
-                $this->outputError('Report execution was terminated.');
+                $this->outputError('Report execution was terminated.', false);
             }
             $result = false;
-        } catch (\Exception $e) {
-            $this->outputError('Exception on execution (if you get this error please create a ticket, we are trying to track the problem): ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            $this->outputError(
+                'Report execution failed: '.$e->getMessage().' in '.basename($e->getFile()).':'.$e->getLine(),
+                false
+            );
             $result = false;
         }
 
@@ -763,13 +766,13 @@ class ReportExecute
      * Handles the display or storage of an error message.
      *
      * Stores the error message in `$this->messageError`.
-     * It then calls `handleTemplateOutput()` to display the message, formatted as HTML
-     * if the `outputmode` is 'html'.
+     * Displays the message using the current output mode unless output is suppressed.
      *
      * @param string|null $error_msg The error message to output. If null, it retrieves
      *                               the last error from `$this->system->getErrorMsg()`.
+     * @param bool $save_output Whether publishing modes may save the message to the output file.
      */
-    private function outputError($error_msg=null){
+    private function outputError($error_msg=null, $save_output=true){
 
         if(!isset($error_msg)){
             $error_msg = $this->system->getErrorMsg();
@@ -779,6 +782,15 @@ class ReportExecute
         }
 
         $this->messageError = $error_msg;
+
+        if (!$save_output && ($this->publishmode === 1 || $this->publishmode === 3)) {
+            // Preserve the last successful output when rendering fails.
+            if (!$this->isVoid) {
+                header('Content-Type: text/plain; charset=UTF-8');
+                echo $error_msg;
+            }
+            return;
+        }
 
         if($this->outputmode=='html'){
             $error_msg = '<span style="color:#ff0000;font-weight:bold">'.$error_msg.'</span>';

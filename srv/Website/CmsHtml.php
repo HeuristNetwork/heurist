@@ -31,7 +31,7 @@ final class CmsHtml
     /**
      * Elements with `data-h-node` in document order.
      *
-     * @return array<int,array{node:string,instance:?string,media:?string,text:bool,field:?string,control:?string,tag:string}>
+     * @return array<int,array{node:string,instance:?string,media:?string,text:bool,field:?string,link:?string,control:?string,name:?string,tag:string}>
      */
     public static function nodes(string $html): array
     {
@@ -50,6 +50,8 @@ final class CmsHtml
                 // the action of a Record field (plan 27g; Saved filter `filter:<page>:<source>`, plan 27j)
                 'link' => $element->hasAttribute('data-h-link') ? $element->getAttribute('data-h-link') : null,
                 'control' => $element->hasAttribute('data-h-control') ? $element->getAttribute('data-h-control') : null,
+                // the name of an element (plan 27n §9)
+                'name' => $element->hasAttribute('data-h-name') ? $element->getAttribute('data-h-name') : null,
                 'tag' => strtolower($element->tagName)
             );
         }

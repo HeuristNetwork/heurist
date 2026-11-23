@@ -900,7 +900,8 @@ EOD;
                 }
             }
 
-
+            $importDef = null;
+            $defs = [];
             if($dbsource_is_same){
 
                 $defs = array(
@@ -1074,7 +1075,7 @@ EOD;
 
                     $query3 = null;
 
-                    if($unique_field_id!='rec_ID'){
+                    if($unique_field_id != 'rec_ID'){
                         //this is detail field
                         if($dbsource_is_same){
                             $local_id = DbsImport::getLocalCode('detailtypes', $defs, $unique_field_id, false);
@@ -1082,16 +1083,15 @@ EOD;
                             $local_id = DbsImport::getLocalCode('detailtypes', $importDef->getDefinitions('source'), $unique_field_id, false);
                         }
 
-
-
                         foreach($record_src['details'] as $dty_ID => $values){
 
-                            if(is_array($values) && @$values['dty_ID']>0){ //interpreatable format
+                            if(is_array($values) && @$values['dty_ID'] > 0){ //interpreatable format
                                 $dty_ID = $values['dty_ID'];
                                 $values = array($values['value']);
                             }
 
-                            if($dty_ID==$local_id && is_array($values)){
+                            $idComparison = isPositiveInt($dty_ID) && $dty_ID == $local_id || $dty_ID == $unique_field_id; // check by local ID if dty_ID is NOT a concept ID
+                            if($idComparison && is_array($values)){
                                 $record_src_original_id = array_shift($values);
                                 break;
                             }
@@ -1104,8 +1104,15 @@ EOD;
 
                         $target_RecID = mysql__select_value($mysqli, $query3);
 
+                        if(!isPositiveInt($target_RecID) && (strpos($record_src_original_id, '0-') === 0 || defined('HEURIST_DBID') && strpos($record_src_original_id, HEURIST_DBID) === 0)){
+
+                            $localRecID = explode('-', $record_src_original_id)[1];
+                            $target_RecID = mysql__select_value($mysqli, "SELECT rec_ID FROM Records WHERE rec_ID = ?", ['i', $localRecID]);
+                        }
+
                         $target_RecID = intval($target_RecID);
-                        if($target_RecID>0){
+
+                        if(isPositiveInt($target_RecID)){
                             //already exists
                             $ids_exist[] = $target_RecID;
                             $records_corr[$record_src['rec_ID']] = $target_RecID;

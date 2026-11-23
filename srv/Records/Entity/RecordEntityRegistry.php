@@ -35,7 +35,9 @@ final class RecordEntityRegistry
         'page' => array('rectype' => 'RT_CMS_PAGE', 'job' => 'website-build'),
         'report' => array('rectype' => 'RT_REPORT_TEMPLATE', 'job' => null),
         // the generated report, or a scheduled export later (plan 30)
-        'output' => array('rectype' => 'RT_REPORT_OUTPUT', 'job' => 'report-generate')
+        'output' => array('rectype' => 'RT_REPORT_OUTPUT', 'job' => 'report-generate'),
+        // stored settings of a story map, crosstabs or export (plan 27q1)
+        'presentation' => array('rectype' => 'RT_PRESENTATION_SET', 'job' => null)
     );
 
     /** @var array<string,int> name => local record type id */

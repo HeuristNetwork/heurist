@@ -133,7 +133,7 @@
 #menu-structure-refresh-hint#Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.
 #Setup#
 #menu-manage-dashboards#Shortcuts bar
-#menu-manage-archive#Safeguard file - download
+#menu-manage-archive#Safeguard file → download
 #menu-manage-archive-upload#Safeguard file → repository
 #menu-automatic-deposit#Set up automatic deposit
 #menu-manage-dashboards-hint#Defines an editable list of shortcuts to functions to be displayed on a toolbar at startup unless turned off
@@ -580,3 +580,73 @@
 #dms_to_decimal#Convert DMS coordinates to decimal
 #menu-selected-dms_to_decimal#Convert DMS coordinates to decimal
 #record_action_dms_to_decimal#Convert latitude and longitude from degrees, minutes and seconds to decimal degrees in the selected fields. Repeat values are supported. Invalid values are preserved and reported.
+
+#Show#
+#Search#
+#entries#
+#Column name#
+#Change column type#
+#Insert a new column before#
+#Insert a new column after#
+#Delete selected columns#
+#Rename this column#
+#Order ascending#
+#Order descending#
+#Insert a new row before#
+#Insert a new row after#
+#Delete selected rows#
+#Edit comments#
+#Add comments#
+#Comments#
+#Clear comments#
+#Copy#
+#Paste#
+#Save as#
+#About#
+#Are you sure?#
+#This action will destroy any existing merged cells. Are you sure?#
+#Invalid merged properties#
+#No cell selected#
+#Rename this worksheet#
+#Delete this worksheet#
+#It was not possible to rename worksheet due conflict name#
+#Cut#
+#Hide#
+#Unhide#
+#Select All#
+#Blanks#
+#Add current selection to filter#
+#Rename this cell#
+#Jan#
+#Feb#
+#Mar#
+#Apr#
+#May#
+#Jun#
+#Jul#
+#Aug#
+#Sep#
+#Oct#
+#Nov#
+#Dec#
+#January#
+#February#
+#March#
+#April#
+#June#
+#July#
+#August#
+#September#
+#October#
+#November#
+#December#
+#Sunday#
+#Monday#
+#Tuesday#
+#Wednesday#
+#Thursday#
+#Friday#
+#Saturday#
+#Done#
+#Reset#
+#Update#

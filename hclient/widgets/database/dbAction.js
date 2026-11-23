@@ -121,7 +121,12 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         }else if(this.options.actionName=='restore')
         {
-            this._on(this._$('#btnSelectZip'),{click:this._selectArchive});
+            this._on(this._$('#btnSelectZip'), {click:this._selectArchive});
+            this._on(this._$('#btnCompareArchive'), {click:this._compareArchive});
+            this._on(this._$('input[name=selArchiveFolder]'), {change:() => {
+                this._$('#selectedZip').text('');
+                this._$('#db-restore-name').hide();
+            }});
 
         }else if(this.options.actionName=='register')
         {
@@ -485,6 +490,54 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
         });
+    },
+
+    _compareArchive: async function(){
+        const api = window.hWin.HAPI4;
+        const messages = window.hWin.HEURIST4.msg;
+        const button = this._$('#btnCompareArchive');
+        const request = new URLSearchParams({
+            action: 'compare_archive',
+            db: api.database,
+            file: this._$('#selectedZip').text(),
+            folder: this._$('input[name=selArchiveFolder]:checked').val(),
+            pwd: this.options.entered_password || ''
+        });
+
+        button.button('disable');
+        button.button('option', 'label', window.hWin.HR('Comparing archive…'));
+        try {
+            const response = await fetch(api.baseURL + 'hserv/controller/databaseController.php', {
+                method: 'POST',
+                credentials: 'include',
+                body: request
+            });
+            const contentType = response.headers.get('Content-Type') || '';
+            if (contentType.includes('application/json')) {
+                messages.showMsgErr(await response.json());
+                return;
+            }
+            if (!response.ok || !contentType.startsWith('text/tab-separated-values')) {
+                throw new Error('Unexpected response from database archive comparison');
+            }
+
+            const filename = (response.headers.get('Content-Disposition') || '').match(/filename="([^"]+)"/);
+            const url = URL.createObjectURL(await response.blob());
+            const link = $('<a>', {
+                href: url,
+                download: filename ? filename[1] : 'archive_comparison.tsv'
+            }).appendTo(document.body);
+            link[0].click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } catch (error) {
+            messages.showMsgErr(window.hWin.HR('Could not download the archive comparison report.'));
+        } finally {
+            if (button.button('instance')) {
+                button.button('option', 'label', window.hWin.HR('Compare with current database and download TSV'));
+                button.button('enable');
+            }
+        }
     },
 
     /**

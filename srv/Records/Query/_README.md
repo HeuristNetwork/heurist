@@ -13,6 +13,11 @@ and returns an ordered page of record IDs plus its total count.
 - `Parser/RecordQueryParser.php` — syntax normalization and validation.
 - `Compiler/QueryBuilder.php` — parameterised SQL facade.
 - `Compiler/SqlTables.php` — table names of the compiled SQL (plan 15).
+- `FieldValueCounter.php`, `FieldValueRange.php`, `FieldValueBuckets.php` — `/records/aggregate` op=values, minmax,
+  ranges (facets, value pickers).
+- `CrossTabulator.php` — op=crosstab (plan 27q2): counts or a measure (first value) by the buckets of up to three
+  fields, also of linked records (field path codes `10:lt240:48:237`); counting by record key sets, totals are distinct
+  records. `RangeValue.php` — the range syntax `"40"`, `"40<>50"`, `"1,2,3"` (as `rangeDefinitions.js`).
 
 ## Table names in compiled SQL
 
@@ -21,7 +26,7 @@ table keys — `{records}`, `{details}`, `{links}`, `{dateIndex}`, `{permissions
 `{bookmarks}`, `{tagLinks}`, `{tags}`, `{forwarding}`, `{worksets}`, `{fieldTypes}`,
 `{structure}`, `{terms}`, `{translations}`, `{rectypes}`, `{files}`, `{groups}`,
 `{memberships}` — and the builders resolve them when they make the final SQL
-(`QueryBuilder::sql()`, also used by `FieldValueCounter`/`Range`/`Buckets`;
+(`QueryBuilder::sql()`, also used by `FieldValueCounter`/`Range`/`Buckets`/`CrossTabulator`;
 `SystemQueryBuilder`). The names come from `RecordSchema` (given to the
 `QueryBuilder` constructor, default: the current tables), `DefinitionLookup::TABLES`,
 `FileRepository::TABLES` and `UserGroupRepository::TABLES`. `CompiledQuery::$sql`

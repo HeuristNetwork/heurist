@@ -3731,7 +3731,7 @@ console.log('onEditFormChange @todo check buttons!!!');
 
                 $dlg.dialog('close');
                 that.previewEditor.manageRecords('reloadEditForm', true);
-                that._triggerRefresh('rst', recID);
+                that._triggerRefresh('rst', request.src_rty);
 
                 window.hWin.HEURIST4.msg.showMsgFlash('Structure has been updated, but no sub records were created...', 3000);
             });

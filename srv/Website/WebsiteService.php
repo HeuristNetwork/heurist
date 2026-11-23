@@ -122,12 +122,12 @@ final class WebsiteService
         }
         $issues = $pageParsed['issues'];
         if($site !== null && !$home){ $issues = array_merge($issues, $siteParsed['issues']); }
-        $checkConfig = $pageParsed['config'];
-        if($site !== null && !$home){
-            // header and footer hosts are configured on the website record
-            $checkConfig['instances'] = $pageParsed['config']['instances'] + $siteParsed['config']['instances'];
-        }
-        $issues = array_merge($issues, CmsValidator::check($checkConfig, $parts, $pageTexts, $this->baseUrl));
+        // header and footer hosts are configured on the website record, together with the instances of the home
+        // content: those are "configured elsewhere", not instances without a host on this page (2026-11-17)
+        $otherInstances = $site !== null && !$home
+            ? array_map('strval', array_keys($siteParsed['config']['instances']))
+            : array();
+        $issues = array_merge($issues, CmsValidator::check($pageParsed['config'], $parts, $pageTexts, $this->baseUrl, $otherInstances));
 
         // a record page (plan 27g): the record of the URL with the rights of the visitor
         $recordPage = $site !== null && !$home && CmsValidator::recordCards($pageParsed['config']) !== null;
@@ -170,14 +170,16 @@ final class WebsiteService
      * state `hidden` = all values, `partly` = some; review 2026-11-08). A standalone page: only itself.
      *
      * @return array{issues:array,records:array<int,array{id:int,title:string,visibility:string,role:string,
-     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string}>,
+     *         usedIn:array<int,array{page:int,pageTitle:string,node:string,kind:string,name?:string}>,
      *         fields?:array<int,array{id:int,name:string,state:string}>}>}
      * @throws WebsiteException
      */
     public function check(int $id, string $language = ''): array
     {
         $codes = $this->repository->codes();
+        // the home content itself (not the Startup page that the address without a page shows)
         $context = $this->context($id, 0, $language);
+        if($context['site'] !== null && !$context['home']){ $context = $this->context($id, $id, $language); }
         $site = $context['site'];
         $title = function(array $record) use ($codes): string {
             $name = WebsiteRepository::value($record, $codes['name']);
@@ -221,6 +223,8 @@ final class WebsiteService
                 $site !== null ? intval($site['rec_ID']) : 0, intval($pageId));
             foreach($references as $reference){
                 $use = array('page' => intval($pageId), 'pageTitle' => $title($page), 'node' => $reference['node'], 'kind' => $reference['kind']);
+                // the name of the element (plan 27n §9)
+                if(isset($reference['name'])){ $use['name'] = $reference['name']; }
                 if($reference['kind'] === 'field'){
                     $fieldId = $definitions->localId('dty', (string)$reference['field']);
                     if($fieldId > 0){ $fieldUses[$reference['id']][$fieldId][] = $use; }

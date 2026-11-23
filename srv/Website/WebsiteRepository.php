@@ -121,7 +121,7 @@ final class WebsiteRepository
         if(empty($visible)){ return array(); }
         $result = array();
         $loaded = (new RecordDataService($this->database, $this->runtime))
-            ->loadRecords($visible, array('rec_NonOwnerVisibility'), array(), array('allDetails' => true));
+            ->loadRecords($visible, array('rec_NonOwnerVisibility', 'rec_Modified'), array(), array('allDetails' => true));
         foreach($loaded as $record){ $result[intval($record['rec_ID'])] = $record; }
         $ordered = array();
         foreach($ids as $id){
@@ -245,18 +245,20 @@ final class WebsiteRepository
     }
 
     /**
-     * Title and URL of records the visitor may see (record links, plan 27g §6).
+     * Title, URL and last change of records the visitor may see (record links, plan 27g §6; generated record pages and
+     * the check of a generated page before it is sent, plan 27m §2.1).
      *
-     * @return array<int,array{title:string,url:string}> Record id => plain title and rec_URL ('' without one).
+     * @return array<int,array{title:string,url:string,modified:string}> Record id => plain title, rec_URL ('' without one),
+     *         rec_Modified.
      */
     public function recordHeads(array $ids): array
     {
         $result = array();
         $ids = array_values(array_filter(array_map('intval', $ids), static function(int $id){ return $id > 0; }));
         if(empty($ids)){ return $result; }
-        foreach(RecordRepository::shared($this->database)->headers($ids, array('rec_Title', 'rec_URL'), RecordAccess::fromRuntime($this->runtime)) as $id => $row){
+        foreach(RecordRepository::shared($this->database)->headers($ids, array('rec_Title', 'rec_URL', 'rec_Modified'), RecordAccess::fromRuntime($this->runtime)) as $id => $row){
             $result[intval($id)] = array('title' => trim(html_entity_decode(strip_tags((string)($row['rec_Title'] ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8')),
-                'url' => trim((string)($row['rec_URL'] ?? '')));
+                'url' => trim((string)($row['rec_URL'] ?? '')), 'modified' => (string)($row['rec_Modified'] ?? ''));
         }
         return $result;
     }

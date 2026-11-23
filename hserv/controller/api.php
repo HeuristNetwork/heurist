@@ -130,6 +130,7 @@ $entities = array(
 
 'fieldgroups'=>'DefDetailTypeGroups',
 'rectypegroups'=>'DefRecTypeGroups',
+'vocabularygroups'=>'DefVocabularyGroups',
 'rectypes'=>'DefRecTypes',
 'fields'=>'DefDetailTypes',
 'terms'=>'DefTerms',
@@ -686,10 +687,13 @@ if($method === 'search'){
     $publicSearchResources = array(
         'records', 'graph', 'dbs', 'databases',
         'rty', 'rectypes',
-        'dty', 'fields',
+        'dty', 'fields', 
         'trm', 'terms', 'trl', 'termlinks',
         'rst', 'recstructure',
         'def',
+        'fieldgroups', 'dtg',
+        'rectypegroups', 'rtg',        
+        'vocabularygroups', 'vcg',        
         'map', 'time'
     );
     $allow_anonymous = in_array($resource, $publicSearchResources, true);
@@ -935,7 +939,9 @@ if($is_def_query){
             $controller = $factory->jobController($record_entity === 'output'
                 ? $factory->reportJobHandlers($reportRenderer, $reportWriter) : $factory->websiteJobHandlers());
             $controller->handleRequest('POST', array(), $req_params, array('type' => $entityJob,
-                'params' => $record_entity === 'output' ? array('output' => intval($entityId)) : array('id' => intval($entityId))));
+                // a website build: the Generate options of the body (plan 27m §2.1)
+                'params' => $record_entity === 'output' ? array('output' => intval($entityId))
+                    : array('id' => intval($entityId), 'options' => is_array($json) ? $json : array())));
         }
     }else{
         $controller->handleEntityRequest($record_entity, $http_verb, array_slice($requestUri, 4), $req_params,

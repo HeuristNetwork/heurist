@@ -563,7 +563,7 @@ function addNewConnections(recordIDs, data){
             if(callbackFunctions === null && Object.keys(visualiserCallbackFunctions).length > 0){
                 callbackFunctions = visualiserCallbackFunctions;
             }
-            if(nodeSettings === null && Object.keys(nodeSettings).length > 0){
+            if(nodeSettings !== null && Object.keys(nodeSettings).length > 0){
                 nodeSettings = visualiserNodeSettings;
             }
 

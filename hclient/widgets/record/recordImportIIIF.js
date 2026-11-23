@@ -49,7 +49,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
             missing = 'You will need record types 2-110 (IIIF Manifest), 2-111 (IIIF Canvas) and 2-109 (IIIF Annotation)';
         }else{
             let hDb = window.hWin.$Db || (typeof $Db !== 'undefined' ? $Db : null);
-            if(hDb && $.isFunction(hDb.rst)){
+            if(hDb && typeof hDb.rst === 'function'){
                 if (!(this.DT_IIIF_ID > 0) || !hDb.rst(this.RT_IIIF_ANNOTATION, this.DT_IIIF_ID)) {
                     missing = 'You will need record type 2-109 (IIIF Annotation) with field DT_IIIF_ID (Original IIIF ID)';
                 } else if (!(this.DT_IIIF_CANVAS > 0)
@@ -81,7 +81,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
     _initManifestSelector: function(){
 
         let ele = this._$('#manifest_selector');
-        if(ele.length===0 || !$.isFunction(ele.editing_input)){
+        if(ele.length===0 || typeof ele.editing_input !== 'function'){
             // Fallback for older pages where editing_input is not loaded.
             ele.html('<input type="text" id="manifest_file_id" style="width:95%" placeholder="Registered manifest file ID or obfuscated file ID">');
             return;
@@ -130,7 +130,7 @@ $.widget( "heurist.recordImportIIIF", $.heurist.recordAction, {
         }
 
         let ele = this._$('#manifest_selector');
-        if(ele.length>0 && $.isFunction(ele.editing_input)){
+        if(ele.length>0 && typeof ele.editing_input === 'function'){
             try{
                 let val = ele.editing_input('getValues');
                 return this._extractManifestFileId(val);
