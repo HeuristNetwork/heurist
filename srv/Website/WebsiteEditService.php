@@ -535,7 +535,7 @@ final class WebsiteEditService
     }
 
     /**
-     * A record the user may build (job "website-build"): a v4 website or standalone page.
+     * A record the user may build (job "website-build"): a v4 website (not a menu or standalone page, 2026-11-23).
      *
      * @return array Summary.
      * @throws WebsiteException
@@ -543,8 +543,8 @@ final class WebsiteEditService
     public function buildable(int $id): array
     {
         $summary = $this->summary($id);
-        if(!$summary['v4'] || $summary['kind'] === 'page'){
-            throw new WebsiteException(400, 'Only a website or a standalone page of format version 4 can be generated');
+        if(!$summary['v4'] || $summary['kind'] !== 'website'){
+            throw new WebsiteException(400, 'Only a website of format version 4 can be generated');
         }
         if(!$summary['canEdit']){
             throw new WebsiteException(403, 'You can not generate website '.$id);
@@ -568,7 +568,7 @@ final class WebsiteEditService
             $result[] = array(
                 'id' => intval($item['id']),
                 'title' => $this->name($page),
-                // the module types of the page: targets of a Saved filter (plan 27j)
+                // the module types of the page (and the crosstabs, story map widgets): targets of a Saved filter (plan 27j)
                 'modules' => self::moduleTypes($config),
                 'children' => $this->pageTree($item['children'], $pages)
             ) + ($cards !== null ? array('record' => true, 'template' => is_scalar($cards['template'] ?? null) ? $cards['template'] : '') : array());
@@ -576,12 +576,17 @@ final class WebsiteEditService
         return $result;
     }
 
-    /** The module types of a parsed configuration (its instances of kind `module`), each once. */
+    /**
+     * The module types of a parsed configuration (its instances of kind `module`, and the widgets that show records:
+     * crosstabs, storymap), each once.
+     */
     private static function moduleTypes($config): array
     {
         $types = array();
         foreach(is_array($config['instances'] ?? null) ? $config['instances'] : array() as $instance){
-            $type = is_array($instance) && ($instance['kind'] ?? '') === 'module' ? (string)($instance['type'] ?? '') : '';
+            $kind = is_array($instance) ? (string)($instance['kind'] ?? '') : '';
+            $type = is_array($instance) ? (string)($instance['type'] ?? '') : '';
+            if($kind !== 'module' && !($kind === 'widget' && in_array($type, array('crosstabs', 'storymap'), true))){ $type = ''; }
             if($type !== '' && !in_array($type, $types, true)){ $types[] = $type; }
         }
         return $types;
