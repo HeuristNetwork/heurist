@@ -2375,8 +2375,7 @@ class HPredicate {
         
         $detal_compare =  'rd.dtl_Value ';
         $title_compare =  'link.rec_Title ';
-        $url_compare =  $this->exact ? 'link.rec_URL = "'.$val.'" ' : 'link.rec_URL LIKE "%'.$val.'%" ';
-        $url_compare =  $this->exact ? 'link.rec_URL NOT LIKE "%'.$val.'%" ' : $url_compare;
+        $url_compare =  "link.rec_URL ";
 
         if($this->fulltext){
             $detal_compare = "MATCH($detal_compare) $val";
@@ -2387,6 +2386,7 @@ class HPredicate {
                 ? heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $val_wo_prefixes, 'recDetails') : null;
             $ftTitle = (!$this->negate && !$this->exact)
                 ? heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $val_wo_prefixes, 'Records') : null;
+            $url_compare =  "link.rec_URL {$val} ";
             if($ftDetail!==null && $ftTitle!==null){
                 $detal_compare = $ftDetail;
                 $title_compare = $ftTitle;
@@ -2404,6 +2404,9 @@ class HPredicate {
             }
         }
 
+        $recSearch_title = str_replace('link.', 'rec.', $title_compare);
+        $recSearch_url = str_replace('link.', 'rec.', $url_compare);
+
 $rQuery = <<<QUERY
 SELECT rl.rl_SourceID as dtl_RecID
 FROM Records link 
@@ -2411,6 +2414,12 @@ JOIN recLinks rl
 ON rl.rl_TargetID = link.rec_ID
 WHERE $title_compare OR $url_compare
     AND rl.rl_DetailTypeID IS NOT NULL 
+
+UNION ALL
+
+SELECT rec.rec_ID
+FROM Records rec
+WHERE $recSearch_title OR $recSearch_url
 
 UNION ALL
 
@@ -2427,6 +2436,7 @@ if($val_enum!=='=0'){
   $rQuery .= <<<QUERY
 
 UNION ALL
+
 SELECT rd.dtl_RecID
 FROM defDetailTypes dt
 JOIN recDetails rd
