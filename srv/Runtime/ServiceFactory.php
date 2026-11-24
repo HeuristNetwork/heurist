@@ -561,12 +561,13 @@ final class ServiceFactory
         return new RecordEntityRegistry($rectypes, array(
             'website' => static function() use ($website) { return $website('website'); },
             'page' => static function() use ($website) { return $website('page'); },
-            'report' => static function() use ($report) { return $report('report'); },
             'output' => static function() use ($report) { return $report('output'); },
-            'presentation' => function(): PresentationEntityHandler {
+            // a report is a Presentation set of kind Card / List Report (plan 27q3)
+            'presentation' => function() use ($report): PresentationEntityHandler {
                 return new PresentationEntityHandler($this->codes, function(int $id, array $fields): array {
                     return RecordRepository::shared($this->database)->values(array($id), $fields)[$id] ?? array();
-                }, function(int $id): int { return $this->pagesUsingPresentation($id); });
+                }, function(int $id): int { return $this->pagesUsingPresentation($id); },
+                static function() use ($report) { return $report('report'); });
             }
         ));
     }
@@ -682,11 +683,13 @@ final class ServiceFactory
         $records = $this->recordQueryController();
         return new SystemQueryService($this->database, $this->runtime, null, $this->entityImageStorage(),
             array_filter($rectypes), array($records, 'execute'), function(string $entity, array $ids): array {
-                return in_array($entity, array('report', 'output'), true) ? $this->reportHandler($entity)->describeMany($ids) : array();
+                // reports are Presentation sets (plan 27q3): their items, other kinds have none
+                if($entity === 'presentation'){ return $this->reportHandler('report')->describeMany($ids); }
+                return $entity === 'output' ? $this->reportHandler('output')->describeMany($ids) : array();
             });
     }
 
-    /** Handler of the entities report and output. */
+    /** Handler of the reports (inside the entity presentation, plan 27q3) and of the entity output. */
     private function reportHandler(string $kind): ReportEntityHandler
     {
         return new ReportEntityHandler($kind, $this->reportRepository(),

@@ -462,7 +462,8 @@ $rtDefines = array(
     'RT_IIIF_CANVAS' => array(2, 111),
     
     //System record type
-    'RT_REPORT_TEMPLATE' => array(2, 1104),  // Smarty report template
+    'RT_REPORT_TEMPLATE' => array(2, 1104),  // retired (plan 27q3): reports are Presentation sets
+    'RT_PRESENTATION_SET' => array(2, 1112), // story map, crosstabs, export or report (card / list) settings
     'RT_REPORT_OUTPUT' => array(2, 1105),    // Smarty report output - generated report
     
     'RT_REGISTERED_FILE' => array(2, 1106)  //registered file - virtual system record type 
@@ -588,7 +589,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_DATA_SOURCE' => array(3, 1083),
     // Smarty reports (plan 12)
     'DT_IS_CARD_VIEW' => array(2, 1182), // Flag Yes|No: report for a single record (popups, cards, record view)
-    'DT_REPORT' => array(2, 1183), // pointer to Custom Report
+    'DT_REPORT' => array(2, 1183), // pointer of a generated report to its Presentation set (plan 27q3)
     'DT_INTERVAL_MINUTES' => array(2, 1184), // regeneration interval of a report schedule
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
@@ -631,6 +632,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ORIGINAL_NAME' => array(2, 1185), 
     'DT_REGISTERED_FILE_TYPE' => array(2, 1186),
     'DT_CONFIGURATION' => array(2, 1187),
+    'DT_PRESENTATION_TYPE' => array(2, 1203), // kind of a Presentation set
     'DT_CMS_PAGE_TRANSLATIONS' => array(2, 1202) // translated text blocks of a v4 website page (plan 27a)
 
 );
@@ -644,6 +646,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
  */
 $trmDefines = array(
     'TRM_PAGETYPE_WEBPAGE' => array(2, 6254),
+    'TRM_PRESENTATION_CARD_REPORT' => array(2, 10645), // Presentation set kinds of reports (plan 27q3)
+    'TRM_PRESENTATION_LIST_REPORT' => array(2, 10646),
     'TRM_PAGETYPE_MENUITEM' => array(2, 6253),
     'TRM_NO' => array(2, 531), // General 'No' term
     'TRM_NO_OLD' => array(99, 5447), // Older 'No' term, potentially from a specific DB context

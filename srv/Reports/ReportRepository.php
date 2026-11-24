@@ -1,9 +1,10 @@
 <?php
 /**
-* ReportRepository.php - Custom Report and Report Schedule records
+* ReportRepository.php - Report and Generated Report records
 *
-* Reads RT_REPORT_TEMPLATE records (title, description, template file, card flag)
-* and the RT_REPORT_OUTPUT records that point to them, with the normal record
+* A report is a Presentation set (RT_PRESENTATION_SET) of kind Card Report or List Report
+* (plan 27q3; was Custom Report 2-1104): title, short summary, template file, output format.
+* Reads them and the RT_REPORT_OUTPUT records that point to them, with the normal record
 * visibility rules of the current user.
 *
 * @project     Heurist academic knowledge management system
@@ -33,8 +34,9 @@ final class ReportRepository
 {
     /** Codes that must be defined in the database before records can be used. */
     public const REQUIRED_CODES = array(
-        'RT_REPORT_TEMPLATE', 'RT_REPORT_OUTPUT',
-        'DT_FILE_NAME', 'DT_IS_CARD_VIEW', 'DT_REPORT', 'DT_INTERVAL_MINUTES'
+        'RT_PRESENTATION_SET', 'RT_REPORT_OUTPUT', 'DT_PRESENTATION_TYPE',
+        'TRM_PRESENTATION_CARD_REPORT', 'TRM_PRESENTATION_LIST_REPORT',
+        'DT_FILE_NAME', 'DT_REPORT', 'DT_INTERVAL_MINUTES'
     );
 
     private DatabaseInterface $database;
@@ -76,7 +78,7 @@ final class ReportRepository
     }
 
     /**
-     * Visible Custom Report records with the number of their visible outputs, sorted by title.
+     * Visible reports with the number of their visible outputs, sorted by title.
      *
      * @param bool $cardOnly Return only single-record (card) reports.
      * @return array<int,array>
@@ -93,7 +95,7 @@ final class ReportRepository
         return $reports;
     }
 
-    /** One visible Custom Report record, or null. */
+    /** One visible report, or null (also for a Presentation set of another kind). */
     public function getReport(int $recordId): ?array
     {
         if($recordId < 1 || !$this->isInstalled()){ return null; }
@@ -101,7 +103,7 @@ final class ReportRepository
         return $reports[0] ?? null;
     }
 
-    /** One visible Custom Report record that uses the given template file, or null. */
+    /** One visible report that uses the given template file, or null. */
     public function findByFile(string $file): ?array
     {
         foreach($this->listReports() as $report){
@@ -111,7 +113,7 @@ final class ReportRepository
     }
 
     /**
-     * Template file names used by any Custom Report record, visible or not, in lower case.
+     * Template file names used by any report record, visible or not, in lower case.
      * A private report's file must not be shown to others as "unregistered".
      *
      * @return array<string,int> file name => number of records using it
@@ -122,7 +124,7 @@ final class ReportRepository
         $files = array();
         $fileField = $this->codes->id('DT_FILE_NAME');
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); },
-            $this->repository()->find($this->codes->id('RT_REPORT_TEMPLATE'), array('rec_ID')));
+            $this->repository()->find($this->codes->id('RT_PRESENTATION_SET'), array('rec_ID')));
         foreach($this->repository()->values($ids, array($fileField)) as $fields){
             foreach($fields[$fileField] ?? array() as $value){
                 $file = strtolower(trim($value));
@@ -149,7 +151,7 @@ final class ReportRepository
      */
     private function loadReports(?int $recordId): array
     {
-        $rows = $this->repository()->find($this->codes->id('RT_REPORT_TEMPLATE'),
+        $rows = $this->repository()->find($this->codes->id('RT_PRESENTATION_SET'),
             array('rec_ID', 'rec_Title', 'rec_OwnerUGrpID', 'rec_NonOwnerVisibility', 'rec_Modified'),
             RecordAccess::fromRuntime($this->runtime), $recordId === null ? null : array($recordId));
         if(empty($rows)){ return array(); }
@@ -157,15 +159,26 @@ final class ReportRepository
         $ids = array_map(static function(array $row): int { return intval($row['rec_ID']); }, $rows);
         $fields = array(
             'name' => $this->codes->id('DT_NAME'),
-            'description' => $this->codes->id('DT_EXTENDED_DESCRIPTION'),
             'summary' => $this->codes->id('DT_SHORT_SUMMARY'),
             'file' => $this->codes->id('DT_FILE_NAME'),
-            'card' => $this->codes->id('DT_IS_CARD_VIEW'),
+            'kind' => $this->codes->id('DT_PRESENTATION_TYPE'),
             'mime' => $this->codes->id('DT_FILE_EXT')
         );
         $details = $this->loadDetails($ids, array_values($fields));
-        $terms = $this->loadTerms($this->collectValues($details, array($fields['card'], $fields['mime'])));
-        $outputs = $this->loadOutputs($ids);
+        // only the report kinds of the Presentation sets
+        $card = $this->codes->id('TRM_PRESENTATION_CARD_REPORT');
+        $list = $this->codes->id('TRM_PRESENTATION_LIST_REPORT');
+        $kinds = array();
+        foreach($ids as $id){
+            $term = intval($this->first($details[$id] ?? array(), $fields['kind']));
+            if($term > 0 && ($term === $card || $term === $list)){ $kinds[$id] = $term === $card ? 'card' : 'list'; }
+        }
+        $rows = array_values(array_filter($rows, static function(array $row) use ($kinds): bool {
+            return isset($kinds[intval($row['rec_ID'])]);
+        }));
+        if(empty($rows)){ return array(); }
+        $terms = $this->loadTerms($this->collectValues($details, array($fields['mime'])));
+        $outputs = $this->loadOutputs(array_keys($kinds));
 
         $reports = array();
         foreach($rows as $row){
@@ -179,11 +192,12 @@ final class ReportRepository
             $reports[] = array(
                 'id' => $id,
                 'title' => $title,
-                'description' => $this->first($values, $fields['description'])
-                    ?? $this->first($values, $fields['summary']) ?? '',
+                'description' => $this->first($values, $fields['summary']) ?? '',
                 'file' => $file,
-                'isCardView' => $this->isYes($terms, $this->first($values, $fields['card'])),
-                // the output type of the template; '' before the field is moved to it (plan 30 §5)
+                // Presentation Type: card (one record) or list (plan 27q3)
+                'kind' => $kinds[$id],
+                'isCardView' => $kinds[$id] === 'card',
+                // the output type of the template; '' when it is not set (plan 30 §5)
                 'format' => $mime === null ? '' : self::formatFromMime($mime['code'] !== '' ? $mime['code'] : $mime['label']),
                 'ownerGroupId' => $ownerGroupId,
                 'visibility' => (string)$row['rec_NonOwnerVisibility'],
@@ -382,15 +396,6 @@ final class ReportRepository
             $result[$id] = array('label' => $term['term'], 'code' => $term['code']);
         }
         return $result;
-    }
-
-    /** True when the term value of a Flag field is "Yes". */
-    private function isYes(array $terms, ?string $value): bool
-    {
-        $term = $terms[intval($value)] ?? null;
-        if($term === null){ return false; }
-        return in_array(strtolower(trim($term['label'])), array('yes', 'y', 'true'), true)
-            || in_array(strtolower(trim($term['code'])), array('yes', 'y', 'true', '1'), true);
     }
 
     /** First value of a field, or null. */

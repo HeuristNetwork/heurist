@@ -1,9 +1,9 @@
 <?php
 /**
-* ReportService.php - Templates of the Custom Report records
+* ReportService.php - Templates of the report records
 *
-* Reads, writes, imports, exports and runs the template of a report record, and tells the
-* state of the report definitions (plan 30). A report is named by its record id only; the
+* Reads, writes, imports, exports and runs the template of a report record (a Presentation set of
+* kind Card Report or List Report, plan 27q3), and tells the state of the report definitions (plan 30). A report is named by its record id only; the
 * template file stays behind the record. A template file without a record is not run:
 * it is listed by status() and registered, or deleted, first.
 *
@@ -68,7 +68,7 @@ final class ReportService
     }
 
     /**
-     * GET /report/setup: the state of the definitions, what the client needs to know about the report
+     * GET /presentation/setup: the state of the definitions, what the client needs to know about the report
      * output, and the template files without a record.
      */
     public function status(): array
@@ -173,7 +173,7 @@ final class ReportService
         if($count > 0){ throw new ReportInUseException($count); }
     }
 
-    /** Delete a template file without a record: DELETE /report/setup?name=file name. */
+    /** Delete a template file without a record: DELETE /presentation/setup?name=file name. */
     public function deleteUnregistered(string $file): array
     {
         $this->policy->requireMember();
@@ -192,7 +192,7 @@ final class ReportService
      * Import an uploaded template (concept codes are converted to local ids) and create its record.
      *
      * @param array $upload The uploaded file ($_FILES entry).
-     * @param bool $isCardView The new report is a card report.
+     * @param bool $isCardView The new report is a Card Report (else a List Report).
      * @return array The new report.
      */
     public function importTemplate(array $upload, bool $isCardView = false): array
@@ -202,16 +202,17 @@ final class ReportService
             throw new InvalidArgumentException('Template file is not uploaded');
         }
         if(!$this->reports->isInstalled()){
-            throw new DomainException('The report record types are not installed: POST /report/setup');
+            throw new DomainException('The report definitions are not installed: POST /presentation/setup');
         }
         $file = $this->renderer->importTemplate($upload);
         $details = array(
             $this->codes->id('DT_NAME') => array(substr($file, 0, -4)),
-            $this->codes->id('DT_FILE_NAME') => array($file)
+            $this->codes->id('DT_FILE_NAME') => array($file),
+            $this->codes->id('DT_PRESENTATION_TYPE') => array($this->codes->id($isCardView
+                ? 'TRM_PRESENTATION_CARD_REPORT' : 'TRM_PRESENTATION_LIST_REPORT'))
         );
-        if($isCardView){ $details[$this->codes->id('DT_IS_CARD_VIEW')] = array($this->codes->id('TRM_YES')); }
         $saved = ($this->recordSave)()->save('POST', 0, RecordInput::fromBody(
-            array('rec_RecTypeID' => $this->codes->id('RT_REPORT_TEMPLATE'), 'details' => $details)));
+            array('rec_RecTypeID' => $this->codes->id('RT_PRESENTATION_SET'), 'details' => $details)));
         return $this->report(intval($saved['recordId']));
     }
 
@@ -234,7 +235,7 @@ final class ReportService
     }
 
     /**
-     * Render one record with a report (GET /report/{id}/execute). The report must be visible to the user,
+     * Render one record with a report (GET /presentation/{id}/execute). The report must be visible to the user,
      * a guest runs card reports only; the engine applies the record visibility of the user. A wrong
      * template must not run for ever, so the time of a test run is the limit.
      */
@@ -282,7 +283,7 @@ final class ReportService
     }
 
     /**
-     * Template files without a Custom Report record.
+     * Template files without a report record.
      *
      * @return array<int,array{file:string,title:string,modified:?string}>
      */

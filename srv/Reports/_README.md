@@ -4,18 +4,21 @@
 
 Reports manager for Smarty report templates (plans 12 and 30 in heurist-explorer,
 `docs/development/`). The API names reports and generated reports by record id only (plan 30).
-A report is a Custom Report
-record (`RT_REPORT_TEMPLATE` 2-1104: name, description, template file name
-`DT_FILE_NAME` 2-62, card flag `DT_IS_CARD_VIEW` 2-1182) whose template body
-stays in `smarty-templates/*.tpl`, under a name set once when the record is created.
+A report is a Presentation set
+(`RT_PRESENTATION_SET` 2-1112, entity `presentation`, plan 27q3) of kind Card Report 2-10645 (one record)
+or List Report 2-10646: name, short summary 2-3, template file name `DT_FILE_NAME` 2-62, output format
+`DT_FILE_EXT` 2-29. It was a Custom Report record (2-1104, entity `report`) before 2026-11-24; that type is
+retired, without conversion. Its template body stays in `smarty-templates/*.tpl`, under a name set once when the
+record is created.
 An output (`RT_REPORT_OUTPUT` 2-1105, entity `output`, UI Generated report) points to a report
 (`DT_REPORT`) and has its own query without parameters (`DT_QUERY_STRING`), language and interval
 (0: on request only). Its file is `generated-reports/{record id}.{format}` (`ReportOutputStore.php`).
 Template files without a record are "unregistered": they do not run until they are registered.
 
 Report and output records are written by the common record services
-(`/records/{id}`, `/report/{id}`, `/output/{id}`); `ReportEntityHandler.php` adds the
-actions (`asset`, `execute`, `export`, `import`, `setup`) and the rules: the template file name, a
+(`/records/{id}`, `/presentation/{id}`, `/output/{id}`); `ReportEntityHandler.php` adds the
+actions (`asset`, `execute`, `export`, `import`, `setup`) and the rules (for a report through
+`Presentations/PresentationEntityHandler.php`, which hands its hooks and actions of a report to it): the template file name, a
 template with outputs is not deleted, a copy gets its own file, an output query has no parameters.
 `ReportRecordWriterInterface` (`hserv\report\ReportRecordWriter`) only installs the
 definitions and converts `usrReportSchedule`.
@@ -27,7 +30,7 @@ the srv one (`Smarty/`, plan 12 Phase 6). The new API always uses the srv engine
 and `runReportSchedules.php`); the legacy renderer only converts templates on
 import/export.
 
-HTTP routes: see `ReportEntityHandler.php`. `GET /report/setup`
+HTTP routes: see `ReportEntityHandler.php`. `GET /presentation/setup`
 gives logged-in users `settings`: `javaScriptAllowed` (the database is in
 `js_in_database_authorised.txt`; otherwise scripts and style blocks are removed
 from report output) and `testRecordLimit`.
@@ -45,7 +48,8 @@ from report output) and `testRecordLimit`.
   output on record ids (`renderIds`), import/export conversion.
 - `Jobs/` — job types `report-preview` and `report-generate` (either engine).
 - `Smarty/` — the srv Smarty engine; see `Smarty/_README.md`.
-- `ReportEntityHandler.php` — hooks and actions of the entities report and output (plan 30).
+- `ReportEntityHandler.php` — hooks and actions of reports (inside the entity presentation, plan 27q3) and of
+  the entity output (plan 30).
 - `ReportRecordWriterInterface.php` — install definitions.
 - `ReportJobPlanner.php` — validation of the report jobs (`report-preview`,
   `report-generate`), record ids of a query, due outputs for cron.

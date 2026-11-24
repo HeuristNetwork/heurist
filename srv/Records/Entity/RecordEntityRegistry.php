@@ -33,10 +33,10 @@ final class RecordEntityRegistry
     public const ENTITIES = array(
         'website' => array('rectype' => 'RT_CMS_HOME', 'job' => 'website-build'),
         'page' => array('rectype' => 'RT_CMS_PAGE', 'job' => 'website-build'),
-        'report' => array('rectype' => 'RT_REPORT_TEMPLATE', 'job' => null),
         // the generated report, or a scheduled export later (plan 30)
         'output' => array('rectype' => 'RT_REPORT_OUTPUT', 'job' => 'report-generate'),
-        // stored settings of a story map, crosstabs or export (plan 27q1)
+        // stored settings of a story map, crosstabs, export or report (plan 27q1; reports: plan 27q3, the entity
+        // report of the Custom Report 2-1104 is gone)
         'presentation' => array('rectype' => 'RT_PRESENTATION_SET', 'job' => null)
     );
 

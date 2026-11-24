@@ -43,6 +43,9 @@ final class WebsiteRepository
         'version' => 'DT_VERSION',
         'configuration' => 'DT_CONFIGURATION',
         'translations' => 'DT_CMS_PAGE_TRANSLATIONS',
+        // Presentation sets of the elements of a page (plan 27q3): set from the configuration on every save
+        'presentations' => 'DT_PAGE_PRESENTATIONS',
+        'presentation' => 'RT_PRESENTATION_SET',
         'header' => 'DT_CMS_HEADER',
         'footer' => 'DT_CMS_FOOTER',
         'css' => 'DT_CMS_CSS',
@@ -100,6 +103,22 @@ final class WebsiteRepository
     public function definitions(): DefinitionLookup
     {
         return $this->definitions;
+    }
+
+    /**
+     * The ids of records of a type, of the given ones (any visibility): a pointer must not point to a
+     * deleted record or one of another type.
+     *
+     * @param array<int,int> $ids
+     * @return array<int,int>
+     */
+    public function idsOfType(array $ids, int $rectype): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids), static function(int $id){ return $id > 0; })));
+        if(empty($ids) || $rectype < 1){ return array(); }
+        $found = array_map(static function(array $row): int { return intval($row['rec_ID']); },
+            RecordRepository::shared($this->database)->find($rectype, array('rec_ID'), null, $ids));
+        return array_values(array_intersect($ids, $found));
     }
 
     /** One record visible to the current user with all its details, or null. */

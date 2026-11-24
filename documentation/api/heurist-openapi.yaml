@@ -49,7 +49,7 @@ tags:
   description: Search for and retrieve records
 - name: Entities
   description: >-
-    Record types with a name in the URL: user, group, bookmark, reminder, tag, website, page, report and output. One
+    Record types with a name in the URL: user, group, bookmark, reminder, tag, website, page, presentation and output. One
     set of paths for all of them, /{entity}/{recordId}/{action}, in the record format of /records, wherever an entity is
     stored. GET and POST /sys search them with a query; /{entity}?q=... is the same search for one entity.
     /sys/{entity}/... is accepted as an alias of /{entity}/... and is not listed here.
@@ -839,10 +839,10 @@ paths:
       summary: Search the system entities
       description: >-
         Uses the common Heurist query contract with stable fields mapped to current system tables.
-        The t predicate selects filter, user, group, tag, bookmark, reminder, website, page, report or output, by
+        The t predicate selects filter, user, group, tag, bookmark, reminder, website, page, presentation or output, by
         its name (aliases tags, keyword, keywords, workgroup), record type id or record type concept code; omission
         currently defaults to filter. GET|POST /{entity}?q=... of these entities (not filter) is the same search with
-        t added: /user, /group, /tag, /bookmark, /reminder, /website, /page, /report, /output. website, page, report
+        t added: /user, /group, /tag, /bookmark, /reminder, /website, /page, /presentation, /output. website, page, presentation
         and output are searched as GET /records and give its output. Authentication is required, except for saved filters of the Website filters group (4),
         which everyone may read. Filter results are limited to Everyone (0), Website filters (4), the current user
         and the groups they belong to, unless the caller is the database owner; owner accepts a list
@@ -1808,9 +1808,9 @@ paths:
         Returns {records: [one], meta} in the record format: universal rec_* headers, rec_RecTypeID the local id of
         the record type, details by field id. The record must be of the entity's type (404 otherwise). recordId may
         be a concept code {this database id}-{record id}. Tags add rec_Usage (the number of tagged records).
-        meta has canEdit for website, page, report and output; logged-in users also get the entity's own meta
-        (meta.website: kind, version, URL, languages, menu tree; meta.report, meta.output). A search of report or
-        output adds meta.items with these values by record id: report - title, file, isCardView, format, canEdit,
+        meta has canEdit for website, page, presentation and output; logged-in users also get the entity's own meta
+        (meta.website: kind, version, URL, languages, menu tree; meta.report of a report presentation, meta.output). A search of presentation or
+        output adds meta.items with these values by record id: report (a presentation of kind card / list report) - title, file, kind, isCardView, format, canEdit,
         fileExists, outputCount; output - reportId, reportTitle, query, language, intervalMinutes, format, canEdit,
         generated {format, size, modified} or null. A guest may read a record that is visible to
         everyone, and one field of it; users and groups are not visible to guests, and every other request of an
@@ -1878,7 +1878,7 @@ paths:
 
         - **page** (99-52) - public unless the body says otherwise.
 
-        - **report** (2-1104) - the file name (2-62) is set here and does not change later. It has only letters, digits, spaces
+        - **presentation** (2-1112; a report is one of kind Card Report 2-10645 or List Report 2-10646, plan 27q3: was the entity report of 2-1104) - a report: the file name (2-62) is set here and does not change later. It has only letters, digits, spaces
           and - _ ( ) . , @, and starts with a letter, a digit or "(" (422 otherwise); empty is made from the title; a new record gets an empty file or
           takes a file without a record (registration).
 
@@ -1886,7 +1886,7 @@ paths:
           generated-reports/{record id}.{format}; the format comes from the template.
 
 
-        The rules of website, page, report and output run for every write of their record type, also through
+        The rules of website, page, presentation and output run for every write of their record type, also through
         /records/{recordId}.
       security:
       - bearerAuth: []
@@ -1918,8 +1918,8 @@ paths:
         Who may change it - tag: the tags of the user and of the user's groups (database owner: all); bookmark:
         its user only (404 for others); reminder: its owner or the database owner; user: the user themselves,
         administrators any (user 2: only user 2), the account status only administrators, an empty password
-        keeps it; group: its admins and the database owner; website, page, report, output: the record's owner and
-        editors. report - the file name (2-62) can not change (422).
+        keeps it; group: its admins and the database owner; website, page, presentation, output: the record's owner and
+        editors. A report presentation - the file name (2-62) can not change (422).
       security:
       - bearerAuth: []
       parameters:
@@ -1978,7 +1978,7 @@ paths:
         then its links are removed first; bookmark: refused while the user has personal tags on the record (409
         has_personal_tags); user / group: the legacy checks and clean-up, never user 2 or group 1, nor a user or group
         that owns records, nor the last admin of a group (409 refused); website: with pages=1 also its menu pages
-        that no other record points to (format 4 only); report: refused while outputs point to it (409 report_in_use with
+        that no other record points to (format 4 only); a report presentation: refused while outputs point to it (409 report_in_use with
         outputs, their number), else also its template file; output: also its generated file.
       security:
       - bearerAuth: []
@@ -2113,7 +2113,7 @@ paths:
       summary: Are the record types and fields of an entity installed
       description: >-
         With the local ids of the record types, fields and terms the entity uses (codes). Website and page only;
-        reports use /report/setup.
+        reports use /presentation/setup.
       security:
       - bearerAuth: []
       responses:
@@ -2144,7 +2144,7 @@ paths:
       summary: Start the job of an entity
       description: >-
         Website or standalone page of format 4 - the job website-build (a ZIP). Output - the job report-generate (the
-        right to change the output is needed). State and result on /jobs/{id}. Report: /report/{recordId}/execute.
+        right to change the output is needed). State and result on /jobs/{id}. A report presentation: /presentation/{recordId}/execute.
       security:
       - bearerAuth: []
       parameters:
@@ -2418,7 +2418,7 @@ paths:
         '200': {description: Changed, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
         '400': {description: Invalid change, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
         '403': {description: Not an admin of the group, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/report/setup:
+  /{database}/presentation/setup:
     parameters:
     - $ref: '#/components/parameters/Database'
     get:
@@ -2428,7 +2428,7 @@ paths:
       description: >-
         Logged-in users. installed, missing (codes), canSetup, allowDynamicReports, settings {javaScriptAllowed,
         testRecordLimit}, unregistered [{file, title, modified}]. A template file without a record can not be run:
-        register it (POST /report/0 with its name in 2-62) or delete it.
+        register it (POST /presentation/0 with its name in 2-62 and kind 2-1203 card / list report) or delete it.
       security:
       - bearerAuth: []
       responses:
@@ -2455,7 +2455,7 @@ paths:
         '200': {description: '{file, fileDeleted}'}
         '400': {description: The file has a report record, or the name is invalid, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
         '404': {description: No such file, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/report/import:
+  /{database}/presentation/import:
     post:
       tags: [Entities]
       operationId: importReport
@@ -2474,11 +2474,11 @@ paths:
               required: [import_template]
               properties:
                 import_template: {type: string, format: binary}
-                isCardView: {type: boolean}
+                kind: {type: string, enum: [card, list], description: The kind of the new report (default list); isCardView=true is the older form of card}
       responses:
         '200': {description: The new report, content: {application/json: {schema: {type: object, additionalProperties: true}}}}
         '400': {description: No file, content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/report/{recordId}/asset:
+  /{database}/presentation/{recordId}/asset:
     parameters:
     - $ref: '#/components/parameters/Database'
     - $ref: '#/components/parameters/RecordId'
@@ -2486,7 +2486,7 @@ paths:
       tags: [Entities]
       operationId: getReportTemplate
       summary: The template of a report
-      description: Answer {report, body}. Logged-in users.
+      description: Answer {report, body}. Logged-in users. Another kind of Presentation set answers 400.
       security:
       - bearerAuth: []
       responses:
@@ -2515,7 +2515,7 @@ paths:
       responses:
         '200': {description: '{id, fileDeleted}'}
         '409': {description: Outputs point to the report (report_in_use), content: {application/json: {schema: {$ref: '#/components/schemas/RecordEditError'}}}}
-  /{database}/report/{recordId}/execute:
+  /{database}/presentation/{recordId}/execute:
     parameters:
     - $ref: '#/components/parameters/Database'
     - $ref: '#/components/parameters/RecordId'
@@ -2546,7 +2546,7 @@ paths:
       requestBody: {content: {application/json: {schema: {type: object, additionalProperties: true}}}}
       responses:
         '200': {description: HTML, content: {text/html: {schema: {type: string}}}}
-  /{database}/report/{recordId}/export:
+  /{database}/presentation/{recordId}/export:
     get:
       tags: [Entities]
       operationId: exportReport

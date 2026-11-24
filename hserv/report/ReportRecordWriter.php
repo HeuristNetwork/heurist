@@ -3,9 +3,10 @@
 * ReportRecordWriter.php - Setup of the report definitions for the srv/ reports manager
 *
 * Implements Heurist\Reports\ReportRecordWriterInterface with the definitions import
-* (DbsImport): installs Custom Report (2-1104) and Custom Report Schedule (2-1105) from
-* Heurist_Core_Definitions and converts usrReportSchedule rows to records. Other record
-* writes are in the generic record services (srv/Records/Edit, Reports/ReportEntityHandler).
+* (DbsImport): installs Presentation Set (2-1112, a report is one of kind Card / List Report,
+* plan 27q3) and Generated Report (2-1105) from Heurist_Core_Definitions and converts
+* usrReportSchedule rows to records. Other record writes are in the generic record services
+* (srv/Records/Edit, Presentations/PresentationEntityHandler).
 *
 * @project     Heurist academic knowledge management system
 * @package     Report
@@ -33,7 +34,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
     private const SOURCE_DATABASE_ID = 2;
 
     /** Record types to import: local ids in the source database. */
-    private const RECORD_TYPES = array('2-1104' => 1104, '2-1105' => 1105);
+    private const RECORD_TYPES = array('2-1112' => 1112, '2-1105' => 1105);
 
     /** Output formats of ReportExecute and their MIME types. */
     private const FORMATS = array(
@@ -53,7 +54,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
     }
 
     /**
-     * Create a Custom Report record.
+     * Create a report: a Presentation set of kind Card Report or List Report.
      *
      * @param string $title Report title.
      * @param string $templateFile Template file name.
@@ -68,14 +69,14 @@ class ReportRecordWriter implements ReportRecordWriterInterface
             $this->fieldId('2-1') => $title,
             $this->fieldId('2-62') => $templateFile
         );
-        $flag = $this->flagTermId($isCardView);
-        if ($flag > 0) {
-            $details[$this->fieldId('2-1182')] = $flag;
+        $kind = intval(ConceptCode::getTermLocalID($isCardView ? '2-10645' : '2-10646'));
+        if ($kind > 0) {
+            $details[$this->fieldId('2-1203')] = $kind;
         }
         if (trim($description) !== '') {
-            $details[$this->fieldId('2-4')] = $description;
+            $details[$this->fieldId('2-3')] = $description;
         }
-        return $this->saveRecord($this->recordTypeId('2-1104'), $details, $access);
+        return $this->saveRecord($this->recordTypeId('2-1112'), $details, $access);
     }
 
     /**
@@ -94,7 +95,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
                 $missing[] = $sourceId;
             }
         }
-        foreach (array('2-1182', '2-1183', '2-1184', '2-62') as $code) {
+        foreach (array('2-1203', '2-1183', '2-1184', '2-62') as $code) {
             if (!($this->fieldId($code, false) > 0)) {
                 // a field without its record type: import both record types again
                 $missing = array_values(self::RECORD_TYPES);
@@ -117,7 +118,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
                 throw new \RuntimeException($this->errorMessage($this->system->getError(), 'Cannot import report definitions'));
             }
             ConceptCode::setSystem($this->system);
-            $report[] = 'Imported record types Custom Report (2-1104) and Custom Report Schedule (2-1105)';
+            $report[] = 'Imported record types Presentation Set (2-1112) and Generated Report (2-1105)';
         }
 
         return array_merge($report, $this->convertSchedules());
@@ -179,7 +180,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
     }
 
     /**
-     * Id of the Custom Report record for a template file; create it when missing.
+     * Id of the report (Presentation set) of a template file; create it when missing.
      */
     private function findOrCreateReport(string $templateFile, array $access): int
     {
@@ -187,7 +188,7 @@ class ReportRecordWriter implements ReportRecordWriterInterface
         $file = pathinfo($templateFile, PATHINFO_FILENAME).'.tpl';
         $id = mysql__select_value($mysqli,
             'SELECT r.rec_ID FROM Records r JOIN recDetails d ON d.dtl_RecID=r.rec_ID AND d.dtl_DetailTypeID='.intval($this->fieldId('2-62'))
-            .' WHERE r.rec_RecTypeID='.intval($this->recordTypeId('2-1104')).' AND r.rec_FlagTemporary=0'
+            .' WHERE r.rec_RecTypeID='.intval($this->recordTypeId('2-1112')).' AND r.rec_FlagTemporary=0'
             .' AND (d.dtl_Value="'.$mysqli->real_escape_string($file).'" OR d.dtl_Value="'.$mysqli->real_escape_string(substr($file, 0, -4)).'") LIMIT 1');
         if ($id) {
             return intval($id);
@@ -221,21 +222,6 @@ class ReportRecordWriter implements ReportRecordWriterInterface
             throw new \RuntimeException($this->errorMessage($result ?: $this->system->getError(), 'Cannot save record'));
         }
         return intval($result['data']);
-    }
-
-    /**
-     * Term id of "Yes" or "No" in the vocabulary of the card view field.
-     */
-    private function flagTermId(bool $yes): int
-    {
-        $labels = $yes ? array('yes', 'y', 'true') : array('no', 'n', 'false');
-        foreach ($this->fieldTerms($this->fieldId('2-1182', false)) as $term) {
-            if (in_array(strtolower(trim($term['trm_Label'])), $labels, true)
-                || in_array(strtolower(trim((string)$term['trm_Code'])), $labels, true)) {
-                return intval($term['trm_ID']);
-            }
-        }
-        return 0;
     }
 
     /**

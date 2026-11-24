@@ -71,7 +71,7 @@ class ReportTemplateMgr
     }
 
     /**
-     * A template file of a Custom Report record follows the rights of the record (plan 30): only who may
+     * A template file of a report (Presentation set of kind Card / List Report, plan 27q3) follows the rights of the record (plan 30): only who may
      * change the record changes the file; a report that is not public or viewable is read by them only.
      * A file without a record has no owner.
      *
@@ -83,12 +83,12 @@ class ReportTemplateMgr
     {
         $mysqli = $this->system->getMysqli();
         if(!$mysqli || empty($template_file)
-            || !$this->system->defineConstant('RT_REPORT_TEMPLATE') || !$this->system->defineConstant('DT_FILE_NAME')){
+            || !$this->system->defineConstant('RT_PRESENTATION_SET') || !$this->system->defineConstant('DT_FILE_NAME')){
             return;
         }
         $base = pathinfo(basename($template_file), PATHINFO_FILENAME);
         $rows = mysql__select_all($mysqli, 'SELECT rec_OwnerUGrpID, rec_NonOwnerVisibility FROM Records, recDetails'
-            .' WHERE dtl_RecID=rec_ID AND rec_RecTypeID='.intval(RT_REPORT_TEMPLATE).' AND dtl_DetailTypeID='.intval(DT_FILE_NAME)
+            .' WHERE dtl_RecID=rec_ID AND rec_RecTypeID='.intval(RT_PRESENTATION_SET).' AND dtl_DetailTypeID='.intval(DT_FILE_NAME)
             ." AND dtl_Value IN ('".$mysqli->real_escape_string($base)."','".$mysqli->real_escape_string($base.'.tpl')."')");
         foreach(is_array($rows) ? $rows : [] as $row){
             if(!$forWrite && in_array($row[1], ['public', 'viewable'], true)){ continue; }

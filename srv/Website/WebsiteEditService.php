@@ -287,6 +287,7 @@ final class WebsiteEditService
                 $codes['configuration'] => self::json($config)
             );
             if($codes['standalonePage'] > 0){ $details[$codes['pageType']] = array($codes['standalonePage']); }
+            $details = $this->withPresentations($details);
             $result = $this->save->save('POST', 0, RecordInput::fromBody(array(
                 'rec_ID' => 0, 'rec_RecTypeID' => $codes['page'], 'rec_NonOwnerVisibility' => 'public', 'details' => $details
             )));
@@ -327,13 +328,39 @@ final class WebsiteEditService
         $translated = array_values(array_filter($names, static function($value): bool {
             return is_string($value) && preg_match('/^[a-z]{2,3}:/i', $value) === 1;
         }));
-        $result = $this->save->save('PATCH', $pageId, RecordInput::fromBody(array('rec_ID' => $pageId, 'details' => array(
+        $result = $this->save->save('PATCH', $pageId, RecordInput::fromBody(array('rec_ID' => $pageId, 'details' => $this->withPresentations(array(
             $codes['name'] => array_merge(array($title), $translated),
             $codes['content'] => $html,
             $codes['configuration'] => self::json($config)
-        ))));
+        )))));
         return array('id' => $pageId, 'url' => $this->urls->page($pageId), 'title' => $title, 'created' => false,
             'issues' => $result['issues']);
+    }
+
+    /**
+     * Details of a page save with the field "Presentations on this page" 2-1204 (plan 27q3) set from the configuration
+     * in them: the Presentation sets of its story map and crosstabs elements (none: the field is emptied). Details
+     * without the configuration are not changed. The field is a back link: the List of a presentation finds its pages
+     * with an ordinary record search.
+     *
+     * @param array<int|string,mixed> $details Field id => value(s).
+     * @return array<int|string,mixed>
+     */
+    public function withPresentations(array $details): array
+    {
+        $codes = $this->repository->codes();
+        $field = intval($codes['presentations'] ?? 0);
+        $configField = intval($codes['configuration'] ?? 0);
+        if($field < 1 || $configField < 1 || !array_key_exists($configField, $details)){ return $details; }
+        $value = $details[$configField];
+        $value = is_array($value) ? (array_values($value)[0] ?? '') : $value;
+        if(is_array($value)){ $value = $value['value'] ?? ''; }
+        $config = json_decode((string)$value, true);
+        // a preset that is gone (or not a Presentation set) is not pointed to: the save would fail
+        $details[$field] = is_array($config)
+            ? $this->repository->idsOfType(CmsRecordReferences::presentationIds($config), intval($codes['presentation'] ?? 0))
+            : array();
+        return $details;
     }
 
     /** Host element of a module instance. */

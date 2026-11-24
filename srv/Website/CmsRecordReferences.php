@@ -79,6 +79,26 @@ final class CmsRecordReferences
         return $result;
     }
 
+    /**
+     * Presentation sets of the elements of a configuration (story map, crosstabs: `settings.preset`), for the field
+     * "Presentations on this page" 2-1204 (plan 27q3). All instances count, with or without their host.
+     *
+     * @param array $config Decoded configuration.
+     * @return array<int,int> Positive unique ids.
+     */
+    public static function presentationIds(array $config): array
+    {
+        $ids = array();
+        foreach(is_array($config['instances'] ?? null) ? $config['instances'] : array() as $instance){
+            if(!is_array($instance)){ continue; }
+            $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
+            foreach(self::widgetIds((string)($instance['type'] ?? ''), $settings) as $kind => $found){
+                if($kind === 'storymap' || $kind === 'crosstabs'){ $ids = array_merge($ids, $found); }
+            }
+        }
+        return self::ids($ids);
+    }
+
     /** The query source of settings with the action Saved filter (plan 27j) or of a search box (plan 27k §6), or 0. */
     private static function filterSource($settings): int
     {

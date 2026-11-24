@@ -84,6 +84,10 @@ final class WebsiteEntityHandler extends RecordEntityHandler
             }elseif($this->kind === 'page' && $method === 'POST' && !array_key_exists('rec_NonOwnerVisibility', $record)){
                 $record['rec_NonOwnerVisibility'] = 'public';
             }
+            if($this->kind === 'page' && is_array($record['details'] ?? null)){
+                // the back link to the Presentation sets of its elements (plan 27q3)
+                $record['details'] = $this->edit->withPresentations($record['details']);
+            }
             if(isset($body['records'][0])){
                 $body['records'][0] = $record;
                 return $body;

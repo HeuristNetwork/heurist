@@ -1,16 +1,18 @@
 <?php
 /**
-* ReportEntityHandler.php - Hooks and actions of the entities report and output (plan 30)
+* ReportEntityHandler.php - Hooks and actions of reports and of the entity output (plan 30, plan 27q3)
 *
-* report (Custom Report 2-1104): the record owns its template file. The file name is made once, from
-* the title, when the record is created and does not change after that.
-*   GET | PUT | DELETE /report/{id}/asset     the template (`{report, body}`; `{body}` to save)
-*   GET | POST /report/{id}/execute           one record as HTML (`recordId`, or `q` limited to 1; `lang`)
-*   GET /report/{id}/export                   the template with concept codes (.gpl)
-*   POST /report/import                       a template file (multipart `import_template`, `isCardView`)
-*   GET | POST | DELETE /report/setup         state and unregistered files | install | delete a file (`name`; not `file`: the root router sends `?file=` to fileDownload.php)
+* report: a Presentation set of kind Card Report or List Report (plan 27q3; was Custom Report 2-1104).
+* No entity of its own: PresentationEntityHandler gives its hooks and actions of a report to this
+* handler (kind "report"). The record owns its template file. The file name is made once, from the
+* title, when the record is created and does not change after that.
+*   GET | PUT | DELETE /presentation/{id}/asset     the template (`{report, body}`; `{body}` to save)
+*   GET | POST /presentation/{id}/execute           one record as HTML (`recordId`, or `q` limited to 1; `lang`)
+*   GET /presentation/{id}/export                   the template with concept codes (.gpl)
+*   POST /presentation/import                       a template file (multipart `import_template`, `kind` card | list)
+*   GET | POST | DELETE /presentation/setup         state and unregistered files | install | delete a file (`name`; not `file`: the root router sends `?file=` to fileDownload.php)
 *
-* output (Custom Report Schedule 2-1105): a generated report, a record with one file.
+* output (Generated Report 2-1105): a generated report, a record with one file; 2-1183 points to its report.
 *   GET | DELETE /output/{id}/asset           the file (`download=1`: as a file named by the title)
 *   POST /output/{id}/execute                 job report-generate (api.php)
 *
@@ -168,6 +170,12 @@ final class ReportEntityHandler extends RecordEntityHandler
         return $result;
     }
 
+    /** Whether a record is a report the user sees (a Presentation set of kind Card / List Report). */
+    public function isReport(int $id): bool
+    {
+        return $id > 0 && $this->reports->getReport($id) !== null;
+    }
+
     public function describe(int $id): array
     {
         $items = $this->describeMany(array($id));
@@ -244,7 +252,9 @@ final class ReportEntityHandler extends RecordEntityHandler
                 self::allow($method, array('POST'));
                 $upload = $params['uploads']['import_template'] ?? null;
                 if(!is_array($upload)){ throw new InvalidArgumentException('Multipart field "import_template" is required'); }
-                return $service->importTemplate($upload, filter_var($params['isCardView'] ?? false, FILTER_VALIDATE_BOOLEAN));
+                $kind = (string)($params['kind'] ?? '');
+                $card = $kind !== '' ? $kind === 'card' : filter_var($params['isCardView'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                return $service->importTemplate($upload, $card);
             }
             return parent::action($action, $method, $id, $params, $body);
         }

@@ -24,7 +24,7 @@ namespace Heurist\Reports;
 interface ReportRecordWriterInterface
 {
     /**
-     * Import the Custom Report / Report Schedule definitions when they are missing
+     * Import the Presentation Set / Generated Report definitions when they are missing
      * and convert usrReportSchedule rows into Report Schedule records.
      *
      * @return array<int,string> Report lines.

@@ -87,12 +87,12 @@ final class SystemConstants
         'RT_IIIF_ANNOTATION' => array('rty', '2-109'),
         'RT_IIIF_MANIFEST' => array('rty', '2-110'),
         'RT_IIIF_CANVAS' => array('rty', '2-111'),
-        'RT_REPORT_TEMPLATE' => array('rty', '2-1104'),
+        'RT_REPORT_TEMPLATE' => array('rty', '2-1104'), // retired (plan 27q3): reports are Presentation sets
         'RT_REPORT_OUTPUT' => array('rty', '2-1105'),
         'RT_REGISTERED_FILE' => array('rty', '2-1106'),
         'RT_USER_BOOKMARKS' => array('rty', '2-1110'),
         'RT_USER_REMINDERS' => array('rty', '2-1111'),
-        'RT_PRESENTATION_SET' => array('rty', '2-1112'), // story map, crosstabs or export settings (plan 27q1)
+        'RT_PRESENTATION_SET' => array('rty', '2-1112'), // story map, crosstabs, export or report (plan 27q1, 27q3)
         // Fields (ported from hserv/consts.php $dtDefines)
         'DT_NAME' => array('dty', '2-1'),
         'DT_SHORT_NAME' => array('dty', '2-2'),
@@ -198,7 +198,7 @@ final class SystemConstants
         'DT_ORDERING_HIERARCHY' => array('dty', '2-1082'), // field used to define drag-drop ordering of records
         'DT_DATA_SOURCE' => array('dty', '3-1083'),
         'DT_IS_CARD_VIEW' => array('dty', '2-1182'), // Flag Yes|No: report for a single record (popups, cards, record view)
-        'DT_REPORT' => array('dty', '2-1183'), // pointer to Custom Report
+        'DT_REPORT' => array('dty', '2-1183'), // pointer of a generated report to its Presentation set (plan 27q3)
         'DT_INTERVAL_MINUTES' => array('dty', '2-1184'), // regeneration interval of a report schedule
         'DT_ZIP_FILE' => array('dty', '3-1072'),
         'DT_SHAPE_FILE' => array('dty', '3-1069'),
@@ -233,12 +233,15 @@ final class SystemConstants
         'DT_CONFIGURATION' => array('dty', '2-1187'),
         'DT_CMS_PAGE_TRANSLATIONS' => array('dty', '2-1202'), // translated text blocks of a v4 website page (plan 27a)
         'DT_PRESENTATION_TYPE' => array('dty', '2-1203'), // kind of a Presentation set (plan 27q1)
+        'DT_PAGE_PRESENTATIONS' => array('dty', '2-1204'), // Presentation sets shown on a website page (plan 27q3)
         // Terms (ported from hserv/consts.php $trmDefines)
         'TRM_PAGETYPE_WEBPAGE' => array('trm', '2-6254'),
         'TRM_PAGETYPE_MENUITEM' => array('trm', '2-6253'),
         'TRM_PRESENTATION_CROSSTABS' => array('trm', '2-10642'), // kinds of a Presentation set (plan 27q1)
         'TRM_PRESENTATION_EXPORT' => array('trm', '2-10643'),
         'TRM_PRESENTATION_STORYMAP' => array('trm', '2-10644'),
+        'TRM_PRESENTATION_CARD_REPORT' => array('trm', '2-10645'), // report of one record (plan 27q3)
+        'TRM_PRESENTATION_LIST_REPORT' => array('trm', '2-10646'), // report of a list of records (plan 27q3)
         'TRM_NO' => array('trm', '2-531'), // General 'No' term
         'TRM_NO_OLD' => array('trm', '99-5447'), // Older 'No' term, potentially from a specific DB context
         'TRM_SWF' => array('trm', '2-9453'), // Workflow stages vocabulary root/identifier
