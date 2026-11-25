@@ -7721,6 +7721,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     value = !window.hWin.HEURIST4.util.isempty(value.ulf_OrigFileName) ? 
                                     value.ulf_OrigFileName : value.ulf_ExternalFileReference;
                     value ??= orgValue.arc_Value;
+                }else{
+                    value = orgValue.arc_Value;
                 }
 
                 historyLog += `<div id="${field}" style="${rowCSS}" class="record_history_value">
@@ -7775,7 +7777,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 }else if(type == 'date'){ // translate value
                     cur_value = temporalToHumanReadableString(cur_value);
                 }else if(type == 'enum'){ // grab label from dropdown
-                    cur_value = fieldHistory[fld_idx][0].arc_Value;
+                    cur_value = fieldHistory[fieldIndex][0].arc_Value;
                 }else if(type == 'file'){ // set value to filename / url
                     cur_value = !window.hWin.HEURIST4.util.isempty(cur_value.ulf_OrigFileName) ? 
                                     cur_value.ulf_OrigFileName : cur_value.ulf_ExternalFileReference;
