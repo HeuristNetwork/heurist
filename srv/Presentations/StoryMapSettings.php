@@ -75,7 +75,7 @@ final class StoryMapSettings
         return $problems;
     }
 
-    /** story: {rule: {query, levels}, order: {by, dir, manual}, limit}. */
+    /** story: {topicType, rule: {query, levels}, order: {by, dir, manual}, limit}. */
     private static function story($story, array &$problems): void
     {
         if($story === null){ return; }
@@ -90,6 +90,10 @@ final class StoryMapSettings
             }elseif(isset($rule['levels']) && !is_array($rule['levels'])){
                 $problems[] = 'story.rule.levels must be a list';
             }
+        }
+        $topicType = $story['topicType'] ?? null;
+        if($topicType !== null && !(is_int($topicType) && $topicType > 0)){
+            $problems[] = 'story.topicType must be a record type id';
         }
         $limit = $story['limit'] ?? null;
         if($limit !== null && !(is_int($limit) && $limit > 0 && $limit <= self::MAX_LIMIT)){

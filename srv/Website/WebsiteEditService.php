@@ -252,8 +252,11 @@ final class WebsiteEditService
         }
     }
 
-    /** Widgets that Explorer publishes as a standalone page, as the modules (presentation-sources.md §6, plan 27q2 §17). */
-    public const PUBLISHED_WIDGETS = array('crosstabs');
+    /**
+     * Widgets that Explorer publishes as a standalone page, as the modules (presentation-sources.md §6, plan 27q2 §17);
+     * storymap: with its story topic and its own map (27q3 §12, 2026-11-25).
+     */
+    public const PUBLISHED_WIDGETS = array('crosstabs', 'storymap');
 
     /**
      * Import a module (or Explorer) configuration into a standalone page (plan 27b §6, 27d): a
