@@ -110,7 +110,7 @@ final class WebsiteEditService
      * A website or page for the manager (meta.website of GET /website/{id} and /page/{id}).
      *
      * @return array{id:int,kind:string,version:string,v4:bool,title:string,languages:array<int,string>,url:string,
-     *         canEdit:bool,pages:array<int,array>}
+     *         canEdit:bool,pages:array<int,array>,site:array{id:int,title:string,languages:array<int,string>}|null}
      * @throws WebsiteException 404 when the record is not visible or not a website / page.
      */
     public function summary(int $id): array
@@ -130,7 +130,19 @@ final class WebsiteEditService
             $pages = $this->pageTree($menu['tree'], $menu['pages']);
             $languages = $this->siteLanguages($record);
         }
-        $url = $kind === 'page' ? '' : ($v4 ? $this->urls->page($id) : $this->urls->legacy($id));
+        // a menu page: its website and /site/{website}/{page} (27q3 review 1, 2026-11-25)
+        $site = null;
+        if($kind === 'page'){
+            $siteId = $this->repository->websiteOfPage($id);
+            $siteRecord = $siteId > 0 ? $this->repository->record($siteId) : null;
+            if($siteRecord !== null){
+                $site = array('id' => $siteId, 'title' => $this->name($siteRecord),
+                    'languages' => array_map('strtolower', $this->siteLanguages($siteRecord)));
+            }
+        }
+        $url = $kind === 'page'
+            ? ($site !== null && $v4 ? $this->urls->page($site['id'], $id) : '')
+            : ($v4 ? $this->urls->page($id) : $this->urls->legacy($id));
         return array(
             'id' => $id,
             'kind' => $kind,
@@ -141,6 +153,8 @@ final class WebsiteEditService
             'url' => $url,
             'canEdit' => $this->canEdit($id),
             'pages' => $pages,
+            // a menu page: the website of its menu {id, title, languages}, null when none (or not visible)
+            'site' => $site,
             // the module types of the home page (plan 27j)
             'modules' => $kind === 'website'
                 ? self::moduleTypes(CmsValidator::parse(WebsiteRepository::value($record, $codes['configuration']))['config']) : array(),
