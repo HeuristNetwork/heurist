@@ -704,103 +704,63 @@ if(!$system->hasAccess()){
             //
             // Move related record details without particular relmarker field to the separated section
             //
-            function moveRelatedDetails(recID, related_records){
+            function moveRelatedDetails(recID, relatedRecords){
 
-                var $rel_section = $(`div[data-recdetails="${recID}"].relatedSection`); //target div
+                var $relatedSection = $(`div[data-recdetails="${recID}"].relatedSection`); //target div
 
-                var $public_fields = $(`div[data-recdata="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
+                var $publicFields = $(`div[data-recdata="${recID}"]  div.div_public_data`).find('fieldset[id], div[data-order]');
 
-                if(related_records == null || $public_fields.length == 0){
+                if(relatedRecords == null || $publicFields.length == 0){
                     return;
                 }
 
-                for(var key in related_records){
+                for(const key in relatedRecords){
 
-                    var rl_order = related_records[key][0];
-                    var $pre_location = null;
-                    var isAfter = false;
+                    const fieldOrder = relatedRecords[key][0];
 
-                    $last_fieldset = null;
-
-                    $.each($public_fields, function(idx, field){
-
-                        var $cur_field = $(field);
-                        var $next_field = $($public_fields[Number(idx)+1]);
-
-                        if(idx != 0){
-                            var $prev_field = $($public_fields[Number(idx)-1]);
-                        }
-
-                        var cur_order;
-                        var next_order = null;
-
-                        if($cur_field.is('fieldset')){
-                            cur_order = $cur_field.attr('id');
-                            $last_fieldset = $cur_field;
-                        }else{
-                            cur_order = $cur_field.attr('data-order');
-                        }
-
-                        if($next_field){
-
-                            if($next_field.is('fieldset')){
-                                next_order = $next_field.attr('id');
-                            }else{
-                                next_order = $next_field.attr('data-order');
-                            }
-                        }
-                        if(cur_order < rl_order && (next_order == null || rl_order < next_order)){
-
-                            if($next_field && $next_field.is('div')){
-                                $pre_location = $next_field;
-                            }else if($cur_field.is('div')){
-                                $pre_location = $cur_field.parent();
-                            }else{
-                                $pre_location = $cur_field;
-                            }
-                            return false;
-                        }
-                    });
-
-                    if($pre_location == null){
-                        $pre_location = $last_fieldset;
+                    const $field = $publicFields.find(`[data-order="${fieldOrder}"]`);
+                    if($field.length === 0){
+                        continue;
                     }
-                    if($pre_location != null){
 
-                        for(var i = 1; i < Object.keys(related_records[key]).length; i++){
+                    const relatedCount = Object.values(relatedRecords[key]);
+                    for(let idx = 1; idx < relatedCount.length; idx ++){
 
-                            var $rel_field = $rel_section.find(`div[data-id="${related_records[key][i]}"]`).hide();
+                        const relatedID = relatedRecords[key][idx];
 
-                            if($pre_location.is('fieldset')){
-                                $rel_field.clone().appendTo($pre_location).show();// show rel field
-                                $pre_location.show();// show fieldset
-                                $pre_location.prev().show();// show header
-                            }else{
-                                $pre_location.before($rel_field.clone().show());// show rel field
-                                $pre_location.parent().show();// show fieldset
-                                $pre_location.parent().prev().show();// show header
-                            }
+                        const $oldLocation = $relatedSection.find(`[data-id="${relatedID}"]`);
+                        if($oldLocation.length === 0){
+                            continue;
                         }
+
+                        const $oldRecord = $oldLocation.find(`.detail`);
+                        const $newLocation = $field.find('.detail');
+                        const $newElement = $('<span>', {
+                            class: 'value',
+                            html: $oldRecord[0].innerHTML
+                        });
+
+                        $newLocation.append($newElement);
+
+                        $oldLocation.hide();
                     }
+                    $field.removeClass('emptyField');
                 }
 
                 // hide 'relation' section if there isn't any relmarkers to display
-                if($rel_section.find('div[data-id]:visible').length == 0){
+                $relatedSection.hide();
 
-                    $rel_section.hide();
-
-                    let hasRelationShown = false;
-                    $rel_section.find('div[data-id]').each((idx, element) => {
-                        if($(element).css('display') !== 'none'){
-                            $rel_section.show();
-                            hasRelationShown = true;
-                            return false;
-                        }
-                    });
-
-                    if(!hasRelationShown){
-                        $rel_section.remove();
+                let hasRelationShown = false;
+                $relatedSection.find('div[data-id]').each((idx, element) => {
+                    if($(element).css('display') !== 'none'){
+                        $relatedSection.show();
+                        hasRelationShown = true;
+                        return false;
                     }
+                });
+
+                if(!hasRelationShown){
+                    $relatedSection.remove();
                 }
             }//end moveRelatedDetails
 
@@ -986,14 +946,22 @@ if(!$system->hasAccess()){
                     }
 
                 }
-                
+
                 if(isAdminInterface){
-                    $('#custom-report-link').show();
-                    $('#custom-report-link').on('click', () => openReportSelector());
+                    $('.custom-report-link').show();
+                    $('.custom-report-link').on('click', () => openReportSelector());
                 }
 
-                $('#pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
+                $('.pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
 
+                $('[name="show-unused-fields"]').on('change', (event) => {
+                    const showUnusedFields = $(event.target).is(':checked');
+                    const $parent = $(event.target).closest('div[data-recdata]');
+                    const $fields = $parent.find('.emptyField');
+                    showUnusedFields ? $fields.show() : $fields.hide();
+                });
+
+                $('[name="show-unused-fields"]').trigger('change');
             });
 
         </script>
@@ -1028,7 +996,7 @@ if(!empty($import_webfonts)){
                     visibility: visible;
                 }
 
-                .record-media-controls, .download_link, #custom-report-link, #pdf-download-link, .network-graph-area{
+                .record-media-controls, .download_link, #custom-report-link, .pdf-download-link, .network-graph-area{
                     display: none;
                 }
 
@@ -1131,7 +1099,8 @@ if(!empty($import_webfonts)){
             width: 50%;
         }
 
-        .detail > .value.grayed{
+        .detail > .value.grayed,
+        .emptyField{
             background: rgb(233 233 233) !important;
         }
 
@@ -1195,7 +1164,7 @@ if(defined('FONT_SIZE') && FONT_SIZE!==''){
             width: 20%;
         }
 
-        #pdf-download-link{
+        .pdf-download-link{
             font-size: 0.9em;
 
             margin-left: 1em;
@@ -1485,8 +1454,11 @@ function print_header_line(array $bib) {
         <?php }
         if(!($is_map_popup || $without_header)){
         ?>
-            <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em;display:none" href="#">Custom report</a></span>
-            <span class="link"><a id="pdf-download-link" class="normal" style="font-size:0.9em;margin-left:10px;" href="#">Download PDF</a></span>
+            <span class="link"><a class="normal custom-report-link" style="font-size:0.9em;display:none" href="#">Custom report</a></span>
+            <span class="link"><a class="normal pdf-download-link" style="font-size:0.9em;margin-left:10px;" href="#">Download PDF</a></span>
+            <span style="float: right;">
+                <label class="normal" style="font-size:0.9em;margin-left:10px;"><input type="checkbox" name="show-unused-fields" /> unused fields</label>
+            </span>
         <?php }
 
         if(!empty($wfs_details)){
@@ -2300,12 +2272,14 @@ function print_public_details(array $bib) {
     if ($webIcon) {print "<img id=website-icon src='" . $webIcon . "'>";}
     */
     if (@$url) {
-        print '<div class="detailRow" style="border:none 1px #00ff00;">' //width:100%;
+        print '<div class="detailRow" style="border:none 1px #00ff00;display: flex;align-items: center;">' //width:100%;
             .'<div class=detailType>URL</div>'
             .'<div class="detail'.($is_map_popup?' truncate style="max-width:400px;"':'"').'>'
-            .'<span class="link">'
-                .'<a target="_new" class="external-link" href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
-                .'<a target="_new" class="external-link" href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
+            .'<span class="link" style="display: flex; align-items: center;">'
+                .'<a target="_new" class="external-link" style="display: inline-block; max-width: 3em; min-width: unset;"'
+                    . 'href="http://web.archive.org/web/*/'.htmlspecialchars($url).'">page history</a>&nbsp;&nbsp;&nbsp;'
+                .'<a target="_new" class="external-link" style="display: inline-block; min-width: unset; max-width: 25em;"'
+                    . 'href="'.htmlspecialchars($url).'">'.output_chunker($url).'</a>'
             .'</span></div></div>';
     }
 
@@ -2316,81 +2290,75 @@ function print_public_details(array $bib) {
 
     $prevLbl = null;
     $has_translations = !empty($translations);
+    $recTypeID = intval($bib['rec_RecTypeID']);
 
-    foreach ($bds as $bd) {
-        if (defined('DT_PARENT_ENTITY') && $bd['dty_ID']==DT_PARENT_ENTITY) {
+    $fieldQuery = <<<QUERY
+    SELECT rst_DisplayName, rst_DetailTypeID, rst_DisplayOrder, dty_Type, rst_DefaultValue, rst_NonOwnerVisibility, rst_RequirementType
+    FROM defRecStructure
+    LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
+    WHERE rst_RecTypeID = $recTypeID
+    ORDER BY rst_DisplayOrder
+    QUERY;
+
+    $recordFields = mysql__select_assoc($mysqli, $fieldQuery, 0);
+    foreach($recordFields as $field){
+
+        $dty_ID = $field['rst_DetailTypeID'];
+        $fieldName = htmlspecialchars($field['rst_DisplayName']);
+        $fieldVisibility = $field['rst_NonOwnerVisibility'];
+        if(defined('DT_PARENT_ENTITY') && $dty_ID == DT_PARENT_ENTITY){
+            continue;
+        }
+        if(defined('DT_WORKFLOW_STAGE') && $dty_ID == DT_WORKFLOW_STAGE){
             continue;
         }
 
-        if(defined('DT_WORKFLOW_STAGE') && $bd['dty_ID']==DT_WORKFLOW_STAGE){
+        if($field['dty_Type'] === 'separator'){
+            $group_details[] = [$field['rst_DisplayName'], $field['rst_DisplayOrder'], $field['rst_DefaultValue']];
             continue;
         }
 
-        $query = 'SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID ='.$bd['dty_ID']
-                .' AND rst_RecTypeID = '. $bib['rec_RecTypeID'];
+        $fieldValuesAsString = '';
+        foreach($bds as $bd){
 
-        if(!(mysql__select_value($mysqli, $query)>0)) {continue;} //not in structure
-
-        if( $has_translations && isset( $translations[$bd['dty_ID']] ) && !in_array($bd['dtl_ID'], $translations[$bd['dty_ID']]['values']) ){
-            continue;
-        }
-
-        $is_cms_content = !$is_map_popup &&
-                          (defined('RT_CMS_PAGE') && $bib['rec_RecTypeID']==RT_CMS_PAGE ||
-                           defined('RT_CMS_HOME') && $bib['rec_RecTypeID']==RT_CMS_HOME) &&
-                           (defined('DT_EXTENDED_DESCRIPTION') && $bd['dty_ID']==DT_EXTENDED_DESCRIPTION ||
-                            defined('DT_CMS_HEADER') && $bd['dty_ID']==DT_CMS_HEADER ||
-                            defined('DT_CMS_FOOTER') && $bd['dty_ID']==DT_CMS_FOOTER) ? ' cmsContent' : '';
-
-        $ele_id = ($bd['rst_DisplayOrder'] != '' || $bd['rst_DisplayOrder'] != null) ? ('data-order="' . $bd['rst_DisplayOrder']) . '"' : '';
-
-        if($prevLbl != $bd['name']){ // start new detail row
-
-            if($prevLbl != null){
-                print DIV_E.DIV_E;// close previous detail row
+            if($bd['dty_ID'] != $dty_ID){
+                continue;
+            }
+            if($has_translations && isset($translations[$dty_ID]) && !in_array($bd['dtl_ID'], $translations[$dty_ID]['values'])){
+                continue;
             }
 
-            // open new detail row
-            $row_classes = 'detailRow fieldRow' . ($bd['rst_NonOwnerVisibility'] == 'hidden' || $bd['rst_RequirementType'] == 'forbidden' ?
-                                                    ' hiddenField' : '');
+            $grayedOut = isPositiveInt(@$bd['dtl_HideFromPublic']) || $fieldVisibility != 'public' && $fieldVisibility != 'pending' ? ' grayed' : '';
+            $rollover = !empty(@$bd['rollover']) ? htmlspecialchars($bd['rollover']) : '';
+            $value = strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption><ul><ol><li>');
 
-            print '<div class="'. $row_classes .'" '. $ele_id .' style="border:none 1px #00ff00;'   //width:100%;
-                    .($is_map_popup && !in_array($bd['dty_ID'], $always_visible_dt)?CSS_HIDDEN:'')
-                    .($is_map_popup?'':'width:100%;')
-                    //.FONT_SIZE
-                    .'"><div class=detailType>'.($prevLbl==$bd['name']?'':htmlspecialchars($bd['name']))
-                . '</div><div class="detail'.($is_map_popup && ($bd['dty_ID']!=DT_SHORT_SUMMARY)?' truncate':'').$is_cms_content.'">';
+            $fieldValuesAsString .= <<<VALUEROW
+            <span class="value{$grayedOut}" title="{$rollover}">{$value}</span>
+            VALUEROW;
         }
 
-        $is_grayed_out = ( (@$bd['dtl_HideFromPublic']!=null && intval($bd['dtl_HideFromPublic']) == 1)
-                    || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
+        $isCMSContent = !$is_map_popup &&
+                          (defined('RT_CMS_PAGE') && $bib['rec_RecTypeID'] == RT_CMS_PAGE ||
+                           defined('RT_CMS_HOME') && $bib['rec_RecTypeID'] == RT_CMS_HOME) &&
+                           (defined('DT_EXTENDED_DESCRIPTION') && $dty_ID == DT_EXTENDED_DESCRIPTION ||
+                            defined('DT_CMS_HEADER') && $dty_ID == DT_CMS_HEADER ||
+                            defined('DT_CMS_FOOTER') && $dty_ID == DT_CMS_FOOTER) ? ' cmsContent' : '';
 
-        print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em><img><figure><figcaption><ul><ol><li>') . '</span>';// add value
-        $prevLbl = $bd['name'];
+        $fieldPlacement = !empty($field['rst_DisplayOrder']) ? "data-order=\"{$field['rst_DisplayOrder']}\"" : '';
+        $rowClasses = 'detailRow fieldRow' . ($fieldVisibility == 'hidden' || $field['rst_RequirementType'] == 'forbidden' ? ' hiddenField' : '');
+        $rowClasses .= $fieldValuesAsString === '' ? ' emptyField' : '';
+        $isHidden = $is_map_popup && !in_array($dty_ID, $always_visible_dt) ? CSS_HIDDEN : '';
+        $fieldWidth = $is_map_popup ? '' : 'width: 100%;';
+        $includeTruncate = $is_map_popup && $dty_ID != DT_SHORT_SUMMARY ? ' truncate' : '';
+
+        print <<<ROW
+        <div class="{$rowClasses}" {$fieldPlacement} style="border: none 1px #00ff00;{$isHidden}{$fieldWidth}">
+            <div class="detailType">{$fieldName}</div>
+            <div class="detail{$includeTruncate}{$isCMSContent}">{$fieldValuesAsString}</div>
+        </div>
+        ROW;
     }
 
-    if($prevLbl != null){
-        print DIV_E.DIV_E;// close final detail row
-    }
-
-    $group_details = array();
-
-    $query = "SELECT rst_DisplayName, rst_DisplayOrder, rst_DefaultValue
-              FROM defRecStructure
-              LEFT JOIN defDetailTypes ON rst_DetailTypeID = dty_ID
-              WHERE rst_RecTypeID = ". intval($bib['rec_RecTypeID']) ." AND dty_Type = 'separator' AND rst_RequirementType != 'forbidden'
-              ORDER BY rst_DisplayOrder";
-
-    $groups_res = $mysqli->query($query);
-
-    if($groups_res){
-
-        while ($group = $groups_res->fetch_row()) {
-            $group_details[] = array($group[0], $group[1], $group[2]);
-        }
-
-    }
     if($is_map_popup && !$noclutter){
         //echo '<div class=detailRow><div class=detailType><a href="#" onClick="$(\'.fieldRow\').show();$(event.target).hide()">more</a></div><div class="detail"></div></div>';
     }else{
