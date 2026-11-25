@@ -239,6 +239,37 @@ final class WebsiteRepository
     }
 
     /**
+     * The website whose menu has a page (27q3 review 1, 2026-11-25): the menu pointers are followed up from the page
+     * (sub menu of a page, top menu of a website) at most MENU_DEPTH levels. The first website the user may see; 0
+     * when the page is in no menu (a standalone page) or the website is not visible.
+     */
+    public function websiteOfPage(int $pageId): int
+    {
+        $codes = $this->codes();
+        $fields = array_values(array_filter(array($codes['topMenu'], $codes['subMenu'])));
+        if($pageId < 1 || empty($fields) || $codes['home'] < 1){ return 0; }
+        $repository = RecordRepository::shared($this->database);
+        $level = array($pageId);
+        $seen = array($pageId => true);
+        for($depth = 0; $depth < self::MENU_DEPTH && !empty($level); $depth++){
+            $parents = array();
+            foreach($repository->links($level, array('side' => 'target', 'kind' => 'pointer', 'fields' => $fields,
+                'otherTypes' => array_values(array_filter(array($codes['home'], $codes['page']))))) as $link){
+                if(!isset($seen[$link[1]])){ $parents[$link[1]] = true; $seen[$link[1]] = true; }
+            }
+            if(empty($parents)){ return 0; }
+            $types = $repository->rectypeOf(array_keys($parents));
+            $sites = array_keys(array_filter($types, static function($type) use ($codes){ return intval($type) === $codes['home']; }));
+            if(!empty($sites)){
+                $visible = $repository->visibleIds($sites, RecordAccess::fromRuntime($this->runtime));
+                if(!empty($visible)){ return intval(reset($visible)); }
+            }
+            $level = array_keys(array_filter($types, static function($type) use ($codes){ return intval($type) === $codes['page']; }));
+        }
+        return 0;
+    }
+
+    /**
      * Template file of a report: a report record id or a `.tpl` file name (a page template). The report record is
      * not checked for access: the author of the website chose it; the records of the cards follow the visitor's rights.
      *

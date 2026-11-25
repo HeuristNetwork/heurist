@@ -211,8 +211,12 @@ final class ReportService
             $this->codes->id('DT_PRESENTATION_TYPE') => array($this->codes->id($isCardView
                 ? 'TRM_PRESENTATION_CARD_REPORT' : 'TRM_PRESENTATION_LIST_REPORT'))
         );
-        $saved = ($this->recordSave)()->save('POST', 0, RecordInput::fromBody(
-            array('rec_RecTypeID' => $this->codes->id('RT_PRESENTATION_SET'), 'details' => $details)));
+        // Presentation sets are public (27q3 review 4, 2026-11-25)
+        $saved = ($this->recordSave)()->save('POST', 0, RecordInput::fromBody(array(
+            'rec_RecTypeID' => $this->codes->id('RT_PRESENTATION_SET'),
+            'rec_NonOwnerVisibility' => 'public',
+            'details' => $details
+        )));
         return $this->report(intval($saved['recordId']));
     }
 
