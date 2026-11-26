@@ -1905,7 +1905,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 +'<div><span class="ui-icon ui-icon-up-down span_for_radio"></span>'
                 +'<input type="text" name="facet_Title'+idd+'" id="facet_Title'+idd+'" '
                 +' style="font-weight:bold;display:inline-block" class="text ui-widget-content ui-corner-all" />'
-                +'<button label="Remove" class="remove_facet" data-var="'+idd+'" /></div>'
+                +'<button label="Remove" class="remove_facet" data-var="'+idd+'"></button></div>'
                 
                 +'<div style="padding:5px 0 5px 40px">'
                 //+'<label style="font-size:smaller" for="facet_Title'+idd+'">Label</label>&nbsp;'   //'<div class="header_narrow"></div>'
@@ -1929,13 +1929,13 @@ $.widget( "heurist.search_faceted_wiz", {
                    
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 
-                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
+                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"></button>';
 						
                     includeDropdown = false;
                     
                 }else if(facets[k].type=='date' || facets[k].type=='year'){
                     sContent = sContent 
-                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"/>';
+                        +'<button label="slider" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="slider"></button>';
                     
                     sGroupBy = '<span id="facet_DateGroup'+idd+'"><label>Group by '
                         +'<select name="facet_Group'+idd+'"><option>month</option>'
@@ -1985,22 +1985,22 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 
                 if(includeDropdown){
-                    sContent = sContent + '<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
+                    sContent = sContent + '<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"></button>';
                 }
 				
                 if(facets[k].code.indexOf(':ids')<0 && facets[k].type!='blocktext')
                     sContent = sContent
-                        +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"/>'
-                        +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"/>';
+                        +'<button label="list" class="btnset_radio" data-idx="'+idd+'" data-value="3"></button>'
+                        +'<button label="wrapped" class="btnset_radio" data-idx="'+idd+'" data-value="2"></button>';
                                         
                 if((facets[k].type=='enum' || facets[k].type=='reltype') && (facets[k].code.indexOf(':addedby')<0 && facets[k].code.indexOf(':owner')<0)){
-                    sContent = sContent + '<button label="tree" class="btnset_radio" data-idx="'+idd+'" data-value="tree" data-type="tree"/>';
+                    sContent = sContent + '<button label="tree" class="btnset_radio" data-idx="'+idd+'" data-value="tree" data-type="tree"></button>';
                 }
 
                 let show_hide_accord = this.options.params.accordion_view==true;
 
                 sContent = sContent        
-                        +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"/>'
+                        +'<button label="search" class="btnset_radio" data-idx="'+idd+'" data-value="0"></button>'
                 + '</span>'+sMultiSel+'</div></div>' 
 
                 //second/optional line
