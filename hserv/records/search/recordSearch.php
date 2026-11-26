@@ -2275,11 +2275,13 @@ function recordSearchMenuItemsTree($item_ID, &$resultTree, $all_records_details)
  * @param string|null $relation_query (Optional) A complete SQL query string to execute directly.
  *                                    If provided, most of `$params` are bypassed except for output formatting.
  *                                    Used internally for specific cases like fetching relationship records.
+ * @param string|null $relation_query_count (Optional) Matching count query without pagination.
+ *                                        If omitted, the relationship query must be unpaginated.
  * @return array An associative array representing the search result or an error.
  *               Structure depends heavily on the 'detail' parameter. Generally includes 'status', 'data'.
  *               'data' can contain 'records', 'count', 'fields', 'rectypes', 'relations', etc.
  */
-function recordSearch($system, $params, $relation_query=null)
+function recordSearch($system, $params, $relation_query=null, $relation_query_count=null)
 {
     // If $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
     // {"svs":5}
@@ -2543,24 +2545,24 @@ function recordSearch($system, $params, $relation_query=null)
     if($is_count_only){
 
         if($is_count_by_rty){
-            $select_clause = 'select rec_RecTypeID, count(rec_ID) ';
+            $select_clause = 'select rec_RecTypeID, count(DISTINCT rec_ID) ';
         }else{
-            $select_clause = 'select count(rec_ID) ';
+            $select_clause = 'select count(DISTINCT rec_ID) ';
         }
 
 
     }elseif($is_ids_only){
 
         //
-        $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
+        $select_clause = 'select DISTINCT rec_ID ';
 
     }elseif($header_fields!=null){
 
-        $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT '.implode(',',$header_fields).' ';
+        $select_clause = 'select DISTINCT '.implode(',',$header_fields).' ';
 
     }else{
 
-        $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT '   //this function does not pay attention on LIMIT - it returns total number of rows
+        $select_clause = 'select DISTINCT '
         .'bkm_ID,'
         .'bkm_UGrpID,'
         .'rec_ID,'
@@ -2782,8 +2784,9 @@ function recordSearch($system, $params, $relation_query=null)
                                     unset($params2['q']);
 
                                     $relation_query = $select_clause.$from.$where;
+                                    $relation_query_count = 'SELECT COUNT(DISTINCT rec_ID) '.$from.$where;
 
-                                    $response = recordSearch($system, $params2, $relation_query);//search for relationship records
+                                    $response = recordSearch($system, $params2, $relation_query, $relation_query_count);//search for relationship records
                                     if($response['status'] == HEURIST_OK){
 
                                         if(!@$fin_result['data']['relationship']){
@@ -2919,9 +2922,11 @@ function recordSearch($system, $params, $relation_query=null)
 
 
     $search_detail_limit = PHP_INT_MAX;
+    $query_count = null;
 
     if($relation_query!=null){
         $query = $relation_query;
+        $query_count = $relation_query_count;
     }else{
 
         $is_mode_json = false;
@@ -2981,7 +2986,11 @@ function recordSearch($system, $params, $relation_query=null)
             $aquery['sort'] = ' GROUP BY rec_RecTypeID';
         }
 
-        $query =  $select_clause.$aquery['from'].SQL_WHERE.$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
+        $query_base = $aquery['from'].SQL_WHERE.$aquery['where'];
+        $query = $select_clause.$query_base.$aquery['sort'].$aquery['limit'].$aquery['offset'];
+        if(!$is_count_only){
+            $query_count = 'SELECT COUNT(DISTINCT rec_ID) '.$query_base;
+        }
 
     }
 
@@ -3042,9 +3051,21 @@ function recordSearch($system, $params, $relation_query=null)
 
     }else{
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if($query_count!==null){
+            $count_row = mysql__select_row($mysqli, $query_count);
+            if($count_row===null){
+                $res->close();
+                return $system->addError(HEURIST_DB_ERROR,
+                    'Unable to count matching records', $mysqli->error);
+            }
+            $total_count_rows = (int)$count_row[0];
+        }else{
+            // Direct relationship queries without a count query are unpaginated.
+            $total_count_rows = $res->num_rows;
+        }
 
         if($total_count_rows*10>$memory_limit){
+            $res->close();
             return $system->addError(HEURIST_ACTION_BLOCKED,
                 $total_count_rows.MSG_MEMORY_LIMIT);
         }
