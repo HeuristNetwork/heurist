@@ -85,10 +85,15 @@ class USanitize {
     }
 
 
+    /** Read scalar request text without stripping tags or HTML-encoding application values. */
+    public static function inputString($value): string
+    {
+        return is_string($value) || is_int($value) || is_float($value) ? (string)$value : '';
+    }
+
     /**
-     * Recursively sanitizes an array of parameters by trimming whitespace and applying `filter_var` with `FILTER_SANITIZE_STRING`.
-     * Note: `FILTER_SANITIZE_STRING` is deprecated in PHP 8.0. Consider alternatives for future compatibility.
-     * This method is marked to be removed as it's used only once in usr_info.php.
+     * Recursively trims request strings, preserving arrays and non-string scalar types.
+     * Callers validate fields; renderers escape text for their output context.
      *
      * @param array &$params The array of parameters to sanitize (passed by reference).
      * @return void
@@ -97,20 +102,12 @@ class USanitize {
 
         foreach($params as $k => $v)
         {
-            if($v!=null){
-
-                if(!isEmptyArray($v)){
-                    USanitize::sanitizeRequest($v);
-
-                }else{
-                    $v = trim($v);//so we are sure it is whitespace free at both ends
-
-                    //sanitise string
-                    $v = filter_var($v, FILTER_SANITIZE_STRING);
-
-                }
-                $params[$k] = $v;
+            if(is_array($v)){
+                self::sanitizeRequest($v);
+            }elseif(is_string($v)){
+                $v = trim($v);
             }
+            $params[$k] = $v;
         }
 
     }

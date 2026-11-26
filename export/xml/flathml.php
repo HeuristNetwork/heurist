@@ -2118,7 +2118,8 @@ if(array_key_exists('preparedID', $_REQUEST)){
     retrieveParameters2('export', $_REQUEST);
 }
 
-foreach($_REQUEST as $key=>$value) { $params[$key] = filter_var($value, FILTER_SANITIZE_STRING);}
+// Preserve structured search parameters; recordSearch validates the query fields.
+$params = $_REQUEST;
 
 $params['q'] = @$_REQUEST['q'];
 $params['detail'] = 'ids';// return ids only

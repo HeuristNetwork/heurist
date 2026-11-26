@@ -137,7 +137,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
             //vaidate values(dates,int) saves into import table
             $res = ImportParser::parseAndValidate( intval(@$_REQUEST["encoded_filename_id"]),
-                                                   filter_var(@$_REQUEST["original_filename"],FILTER_SANITIZE_STRING),
+                                                   basename(USanitize::inputString($_REQUEST['original_filename'] ?? '')),
                                                    0, $_REQUEST);
 
         }elseif($action=='step3'){ // matching - assign record ids
@@ -186,9 +186,9 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='records'){  //load records from temp import table
 
-            $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
+            $table_name = USanitize::inputString($_REQUEST['table'] ?? '');
 
-            if($table_name==null || $table_name==''){
+            if(!preg_match('/^[A-Za-z0-9_]{1,64}$/D', $table_name)){
                 $system->addError(HEURIST_INVALID_REQUEST, errorWrongParam('"table"'));
                 $res = false;
 
@@ -238,14 +238,14 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='import_preview'){
             //reads import file and returns list of record types to be imported
-            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+            $filename = basename(USanitize::inputString($_REQUEST['filename'] ?? ''));
 
             $res = ImportHeurist::getDefintions($filename);
 
         }elseif($action=='import_definitions'){ //import defs before import records
 
             //update record types from remote database
-            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+            $filename = basename(USanitize::inputString($_REQUEST['filename'] ?? ''));
 
             $res = ImportHeurist::importDefintions($filename, @$_REQUEST['session']);
 
@@ -254,7 +254,7 @@ if(!$system->init(@$_REQUEST['db'])){
             //returns count of imported records
             if(@$_REQUEST['filename']!=null){
                 //filename - source hml or json file (in scratch), session - unique id for progress
-                $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+                $filename = basename(USanitize::inputString($_REQUEST['filename'] ?? ''));
 
                 $res = ImportHeurist::importRecords($filename, @$_REQUEST);
 

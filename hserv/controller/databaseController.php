@@ -289,20 +289,19 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
             //source database
             $is_template = false; //(@$req_params['templatedb']!=null);//not used anymore
             if($is_template){
-                $db_source = filter_var(@$req_params['templatedb'], FILTER_SANITIZE_STRING);
+                $db_source = USanitize::inputString($req_params['templatedb'] ?? '');
             }elseif (@$req_params['sourcedb']){ //by sysadmin from list of databases
-                $db_source = filter_var(@$req_params['sourcedb'], FILTER_SANITIZE_STRING);
+                $db_source = USanitize::inputString($req_params['sourcedb'] ?? '');
             }else{
-                $db_source = $req_params['db'];
+                $db_source = USanitize::inputString($req_params['db'] ?? '');
                 $is_current_db  = true;
             }
-
-            $db_source = trim(preg_replace(REGEX_ALPHANUM, '', $db_source));//for snyk
 
             if(isset($envVersion)){
                 $sErrorMsg = 'This action on remote database host is disabled.';
             }else{
-                $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists    
+                $sErrorMsg = $db_source === '' ? 'Database name is required.'
+                    : DbUtils::databaseValidateName($db_source, 2);//exists
             }
 
             if ($sErrorMsg!=null) {

@@ -54,7 +54,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
     }
     
     $system = new hserv\System();//without connection
-    $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
+    $fileid = \hserv\utilities\USanitize::inputString($req_params['thumb'] ?? '');
     if($fileid!=null){
 
         if(preg_match('/^[a-z0-9]+$/', $fileid)){ //validatate obfuscation id

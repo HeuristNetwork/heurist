@@ -39,16 +39,17 @@ $sysadmin_pwd = USanitize::getAdminPwd();
 if($sysadmin_pwd==null){
     $system->addError(HEURIST_INVALID_REQUEST, errorWrongParam('Password'));
     header(CTYPE_JS);
-    print json_encode($system->getError());    
+    print json_encode($system->getError());
     exit;
 }
 
-$database_to_delete = filter_var(@$_REQUEST['database'], FILTER_SANITIZE_STRING);
+$database_to_delete = \hserv\utilities\USanitize::inputString($_REQUEST['database'] ?? '');
 
 if(isset($envVersion)){
     $sErrorMsg = 'This action on remote database host is disabled.';
 }else{
-    $sErrorMsg = DbUtils::databaseValidateName($database_to_delete, 2);    
+    $sErrorMsg = $database_to_delete === '' ? 'Database name is required.'
+        : DbUtils::databaseValidateName($database_to_delete, 2);
 }
 
 if ($sErrorMsg!=null) {
@@ -60,7 +61,6 @@ if ($sErrorMsg!=null) {
         
         
         
-    $database_to_delete = preg_replace(REGEX_ALPHANUM, "", $database_to_delete);//for snyk
 
     if(array_key_exists('create_archive', $_REQUEST)){
         $create_arc = $_REQUEST['create_archive'];

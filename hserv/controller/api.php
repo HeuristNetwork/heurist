@@ -1017,7 +1017,7 @@ if($is_def_query){
     }
 
     if($requestUri[3]==='login'){
-        if(!$system->doLogin(filter_var($req_params['fields']['login']??$req_params['login']??null, FILTER_SANITIZE_STRING),
+        if(!$system->doLogin(USanitize::inputString($req_params['fields']['login']??$req_params['login']??null),
                              $req_params['fields']['password']??$req_params['password']??null, 'shared'))
         {
             $system->errorExitApi();
