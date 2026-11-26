@@ -7,48 +7,6 @@ parameters:
 			path: admin/harvest/HarvestHelpers.php
 
 		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: admin/harvest/HarvestLogger.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 9
-			path: admin/harvest/SemanticGlobalHarvester.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 4
-			path: admin/harvest/SemanticReferenceRepair.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: admin/harvest/SemanticSchema.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: admin/harvest/SemanticStructureImporter.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 3
-			path: admin/harvest/SemanticTermLinksImporter.php
-
-		-
-			message: '#^Function logLine invoked with 1 parameter, 2 required\.$#'
-			identifier: arguments.count
-			count: 4
-			path: admin/harvest/harvest_semantics_global.php
-
-		-
 			message: '#^Function main invoked with 0 parameters, 1 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -87,12 +45,6 @@ parameters:
 		-
 			message: '#^Function main invoked with 0 parameters, 1 required\.$#'
 			identifier: arguments.count
-			count: 1
-			path: admin/utilities/refreshMembershipList.php
-
-		-
-			message: '#^Result of function main \(void\) is used\.$#'
-			identifier: function.void
 			count: 1
 			path: admin/utilities/refreshMembershipList.php
 
