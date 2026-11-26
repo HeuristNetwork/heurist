@@ -220,7 +220,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add column headers
-    fputcsv($csv_fd, ["User ID", "User name", "Function", "Record ID", "Query", "Resultset Size", "Date", "IP Address", "Operating System", "Browser"]);
+    fputcsv($csv_fd, ["User ID", "User name", "Function", "Record ID", "Query", "Resultset Size", "Date", "IP Address", "Operating System", "Browser"], ',', '"', '\\');
 
     // Prepare user filtering by workgroups
     $users = [];
@@ -324,7 +324,7 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         }
 
         // Add row
-        fputcsv($csv_fd, $line);
+        fputcsv($csv_fd, $line, ',', '"', '\\');
     }// end WHILE
 
     // close descriptors

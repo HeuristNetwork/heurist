@@ -197,7 +197,7 @@ class DbSysArchive extends DbEntityBase
                 $arc = str_replace('NULL,NULL', "NULL\tNULL", $arc);
                 */
                 $arc = '|'.substr($arc, 1);
-                $rec = str_getcsv($arc, $csv_delimiter, $csv_enclosure);
+                $rec = str_getcsv($arc, $csv_delimiter, $csv_enclosure, '\\');
                 /*
                 if(count($rec)>17){
                     $rec2 = array();
@@ -325,7 +325,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
     private function getFieldValue($value, $defStruct){
 
         // Get recDetail values from arc_DataBeforeChange
-        $dtl_record = str_getcsv($value, ',', '"');
+        $dtl_record = str_getcsv($value, ',', '"', '\\');
 
         $value = !empty($dtl_record[3]) && $dtl_record[3] != "NULL" ? $dtl_record[3] : null; // dtl_Value
         $value = !empty($dtl_record[5]) && $dtl_record[5] != "NULL" ? $dtl_record[5] : $value; // dtl_UploadedFileID

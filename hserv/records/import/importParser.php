@@ -700,7 +700,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     }
                 }
 
-                $fields = str_getcsv ( $line, $csv_delimiter, $csv_enclosure );// $escape = "\\"
+                $fields = str_getcsv($line, $csv_delimiter, $csv_enclosure, '\\');
             }else{
                 $fields = fgetcsv($handle, 1000000, $csv_delimiter, $csv_enclosure, "\\" );  
                 if(!$fields){

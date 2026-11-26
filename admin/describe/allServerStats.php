@@ -162,7 +162,7 @@ function saveServerActivity($params){
     }
 
     $report_date = getNow()->format('Y-m-d');
-    $saved = fputcsv($handle, [$report_date, $server, $server_ip, $server_admin, (int)$server_db_count]);
+    $saved = fputcsv($handle, [$report_date, $server, $server_ip, $server_admin, (int)$server_db_count], ',', '"', '\\');
     fflush($handle);
     flock($handle, LOCK_UN);
     fclose($handle);

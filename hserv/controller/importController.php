@@ -219,12 +219,12 @@ if(!$system->init(@$_REQUEST['db'])){
                     $header_flds = json_decode($header_flds, true);
                 }
                 if(!isEmptyArray($header_flds)){
-                    $sz = $sz + fputcsv($fp, $header_flds, ',', '"');
+                    $sz = $sz + fputcsv($fp, $header_flds, ',', '"', '\\');
                 }
 
                 foreach ($res as $idx=>$row) {
 
-                    $sz = $sz + fputcsv($fp, $row, ',', '"');
+                    $sz = $sz + fputcsv($fp, $row, ',', '"', '\\');
                     $cnt++;
                 }
                 rewind($fp);

@@ -95,7 +95,7 @@ if($is_csv){
         die('Failed to create temporary file');
     }
     $record_row = array('Name','Records','File MBytes','Data updated','Structure modified','Reg ID','DB Vsn','Owner','eMail','Institution');
-    fputcsv($fd, $record_row, ',', '"');
+    fputcsv($fd, $record_row, ',', '"', '\\');
 }else{
     $arr_databases = array();
 
@@ -149,7 +149,7 @@ foreach ($dbs as $db){
             $record_row[] = $owner[1];
             $record_row[] = $owner[2];
 
-            fputcsv($fd, $record_row, ',', '"');
+            fputcsv($fd, $record_row, ',', '"', '\\');
         }else{
 
             $record_row[] = implode(' ', $owner);

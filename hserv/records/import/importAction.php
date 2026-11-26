@@ -4604,15 +4604,15 @@ public static function verifyDatabaseAgainstSource($params){
     // Retain tab-separated output for old direct calls. Insert a visible field
     // divider as requested for the non-ODS fallback.
     $fp = fopen('php://temp', 'r+');
-    fputcsv($fp, $report_header, "\t", '"');
+    fputcsv($fp, $report_header, "\t", '"', '\\');
     $last_reported_source = null;
     $last_reported_field = null;
     foreach($report_rows as $report_item){
         $current_field = (string)$report_item['row'][$target_field_index];
         if($last_reported_field!==null && $last_reported_field!==$current_field){
-            fputcsv($fp, array('**********'), "\t", '"');
+            fputcsv($fp, array('**********'), "\t", '"', '\\');
         }
-        fputcsv($fp, $report_item['row'], "\t", '"');
+        fputcsv($fp, $report_item['row'], "\t", '"', '\\');
         $last_reported_source = $report_item['source_id'];
         $last_reported_field = $current_field;
     }
