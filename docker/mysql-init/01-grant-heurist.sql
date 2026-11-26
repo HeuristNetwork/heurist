@@ -3,4 +3,3 @@
 -- but Heurist creates its own hdb_* databases at runtime, so we grant on
 -- the whole prefix instead.
 GRANT ALL PRIVILEGES ON `hdb_%`.* TO 'heurist'@'%';
-FLUSH PRIVILEGES;

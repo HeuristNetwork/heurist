@@ -2102,7 +2102,6 @@ class DbUtils {
 
         // Reset Privileges
         "GRANT ALL PRIVILEGES ON db_target_full.* TO 'user'@'db server'"
-        "FLUSH PRIVILEGES"
 
         // Add SQL triggers and constraints
         databaseCreateConstraintsAndTriggers(db_target_full)
