@@ -15,6 +15,8 @@
 * @since       4.0
 */
 
+require_once __DIR__.'/LineEndingReader.php';
+
 //error_reporting(E_ALL);
 
 // BigDump ver. 0.35b from 2012-12-26
@@ -160,7 +162,6 @@ function db_script($db_name, $filename, $verbose = false){
         ob_start();
     }
 
-    @ini_set('auto_detect_line_endings', 'true');
     @set_time_limit(0);
 
     if (function_exists("date_default_timezone_set") && function_exists("date_default_timezone_get")){
@@ -278,7 +279,7 @@ function db_script($db_name, $filename, $verbose = false){
         // Recognize GZip filename
         $gzipmode=false;
 
-        if ((!$gzipmode && !$file=@fopen($curfilename,"r")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
+        if ((!$gzipmode && !$file=@fopen($curfilename,"rb")) || ($gzipmode && !$file=@gzopen($curfilename,"r")))   //$upload_dir.'/'.
         {
             error_echo(
                 "<p class=\"error\">Can't open sql script file ".$curfilename."</p>");
@@ -378,6 +379,8 @@ function db_script($db_name, $filename, $verbose = false){
             $querylines = 0;
             $inparents = false;
 
+            $lineReader = new \hserv\utilities\LineEndingReader($file);
+
             // Stay processing as long as the $linespersession is not reached or the query is still incomplete
 
             while ($linenumber<$param_start+$linespersession || $query!="")
@@ -385,15 +388,8 @@ function db_script($db_name, $filename, $verbose = false){
 
                 // Read the whole next line
 
-                $dumpline = "";
-                while (!feof($file) && substr ($dumpline, -1) != "\n" && substr ($dumpline, -1) != "\r")
-                {
-                    if (!$gzipmode){
-                        $dumpline .= fgets($file, DATA_CHUNK_LENGTH);
-                    }else{
-                        $dumpline .= gzgets($file, DATA_CHUNK_LENGTH);
-                    }
-                }
+                $dumpline = $lineReader->readLine();
+                if ($dumpline === false) {break;}
                 if ($dumpline==="") {break;}
 
                 // Remove UTF8 Byte Order Mark at the file beginning if any
@@ -534,11 +530,7 @@ function db_script($db_name, $filename, $verbose = false){
 
         if (!$error)
         {
-            if (!$gzipmode){
-                $foffset = ftell($file);
-            }else{
-                $foffset = gztell($file);
-            }
+            $foffset = $lineReader->tell();
             if (!$foffset)
             {
                 error_echo ("<p class=\"error\">UNEXPECTED: Can't read the file pointer offset</p>\n");
