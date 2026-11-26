@@ -12,10 +12,12 @@
 * @since       6.0
 */
 require_once dirname(__FILE__).'/../../vendor/autoload.php';
+require_once __DIR__.'/../../srv/Utilities/TextEncoding.php';
 
 use Smarty\Smarty;
 use Smarty\Security;
 use Smarty\Template;
+use Heurist\Utilities\TextEncoding;
 
 /**
  * Class HeuristSecurityPolicy
@@ -41,6 +43,7 @@ class HeuristSecurityPolicy extends Security {
    *            Includes common array, string, math, and date functions, as well as
    *            custom Heurist-specific modifiers like 'translate', 'label', etc.
    */
+  // utf8_encode is a registered compatibility modifier, not the deprecated PHP function.
   public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 'split',
                     'array_key_exists', 'array_column', 'array_keys', 'array_multisort',
@@ -131,6 +134,8 @@ function smartyInit($system, $smarty_templates_dir=null){
 
         $smarty->setTemplateDir($smarty_templates_dir);
         $smarty->setCompileDir($smarty_templates_dir.'compiled');
+        // Recompile templates that may have cached direct calls to native utf8_encode().
+        $smarty->setCompileId('heurist-latin1-v1');
         $smarty->setCacheDir($smarty_templates_dir.'cache');
         $smarty->setConfigDir($smarty_templates_dir.'configs');
         
@@ -161,13 +166,15 @@ function smartyInit($system, $smarty_templates_dir=null){
                     'nl2br',
                     'preg_match_all','print_r','printf', 'range', 'round',
                     'setlocale', 'strcmp', 'strpos', 'strstr', 'substr', 'strlen',
-                    'time',
-                    'utf8_encode');
+                    'time');
 
         //register php functions
         foreach($php_functions as $fname){
             $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $fname, $fname);
         }
+
+        // Keep the legacy template name, but never call PHP's deprecated function.
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'utf8_encode', array(TextEncoding::class, 'latin1ToUtf8'));
 
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'constant', array($system, 'getConstant'));
         

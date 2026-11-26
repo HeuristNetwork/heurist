@@ -26,6 +26,7 @@ namespace Heurist\Reports\Smarty;
 
 use Heurist\Database\DatabaseInterface;
 use Heurist\Definitions\DefinitionLookup;
+use Heurist\Utilities\TextEncoding;
 use RuntimeException;
 use Smarty\Smarty;
 
@@ -36,7 +37,7 @@ final class SmartyEngineFactory
     private const PHP_MODIFIERS = array('count', 'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode',
         'array_count_values', 'array_keys', 'array_diff', 'array_merge', 'array_slice', 'array_unique',
         'array_values', 'floatval', 'is_numeric', 'json_encode', 'nl2br', 'preg_match_all', 'print_r', 'printf',
-        'range', 'round', 'setlocale', 'strcmp', 'strpos', 'strstr', 'substr', 'strlen', 'time', 'utf8_encode');
+        'range', 'round', 'setlocale', 'strcmp', 'strpos', 'strstr', 'substr', 'strlen', 'time');
 
     private ReportEnvironment $environment;
     private DatabaseInterface $database;
@@ -75,6 +76,8 @@ final class SmartyEngineFactory
         $smarty = new Smarty();
         $smarty->setTemplateDir($templates);
         $smarty->setCompileDir($compiled);
+        // Recompile templates that may have cached direct calls to native utf8_encode().
+        $smarty->setCompileId('heurist-latin1-v1');
         $smarty->setCacheDir($templates.'cache/');
         $smarty->setConfigDir($templates.'configs/');
 
@@ -86,6 +89,8 @@ final class SmartyEngineFactory
         foreach(self::PHP_MODIFIERS as $function){
             $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, $function, $function);
         }
+        // Existing reports keep |utf8_encode; the callback preserves Latin-1 semantics.
+        $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'utf8_encode', array(TextEncoding::class, 'latin1ToUtf8'));
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'constant', array($api, 'constant'));
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_key_exists', array(TemplateModifiers::class, 'arrayKeyExists'));
         $smarty->registerPlugin(Smarty::PLUGIN_MODIFIER, 'array_column', array(TemplateModifiers::class, 'arrayColumn'));

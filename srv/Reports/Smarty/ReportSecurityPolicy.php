@@ -27,6 +27,7 @@ class ReportSecurityPolicy extends Security
 {
     public $static_classes = null;
 
+    // utf8_encode is a registered compatibility modifier, not the deprecated PHP function.
     public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
         'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 'split',
         'array_key_exists', 'array_column', 'array_keys', 'array_multisort',
