@@ -601,7 +601,7 @@ public static function output($data, $params){
                 //write header
                 if($csv_header){
                     if($csv_enclosure){
-                        fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
+                        fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure, '\\');
                     }else{
                         fputs($fd, implode($csv_delimiter, $headers[$rty_ID])."\n");    
                     }
@@ -991,7 +991,7 @@ public static function output($data, $params){
 
 
             }elseif($csv_enclosure){
-                fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
+                fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure, '\\');
             }else{
                 fputs($fd, implode($csv_delimiter, $record_row)."\n");    
             }
@@ -1029,7 +1029,7 @@ public static function output($data, $params){
                         $headerRow = self::usePercentageForCSVHeaders($headerRow, $percentageColIndices[$recordTypeID]);
                     }
                     if($csv_enclosure){
-                        fputcsv($streams[$recordTypeID], $headerRow, $csv_delimiter, $csv_enclosure);
+                        fputcsv($streams[$recordTypeID], $headerRow, $csv_delimiter, $csv_enclosure, '\\');
                     }else{
                         fputs($streams[$recordTypeID], implode($csv_delimiter, $headerRow)."\n");    
                     }
@@ -1059,7 +1059,7 @@ public static function output($data, $params){
                 
                 if($csv_enclosure){
                     foreach ($rows as $row) {
-                        fputcsv($streams[$recordTypeID], $row, $csv_delimiter, $csv_enclosure);
+                        fputcsv($streams[$recordTypeID], $row, $csv_delimiter, $csv_enclosure, '\\');
                     }
                 }else{
                     foreach ($rows as $row) {
@@ -1343,7 +1343,7 @@ public static function output_header($data, $params)
 
             //write header
             if($print_header){
-                fputcsv($fd, $header, $csv_delimiter, $csv_enclosure);
+                fputcsv($fd, $header, $csv_delimiter, $csv_enclosure, '\\');
                 //fwrite($fd, "\n\n");
 
                 $print_header = $output_rows ? false : true; // print header once for rows output
@@ -1354,7 +1354,7 @@ public static function output_header($data, $params)
 
                 if($output_rows){
                     foreach ($fld_details[$rty_ID] as $details) {
-                        fputcsv($fd, $details, $csv_delimiter, $csv_enclosure);
+                        fputcsv($fd, $details, $csv_delimiter, $csv_enclosure, '\\');
                     }
                 }else{
 
@@ -1367,7 +1367,7 @@ public static function output_header($data, $params)
                             array_push($dtl_row, $dtls[$idx]);
                         }
 
-                        fputcsv($fd, $dtl_row, $csv_delimiter, $csv_enclosure);
+                        fputcsv($fd, $dtl_row, $csv_delimiter, $csv_enclosure, '\\');
 
                         $idx ++;
                     }
@@ -1379,8 +1379,8 @@ public static function output_header($data, $params)
             //write terms
             if($placeholders!=null){
 
-                fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
-                fputcsv($fd, $ph_help, $csv_delimiter, $csv_enclosure);
+                fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure, '\\');
+                fputcsv($fd, $ph_help, $csv_delimiter, $csv_enclosure, '\\');
 
                 $k = 0;
                 while ($k<$max_count){
@@ -1398,7 +1398,7 @@ public static function output_header($data, $params)
                         }
                     }//for fields
 
-                    fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure);
+                    fputcsv($fd, $placeholders, $csv_delimiter, $csv_enclosure, '\\');
 
                     $k++;
                 }//while

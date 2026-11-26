@@ -357,7 +357,7 @@ class DbUtils {
                         $owner_user['ugr_FirstName'],
                         $owner_user['ugr_eMail'],
                     date_create('now')->format(DATE_8601));
-                    fputcsv($fp, $row);
+                    fputcsv($fp, $row, ',', '"', '\\');
                     fclose($fp);
                 }
 

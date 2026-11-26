@@ -862,7 +862,7 @@ public static function exportList($params){
     }
 
     // Add headers
-    fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group', 'Instant merge (replace record_to_keep with record ID to keep)'], "\t");
+    fputcsv($fd, ['Record ID', 'Record title', 'View record', 'Merge group', 'Search group', 'Ignore group', 'Instant merge (replace record_to_keep with record ID to keep)'], "\t", '"', '\\');
 
     unset($duplicates['summary']);
 
@@ -878,7 +878,7 @@ public static function exportList($params){
         foreach($records as $rec_ID => $rec_Title) {
 
             $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . self::$system->dbname();
-            fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL, $instant_URL], "\t");
+            fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL, $instant_URL], "\t", '"', '\\');
 
             $merge_URL = '';
             $search_URL = '';

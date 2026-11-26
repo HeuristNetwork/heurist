@@ -114,13 +114,13 @@ class ExportRecordsNODEXL extends ExportRecords{
 
             $fdVertices = fopen($vertexFile, 'w');
             foreach($this->vertices as $vertex){
-                fputcsv($fdVertices, $vertex);
+                fputcsv($fdVertices, $vertex, ',', '"', '\\');
             }
             fclose($fdVertices);
 
             $fdEdges = fopen($edgeFile, 'w');
             foreach($this->edges as $edge){
-                fputcsv($fdEdges, $edge);
+                fputcsv($fdEdges, $edge, ',', '"', '\\');
             }
             fclose($fdEdges);
 
@@ -154,16 +154,16 @@ class ExportRecordsNODEXL extends ExportRecords{
 
             $fd = fopen($destination, 'w');
 
-            fputcsv($fd, ['Vertices']);
+            fputcsv($fd, ['Vertices'], ',', '"', '\\');
 
             foreach($this->vertices as $vertex){
-                fputcsv($fd, $vertex);
+                fputcsv($fd, $vertex, ',', '"', '\\');
             }
 
-            fputcsv($fd, ['Edges']);
+            fputcsv($fd, ['Edges'], ',', '"', '\\');
 
             foreach($this->edges as $edge){
-                fputcsv($fd, $edge);
+                fputcsv($fd, $edge, ',', '"', '\\');
             }
 
             fclose($fd);

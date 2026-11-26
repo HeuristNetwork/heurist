@@ -545,13 +545,13 @@ class LookupController{
                 }else{
 
                     $hasGeo = false;
-                    $this->lookupResponse = str_getcsv($this->lookupResponse, "\n");//parse the rows
+                    $this->lookupResponse = str_getcsv($this->lookupResponse, "\n", '"', '\\');//parse the rows
                     if(is_array($this->lookupResponse) && count($this->lookupResponse)>1){
 
-                        $header = str_getcsv(array_shift($this->lookupResponse));
+                        $header = str_getcsv(array_shift($this->lookupResponse), ',', '"', '\\');
                         $id = 1;
                         foreach($this->lookupResponse as &$line){
-                            $line = str_getcsv($line);
+                            $line = str_getcsv($line, ',', '"', '\\');
                             foreach($header as $idx=>$key){
                                 $line[$key] = $line[$idx];
                                 unset($line[$idx]);

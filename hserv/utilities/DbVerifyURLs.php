@@ -273,11 +273,11 @@ class DbVerifyURLs {
         $csv_enclosure = '"';
         
         $fd = fopen(TEMP_MEMORY, 'w');//less than 1MB in memory otherwise as temp file
-        fputcsv($fd, array('rec_ID','dty_ID','URL'), $csv_delimiter, $csv_enclosure);
+        fputcsv($fd, array('rec_ID','dty_ID','URL'), $csv_delimiter, $csv_enclosure, '\\');
         
         
         foreach($this->results['record'] as $recId=>$url){
-            fputcsv($fd, array($recId, 0, $url), $csv_delimiter, $csv_enclosure);
+            fputcsv($fd, array($recId, 0, $url), $csv_delimiter, $csv_enclosure, '\\');
         }
 
         foreach(array('text','file') as $key){
@@ -285,7 +285,7 @@ class DbVerifyURLs {
                 foreach($this->results[$key] as $recId=>$fields){
                     foreach($fields as $detailTypeId=>$urls){
                         foreach($urls as $url){
-                            fputcsv($fd, array($recId, $detailTypeId, $url), $csv_delimiter, $csv_enclosure);    
+                            fputcsv($fd, array($recId, $detailTypeId, $url), $csv_delimiter, $csv_enclosure, '\\');
                         }
                     }
                 }

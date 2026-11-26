@@ -923,7 +923,7 @@ class BulkEmailSystem {
         header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
         // Add column headers
-        fputcsv($fd, ["User Email", "User Name", "Databases", "Record Counts"]);
+        fputcsv($fd, ["User Email", "User Name", "Databases", "Record Counts"], ',', '"', '\\');
 
         // Add column data, row by row
         foreach ($this->user_details as $email => $details) {
@@ -942,7 +942,7 @@ class BulkEmailSystem {
             }
 
             // Add row
-            fputcsv($fd, [$email, $name, implode(",", $dbs), implode(",", $record_count_arr)]);
+            fputcsv($fd, [$email, $name, implode(",", $dbs), implode(",", $record_count_arr)], ',', '"', '\\');
         }
 
         // Close descriptor and exit

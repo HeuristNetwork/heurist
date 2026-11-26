@@ -171,7 +171,7 @@ class DbExportTSV {
 
                 if($get_headers){ // get table field names
 
-                    $w_res = fputcsv($fd, array_keys($row), "\t");
+                    $w_res = fputcsv($fd, array_keys($row), "\t", '"', '\\');
                     if(!$w_res){
 
                         $this->warnings[] = "Unable to write table headings to TSV file for $table";
@@ -184,7 +184,7 @@ class DbExportTSV {
                     $get_headers = false;
                 }
 
-                $w_res = fputcsv($fd, $row, "\t");
+                $w_res = fputcsv($fd, $row, "\t", '"', '\\');
                 if(!$w_res){
 
                     $this->warnings[] = "Unable to write table row to TSV file for $table<br>";

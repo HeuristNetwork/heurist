@@ -44,9 +44,9 @@ $is_csv = (@$_REQUEST['html']!=1);
             die('Failed to create temporary file');
         }
         $record_row = array('Database','Field','ID','Type','Vocab Cnt','Terms count','Exclusions Count','Records');
-        fputcsv($fd, $record_row, ',', '"');
+        fputcsv($fd, $record_row, ',', '"', '\\');
         $record_row = array('Term-list fields which use individual term selection','','','','','','','');
-        fputcsv($fd, $record_row, ',', '"');
+        fputcsv($fd, $record_row, ',', '"', '\\');
     }
 
         $cnt1 = 0;
@@ -118,7 +118,7 @@ $is_csv = (@$_REQUEST['html']!=1);
 
 
                 $record_row = array($db_name, $row[0], $row[3], $row[4], $vocab_count, count($terms), ($is_idis?count($nonTerms):''), $rec_usage);
-                fputcsv($fd, $record_row, ',', '"');
+                fputcsv($fd, $record_row, ',', '"', '\\');
             }
         }
         $cnt4++;

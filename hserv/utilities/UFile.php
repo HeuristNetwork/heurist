@@ -1693,7 +1693,7 @@ function autoDetectSeparators($filename, $csv_linebreak = 'auto', $csv_enclosure
             }
             */
 
-            $fields = str_getcsv($line, $csv_delimiter, $csv_enclosure);// $escape = "\\"
+            $fields = str_getcsv($line, $csv_delimiter, $csv_enclosure, '\\');
 
             $cnt = count($fields);
             if ($cnt > 200) { //too many fields
