@@ -1333,7 +1333,8 @@ class SortPhrase {
                 return array('rec_ID'.$scending, null);
             case 'rt': case 'type':
                 return array('rec_RecTypeID'.$scending, null);
-            default;
+            default:
+                break;
         }
     }
 }

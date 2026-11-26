@@ -226,7 +226,6 @@ external/
 node_modules/
 hclient/bundles/heurist-*/
 hclient/bundles/heurist-core.bundle.min.js*
-tests/
 descriptors/
 *.lock
 !composer.lock

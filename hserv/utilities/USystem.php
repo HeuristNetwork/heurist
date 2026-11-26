@@ -19,7 +19,7 @@ require_once dirname(__FILE__).'/../../admin/utilities/checkMembershipLib.php';
 
 /**
 * Class USystem
-* 
+*
 * Utility class for retrieving system, PHP configuration, and user environment details.
 *
 * Provides static methods for:
@@ -85,7 +85,7 @@ class USystem {
 
             $sDir = str_replace('\\','/',$sDir);
 
-            
+
             $iDir = explode('/', $sDir);
             $cntDir = count($iDir) - 1;
             $path = [];
@@ -97,8 +97,8 @@ class USystem {
                     $path = array_slice($iDir, 0, $i);
                     break;
                 }
-            }   
-            
+            }
+
             if ($installDir === '') {
                 exit(
                     'Sorry, it is not possible to detect heurist installation folder from CLI path: '
@@ -206,15 +206,15 @@ class USystem {
            $installDir = '/'.$version.'/';
            $wasExplicitInstallDir = true;
         }
-        
-        
+
+
         /*
         $serverName = $_SERVER['SERVER_NAME'] ?? '';
         $is_own_domain = (
             strpos($serverName, '.huma-num.fr') > 0
             && $serverName !== 'heurist.huma-num.fr'
         );
-        
+
         if (!$is_own_domain) {
 
              * Detect installation folder from the first path segment only.
@@ -245,12 +245,12 @@ class USystem {
             }
         }
         */
-        
+
         /*
          * Production installation is always /heurist/.
          * This is intentionally no longer calculated from $installDir.
          */
-        
+
         // Validate detected installation folder.
         if (!empty($_SERVER['DOCUMENT_ROOT'])) {
 
@@ -298,13 +298,13 @@ class USystem {
 
         return array($installDir, $installDir_pro);
     }
-    
+
     private static function isHeuristCodeFolder(string $folderName): bool
     {
         return $folderName === 'heurist'
             || preg_match('/^h7-[A-Za-z0-9_-]+$/', $folderName) === 1;
-    }  
-    
+    }
+
     /**
      * Checks if a specified amount of memory can be allocated within PHP's memory_limit.
      * Considers current memory usage and leaves a 10MB buffer.
@@ -352,7 +352,8 @@ class USystem {
                 $val *= 1048576; break;
             case 'k':
                 $val *= 1024; break;
-            default;
+            default:
+                break;
         }
         return self::fixIntegerOverflow($val);
     }
@@ -457,14 +458,14 @@ class USystem {
 
         return $ret;
     }
-    
+
     /**
      * Retrieves the client's IPv4 address from various HTTP headers or `$_SERVER['REMOTE_ADDR']`.
      *
      * @return string The determined IPv4 address, or 'Unknown' if not found or invalid.
      */
     public static function getUserIP(){
-        
+
         $ipaddress = '';
         if (isset($_SERVER['HTTP_CLIENT_IP'])) {
             $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
@@ -481,10 +482,10 @@ class USystem {
         } else {
             $ipaddress = null;
         }
-        
+
         $ipaddress = filter_var($ipaddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)??'Unknown';
-        
-        return $ipaddress;        
+
+        return $ipaddress;
     }
 
     /**
@@ -533,29 +534,29 @@ class USystem {
      * @return bool True if rewrite rules seem enabled, false otherwise (e.g., on 404 or connection error).
      */
     public static function checkRewriteRuleEnabled(){
-        
-        $url = HEURIST_SERVER_URL . '/abc/web'; 
-         
-        $rewriteRuleEnabled = true; 
-                    
+
+        $url = HEURIST_SERVER_URL . '/abc/web';
+
+        $rewriteRuleEnabled = true;
+
         $headers = @get_headers($url);
         if(!$headers || $headers[0] == 'HTTP/1.1 404 Not Found'){
             //Timeout out or 404
             $rewriteRuleEnabled = false;
         }
-        
+
         return $rewriteRuleEnabled;
     }
-       
+
 
     //======================= session routines =================================
-   
+
     /**
     * Requests heuristref.net membership for current user or server+database
     */
     public function isMemberOfAssociation(){
         return false;
-    }    
+    }
 
     /**
      * Checks if the PHP session save path is configured, exists, and is writable.
@@ -680,25 +681,25 @@ class USystem {
      * @return void
      */
     private static function sendDailyReportToMainServer( $system ){
-        
+
         if(isLocalHost()){
             //return;
         }
-        
+
         $mysqli = $system->getMysqli();
         $databases = mysql__getdatabases4($mysqli);
         $db_count = count($databases);
-        
+
         if($db_count<10){
             return;
         }
-        
+
         $script = HEURIST_MAIN_SERVER . '/h7-alpha/admin/describe/allServerStats.php';
         //DEBUG $script = 'http://127.0.0.1/heurist/admin/describe/allServerStats.php';
-        
+
         $serverName = !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME;
-        
-        
+
+
         $ch = curl_init($script);
 
         curl_setopt($ch, CURLOPT_POST, true);
@@ -735,7 +736,7 @@ class USystem {
 
         unset($ch);
     }
-    
+
     /**
      * Sends a daily error report by email to the admin.
      * Consolidates error log files from the past 30 days, archives them, and emails the content.
@@ -745,7 +746,7 @@ class USystem {
     private static function sendDailyErrorReport(){
 
         $root_folder = HEURIST_FILESTORE_ROOT;
-        
+
         $archiveFolder = $root_folder."AAA_LOGS/";
         $logFolder = $root_folder."_LOGS/";
         $logs_to_be_emailed = array();
@@ -761,7 +762,7 @@ class USystem {
             if($i==1){
                 $logFileForYesterday = $logFolder.$arc_logfile;
             }
-            
+
             //if yesterday log file exists
             if(file_exists($logFolder.$arc_logfile)){
                 //2. copy to log archive folder
@@ -787,7 +788,7 @@ class USystem {
         }
         //'Bug reporter',
         sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
-        
+
         // TODO: needs an else in case there are no logfiles corresponding with the expected path and name
         //       this code seems rather too fragile to be portable between systems
 
@@ -855,7 +856,7 @@ class USystem {
 
         global $accessToken_DeepLAPI, $serverName_DeepL;
         $DeepL = null;
-        
+
         if(!(isset($accessToken_DeepLAPI) && isset($serverName_DeepL))){
             return;
         }
@@ -928,37 +929,37 @@ class USystem {
         }
 
     }
-    
+
     /**
      * $context if defined, it means it is called from initPage.php for standalone app (such as crosstabs)
      * @return string true if current user or database is a member of association
-     */    
+     */
     public static function checkAssociationMembership($system, $context=null):string
     {
-        
+
         $currentUser = $system->getCurrentUser();
         $server = HEURIST_DOMAIN;
         $database = $system->dbnameFull();
-       
+
         // 1. Check the session first
         if(!($currentUser && @$currentUser['ugr_ID']>0)){
             return false;
         }
-        
+
         return 'database';
-        
-        // false && 
+
+        // false &&
         if(session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$database]['isAssociationMember'])){
-            
+
             if($context && 'nonmember'==$_SESSION[$database]['isAssociationMember']){
-                checkMembershipLogNonmember($context, $currentUser['ugr_eMail'], $server, $database);    
+                checkMembershipLogNonmember($context, $currentUser['ugr_eMail'], $server, $database);
             }
-            
+
             return $_SESSION[$database]['isAssociationMember'];
         }
-        
+
         $dbowner = user_getDbOwner($system->getMysqli());
-        
+
         $membershipStatus = checkHeuristNetworkMembership($dbowner['ugr_eMail'], $currentUser['ugr_eMail'], $server, $database, $context??'');
         //$isMember = 'individual';
         if(session_status() !== PHP_SESSION_ACTIVE){
@@ -966,25 +967,25 @@ class USystem {
             @session_start();
         }
         $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
-        
+
         return $membershipStatus;
-        
+
     }
-    
+
     public static function logAssociationMembership($system, $context): void
     {
-      
+
         $currentUser = $system->getCurrentUser();
         $server = HEURIST_DOMAIN;
         $database = $system->dbnameFull();
-       
+
         // 1. Check the session first
         if(!($currentUser && @$currentUser['ugr_ID']>0)){
             return;
         }
-        
-        checkMembershipLogNonmember($currentUser['ugr_eMail'], $server, $database, $context);      
-        
+
+        checkMembershipLogNonmember($currentUser['ugr_eMail'], $server, $database, $context);
+
     }
 
     /**
@@ -1001,14 +1002,14 @@ class USystem {
 
             $fullSegment = $matches[1];
             $versionNo   = $matches[2];
-            
+
             $getAlpha = true;
             $key = 'alpha';
         } else {
             $getAlpha = false;
             $key = 'stable';
-        }        
-        
+        }
+
         //old way $getAlpha = preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
         //old way $key = $getAlpha ? 'alpha' : 'stable';
         $dayAgo = time() - 24 * 60 * 60;
@@ -1039,7 +1040,7 @@ class USystem {
             $mysql_indexdb = mysql__init(HEURIST_INDEX_DATABASE);
             $db_version = getDbVersion($mysql_indexdb);
             if($db_version){
-                $rawdata = HEURIST_VERSION."|{$db_version}";    
+                $rawdata = HEURIST_VERSION."|{$db_version}";
             }
 
         }else{
@@ -1110,7 +1111,7 @@ class USystem {
 
             $checkForAlpha = false;
         }
-        
+
         // Check for any available alpha
         $isAlpha = preg_match("/h\d+-alpha|\/alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
 
@@ -1316,9 +1317,9 @@ class USystem {
      */
     public static function rutime($ru, $rus, $index='utime'){
         return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
-        -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));        
+        -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
     }
-    
+
     /**
      * Inserts the Matomo (formerly Piwik) analytics tracking JavaScript code.
      * Requires $matomoUrl and $matomoSiteId to be globally defined.
@@ -1331,11 +1332,11 @@ class USystem {
      */
     public static function insertLogScript($pageType=null){
         global $matomoUrl, $matomoSiteId;
-        
+
         if(!(isset($matomoSiteId) && isset($matomoUrl))){
             return;
         }
-?>        
+?>
 <!-- Matomo -->
 <script>
 (function () {
@@ -1348,27 +1349,27 @@ class USystem {
     // Block Matomo when embedded
     return;
   }
-  
+
   var _paq = window._paq = window._paq || [];
-  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */                      
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
 
   <?php if($pageType=='startup'){?>
-       //per page  
-      _paq.push(['setCustomDimension', 1, '' ]);  
+       //per page
+      _paq.push(['setCustomDimension', 1, '' ]);
       _paq.push(['setCustomDimension', 2, 'startup' ]);
-      _paq.push(['setCustomDimension', 3, 'eng' ]);  
-      _paq.push(['setCustomDimension', 4, '' ]);  
+      _paq.push(['setCustomDimension', 3, 'eng' ]);
+      _paq.push(['setCustomDimension', 4, '' ]);
       //per visit
       _paq.push(['resetUserId']);
       _paq.push(['setCustomDimension', 5, 'visitor' ]);
-  
+
       _paq.push(['setCustomUrl', '/startup' ]);
   <?php } ?>
-  
+
   _paq.push(['trackPageView']);
-//  _paq.push(['enableLinkTracking']);  
-  
-  
+//  _paq.push(['enableLinkTracking']);
+
+
   (function() {
     var u="//<?php echo $matomoUrl;?>/";
     _paq.push(['setTrackerUrl', u+'matomo.php']);
@@ -1377,12 +1378,11 @@ class USystem {
     g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
   })();
 
-})();  
+})();
 </script>
 <!-- End Matomo Code -->
-<?php        
+<?php
     }
-    
- 
-}
 
+
+}
