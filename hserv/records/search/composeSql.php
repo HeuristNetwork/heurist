@@ -3979,17 +3979,17 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                     }else{
                         $eq = ($this->negate?'!=':'=');
                     }
-                    if($this->case_sensitive){
-                        // Do not impose a utf8 collation on utf8mb4 detail columns.
-                        $eq .= ' BINARY';
-                    }
-
                     if($this->exact){
                         //restore for exact search
                         $this->value = $valueWithLangPrefix;
                     }
 
-                    $res = " $eq '" . $mysqli->real_escape_string($this->value) . "'";
+                    $valueSql = "'".$mysqli->real_escape_string($this->value)."'";
+                    if($this->case_sensitive){
+                        // Do not impose a utf8 collation on utf8mb4 detail columns.
+                        $valueSql = 'CAST('.$valueSql.' AS BINARY)';
+                    }
+                    $res = " $eq ".$valueSql;
                 }
 
                 if( !($this->relation_prefix && $this->fulltext) &&

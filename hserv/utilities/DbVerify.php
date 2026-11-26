@@ -1466,7 +1466,7 @@ ORDER BY child.dtl_RecID";
                     INNER JOIN recDetails AS keeper
                         ON keeper.dtl_RecID = duplicate.dtl_RecID
                        AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
-                       AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                       AND CAST(keeper.dtl_Value AS BINARY) <=> CAST(duplicate.dtl_Value AS BINARY)
                        AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
                        AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
                        AND keeper.dtl_ID < duplicate.dtl_ID
@@ -1525,7 +1525,7 @@ ORDER BY child.dtl_RecID";
                 FROM recDetails AS keeper
                 WHERE keeper.dtl_RecID = duplicate.dtl_RecID
                   AND keeper.dtl_DetailTypeID = duplicate.dtl_DetailTypeID
-                  AND BINARY keeper.dtl_Value <=> BINARY duplicate.dtl_Value
+                  AND CAST(keeper.dtl_Value AS BINARY) <=> CAST(duplicate.dtl_Value AS BINARY)
                   AND keeper.dtl_UploadedFileID <=> duplicate.dtl_UploadedFileID
                   AND HEX(keeper.dtl_Geo) <=> HEX(duplicate.dtl_Geo)
                   AND keeper.dtl_ID < duplicate.dtl_ID

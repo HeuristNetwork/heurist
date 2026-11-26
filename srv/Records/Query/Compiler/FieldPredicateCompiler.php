@@ -480,14 +480,14 @@ final class FieldPredicateCompiler
     }
     /**
      * Exact, case-sensitive equality. The plain comparison (column collation) uses the
-     * value index to find the candidates; BINARY then keeps only the exact match.
-     * BINARY alone hides the column from the index (f:1:"==Johnson": 9.9 s -> 1 ms).
+     * value index to find the candidates; the binary cast keeps only the exact match.
+     * Casting the column alone hides it from the index (f:1:"==Johnson": 9.9 s -> 1 ms).
      */
     private function caseSensitiveEquals(string $column, string $text, SqlBuildContext $state): string
     {
         $state->bind($text, 's');
         $state->bind($text, 's');
-        return '('.$column.' = ? AND BINARY '.$column.' = BINARY ?)';
+        return '('.$column.' = ? AND CAST('.$column.' AS BINARY) = CAST(? AS BINARY))';
     }
 
     /** $contains: plain values use containsCondition() (text fields) instead of LIKE. */
