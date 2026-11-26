@@ -238,6 +238,49 @@ window.hWin.HEURIST4.ui = {
             description:paths(rule, step(rule).source).join('\n') };
     },
     
+    /**
+     * Show base field metadata on hover. The record editor uses twice the standard delay.
+     */
+    initFieldTooltip: function($target, fieldID, isReadOnly, delayMultiplier = 1){
+        $target.tooltip({
+            items: $target,
+            position: {
+                my: 'left+10 center',
+                at: 'right center',
+                collision: 'flipfit'
+            },
+            show: {
+                delay: 500 * delayMultiplier,
+                duration: 0
+            },
+            content: function(){
+                const field = $Db.dty(fieldID);
+                if(!field){
+                    return '';
+                }
+
+                const type = field.dty_Type || '';
+                const typeName = $Db.baseFieldType[type] || type.charAt(0).toUpperCase() + type.slice(1);
+                const conceptID = $Db.getConceptID('dty', fieldID);
+                const $content = $('<div>');
+                $('<div>').text('Base field: ' + field.dty_Name).appendTo($content);
+                $('<div>').css('margin', '10px 0').text('Field type: ' + typeName).appendTo($content);
+                $('<div>').text(`Local & Concept IDs: ${fieldID} (${conceptID})`).appendTo($content);
+                if(isReadOnly()){
+                    $('<div>').css('margin-top', '10px').text('Read only field').appendTo($content);
+                }
+
+                return $content;
+            },
+            open: function(event, ui){
+                ui.tooltip.css({
+                    background: '#D1E7E7',
+                    'font-size': '1.1em'
+                });
+            }
+        });
+    },
+
     isVisible: function(ele){
         return ele && $(ele).is(':visible');
     },

@@ -731,7 +731,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     + 'font-size:10px;font-weight:normal;text-transform:none;color:black;"><span></span></div>').appendTo(item);
             }
 
-            let field_tooltip;
+            if(dtyid > 0){
+                window.hWin.HEURIST4.ui.initFieldTooltip($(item), dtyid, function(){
+                    const field = $Db.rst(that.options.rty_ID, dtyid);
+                    return field?.rst_Display === 'readonly' || field?.rst_MayModify === 'locked';
+                });
+            }
 
             //hide icons on mouse exit
             function _onmouseexit(event){
@@ -749,12 +754,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 node.find('.svs-contextmenu3').hide();
                 node.find('.detail-count').css('display','inline-block');
                 that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
-
-                field_tooltip = node.parents('ul.fancytree-container');
-                
-                if(field_tooltip.tooltip("instance") !== undefined){
-                    field_tooltip.tooltip("destroy");
-                }
             }               
 
             function _onmouseenter(event){
@@ -785,39 +784,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
                     if(dty_ID>0){
                         that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
-
-                        let code = 'ID: '+ dty_ID +' ('+ $Db.getConceptID('dty', dty_ID) +')';
-                        let type = $Db.dty(dty_ID, 'dty_Type');
-                        type = 'Type - '+ $Db.baseFieldType[type] ? $Db.baseFieldType[type] : type.charAt(0).toUpperCase() + type.slice(1);
-                        let name = $Db.dty(dty_ID, 'dty_Name');
-
-                        let tt_content = '<div>'+ name +'</div>'
-                                        +'<div style="margin: 10px 0px;">'+ type +'</div>'
-                                        +'<div>'+ code +'</div>';
-
-                        let tt_width = (code.length > name.length && code.length > type.length) ? code.length : (name.length > type.length) ? name.length : type.length;
-
-                        field_tooltip = node.parents('ul.fancytree-container').tooltip({
-                            items: node,
-                            position:{
-                                my: 'left+10 center',
-                                at: 'right center',
-                                collision: 'none'
-                            },
-                            show:{
-                                duration: 0
-                            },
-                            content: function(){
-                                return tt_content;
-                            },
-                            open: function(event, ui){
-                                ui.tooltip.css({
-                                    "width": tt_width + 'ex',
-                                    "background": "#D1E7E7",
-                                    "font-size": "1.1em"
-                                });
-                            }
-                        });
                     }
                 }
             

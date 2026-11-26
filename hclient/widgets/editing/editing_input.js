@@ -506,6 +506,14 @@ $.widget( "heurist.editing_input", {
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
 
+            const $label = this.header.children('label').first();
+            if(this._isForRecords && this.isReadonly()){
+                $label.css('color', '#008000');
+            }
+            if(this.options.recordset?.entityName === 'Records' && this.options.dtID > 0){
+                window.hWin.HEURIST4.ui.initFieldTooltip($label, this.options.dtID, () => this.isReadonly(), 2);
+            }
+
             // Apply user pref font size
             let usr_font_size = window.hWin.HAPI4.get_prefs_def('userFontSize', 0);
             if(usr_font_size != 0){
@@ -924,10 +932,6 @@ $.widget( "heurist.editing_input", {
         }else if(this.isReadonly()){
 
             this.input_cell.attr('title', 'This field has been marked as non-editable');
-
-            if(this._isForRecords){
-                $('<span>', {text: '(read only)', style: 'color: limegreen;cursor: default;display: inline-block;padding-left: 0.5em;font-weight: normal;'}).appendTo(this.header);
-            }
         }
     }, //end _create------------------------------------------------------------
 
