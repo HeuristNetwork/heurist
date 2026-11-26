@@ -253,3 +253,12 @@ external
 docker-compose.override.yml
 data/db/
 data/filestore/
+
+#Tests
+tests
+!tests/unit/
+!tests/phpunitIni.php 
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+

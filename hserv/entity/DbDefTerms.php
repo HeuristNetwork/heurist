@@ -1394,37 +1394,46 @@ class DbDefTerms extends DbEntityBase
         if(!isEmptyArray($check_dty_IDs)){
             $check_dty_IDs = prepareIds($check_dty_IDs);//for snyk
             $this->system->defineConstant('DT_RELATION_TYPE');
-            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
-            .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) '.$s;
+            $query = 'SELECT DISTINCT dtl_RecID FROM recDetails ';
+            $query_count = 'SELECT COUNT(DISTINCT dtl_RecID) FROM recDetails ';
 
+            $where = 'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) '.$s;
+            
         }else{
-            $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
-            ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
+            $query = "SELECT DISTINCT dtl_RecID FROM recDetails, defDetailTypes ";
+            $query_count = 'SELECT COUNT(DISTINCT dtl_RecID) FROM recDetails, defDetailTypes ';
+            
+            $where = 'WHERE (dty_ID = dtl_DetailTypeID ) AND '
             ."(dty_Type='enum' or dty_Type='relationtype') $s";
         }
+        
+        $query .=  $where;
+        $query_count .=  $where;
 
-        $total_count_rows = 0;
-        $records = array();
-        $res = $mysqli->query($query);
-        if ($res){
-            $total_count_rows = mysql__found_rows($mysqli);
-
-            if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
-
-                $records = array();
-                while ($row = $res->fetch_row())  {
-                    array_push($records, (int)$row[0]);
-                }
-            }
-
-            $res->close();
-        }
-
-        if($mysqli->error){
-            $this->system->addError(HEURIST_DB_ERROR,
-                'Search query error (retrieving number of records that uses terms)', $mysqli->error);
+        $count_row = mysql__select_row($mysqli, $query_count);
+        if($count_row===null){
+            $this->system->addError(HEURIST_DB_ERROR, 'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
         }
+        $records = array();
+        $total_count_rows = (int)$count_row[0];
+        if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<USystem::getConfigBytes('memory_limit'))){
+        
+            $res = $mysqli->query($query);
+            if ($res){
+                    while ($row = $res->fetch_row())  {
+                        array_push($records, (int)$row[0]);
+                    }
+                $res->close();
+            }
+
+            if($mysqli->error){
+                $this->system->addError(HEURIST_DB_ERROR,
+                    'Search query error (retrieving number of records that uses terms)', $mysqli->error);
+                return false;
+            }
+        }
+
 
         $ret['recID'] = $trm_ID;
         $ret['fields'] = $check_dty_IDs;

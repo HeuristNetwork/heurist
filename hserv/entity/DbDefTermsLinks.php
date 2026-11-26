@@ -64,7 +64,7 @@ class DbDefTermsLinks extends DbEntityBase
             $where[] = 'trl_TermID='.intval($this->data['trl_TermID']);
         }
 
-        $query = 'SELECT SQL_CALC_FOUND_ROWS trl_ParentID, trl_TermID FROM defTermsLinks';
+        $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks';
         if(!empty($where)){
             $query .= SQL_WHERE.implode(SQL_AND, $where);
         }
