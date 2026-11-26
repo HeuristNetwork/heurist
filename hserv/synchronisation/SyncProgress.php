@@ -6,10 +6,20 @@ namespace hserv\synchronisation;
 final class SyncProgress
 {
     private \mysqli $mysqli;
+    private bool $useInsertedRowAlias;
 
     public function __construct(\hserv\System $system)
     {
         $this->mysqli = $system->getMysqli();
+        $version = $this->mysqli->server_info;
+        $this->useInsertedRowAlias = stripos($version, 'MariaDB') === false
+            && version_compare($version, '8.0.19', '>=');
+    }
+
+    /** MariaDB and MySQL before 8.0.19 need the VALUES(column) syntax. */
+    private function insertedValue(string $column): string
+    {
+        return $this->useInsertedRowAlias ? 'incoming.'.$column : 'VALUES('.$column.')';
     }
 
     public function begin(int $newRecords, int $updatedRecords): void
@@ -21,9 +31,10 @@ final class SyncProgress
         $stmt = $this->mysqli->prepare(
             "INSERT INTO sysSyncProgress (spr_ID,spr_State,spr_Step,spr_NewRecords,spr_UpdatedRecords,"
             ."spr_NewCompleted,spr_UpdatedCompleted,spr_Message,spr_Log) VALUES (1,'RUNNING','COUNTED',?,?,0,0,?,?) "
-            ."ON DUPLICATE KEY UPDATE spr_State='RUNNING',spr_Step='COUNTED',spr_NewRecords=VALUES(spr_NewRecords),"
-            ."spr_UpdatedRecords=VALUES(spr_UpdatedRecords),spr_NewCompleted=0,spr_UpdatedCompleted=0,"
-            ."spr_Message=VALUES(spr_Message),spr_Log=VALUES(spr_Log)"
+            .($this->useInsertedRowAlias ? "AS incoming " : "")
+            ."ON DUPLICATE KEY UPDATE spr_State='RUNNING',spr_Step='COUNTED',spr_NewRecords=".$this->insertedValue('spr_NewRecords').","
+            ."spr_UpdatedRecords=".$this->insertedValue('spr_UpdatedRecords').",spr_NewCompleted=0,spr_UpdatedCompleted=0,"
+            ."spr_Message=".$this->insertedValue('spr_Message').",spr_Log=".$this->insertedValue('spr_Log')
         );
         $stmt->bind_param('iiss', $newRecords, $updatedRecords, $message, $message);
         $stmt->execute();
@@ -38,9 +49,10 @@ final class SyncProgress
         $stmt = $this->mysqli->prepare(
             "INSERT INTO sysSyncProgress (spr_ID,spr_State,spr_Step,spr_NewRecords,spr_UpdatedRecords,"
             ."spr_NewCompleted,spr_UpdatedCompleted,spr_Message,spr_Log) VALUES (1,'COUNTING','COUNTING',0,0,0,0,?,'') "
+            .($this->useInsertedRowAlias ? "AS incoming " : "")
             ."ON DUPLICATE KEY UPDATE spr_State='COUNTING',spr_Step='COUNTING',spr_NewRecords=0,"
             ."spr_UpdatedRecords=0,spr_NewCompleted=0,spr_UpdatedCompleted=0,"
-            ."spr_Message=VALUES(spr_Message),spr_Log=''"
+            ."spr_Message=".$this->insertedValue('spr_Message').",spr_Log=''"
         );
         $stmt->bind_param('s', $message);
         $stmt->execute();
@@ -79,8 +91,10 @@ final class SyncProgress
         SyncSchema::ensureProgress($this->mysqli);
         $stmt = $this->mysqli->prepare(
             "INSERT INTO sysSyncProgress (spr_ID,spr_State,spr_Step,spr_Message,spr_Log) "
-            ."VALUES (1,'FAILED','FAILED',?,'') ON DUPLICATE KEY UPDATE spr_State='FAILED',spr_Step='FAILED',"
-            ."spr_Message=VALUES(spr_Message)"
+            ."VALUES (1,'FAILED','FAILED',?,'') "
+            .($this->useInsertedRowAlias ? "AS incoming " : "")
+            ."ON DUPLICATE KEY UPDATE spr_State='FAILED',spr_Step='FAILED',"
+            ."spr_Message=".$this->insertedValue('spr_Message')
         );
         $stmt->bind_param('s', $message);
         $stmt->execute();

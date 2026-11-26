@@ -4,7 +4,20 @@ declare(strict_types=1);
 
 final class SemanticMapRepository
 {
-    public function __construct(private PDO $pdo) {}
+    private bool $useInsertedRowAlias;
+
+    public function __construct(private PDO $pdo)
+    {
+        $version = (string)$pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
+        $this->useInsertedRowAlias = stripos($version, 'MariaDB') === false
+            && version_compare($version, '8.0.19', '>=');
+    }
+
+    /** MariaDB and MySQL before 8.0.19 need the VALUES(column) syntax. */
+    private function insertedValue(string $column): string
+    {
+        return $this->useInsertedRowAlias ? 'incoming.'.$column : 'VALUES('.$column.')';
+    }
 
     public function getPdo(): PDO
     {
@@ -94,9 +107,9 @@ final class SemanticMapRepository
              VALUES
                 (:type, :targetId, :originDb, :originId,
                  :viaDb, :viaDatabase, :sourceLocalId,
-                 :isOrigin, :isDerived)
+                 :isOrigin, :isDerived)'.($this->useInsertedRowAlias ? ' AS incoming' : '').'
              ON DUPLICATE KEY UPDATE
-                `sem_TargetID` = VALUES(`sem_TargetID`),
+                `sem_TargetID` = '.$this->insertedValue('`sem_TargetID`').',
                 `sem_UpdatedAt` = CURRENT_TIMESTAMP'
         );
         $stmt->bindValue(':type', $entityType, PDO::PARAM_STR);
@@ -158,11 +171,11 @@ final class SemanticMapRepository
                  :dtyDb, :dtyId,
                  :viaDb, :viaDatabase,
                  :sourceRst, :sourceRty, :sourceDty,
-                 :isOrigin, :isDerived)
+                 :isOrigin, :isDerived)'.($this->useInsertedRowAlias ? ' AS incoming' : '').'
              ON DUPLICATE KEY UPDATE
-                `sms_TargetRstID` = VALUES(`sms_TargetRstID`),
-                `sms_TargetRtyID` = VALUES(`sms_TargetRtyID`),
-                `sms_TargetDtyID` = VALUES(`sms_TargetDtyID`),
+                `sms_TargetRstID` = '.$this->insertedValue('`sms_TargetRstID`').',
+                `sms_TargetRtyID` = '.$this->insertedValue('`sms_TargetRtyID`').',
+                `sms_TargetDtyID` = '.$this->insertedValue('`sms_TargetDtyID`').',
                 `sms_UpdatedAt` = CURRENT_TIMESTAMP'
         );
         $stmt->bindValue(':targetRst', $targetRstId, PDO::PARAM_INT);
