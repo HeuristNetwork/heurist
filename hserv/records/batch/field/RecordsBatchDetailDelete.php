@@ -243,7 +243,7 @@ class RecordsBatchDetailDelete extends RecordsBatchAction
 
                     if(trim($newVal)==''){
                         $sql = 'delete from recDetails where dtl_ID = '.$dtlID;
-                        if ($mysqli->query($sql) === true) {
+                        if ($mysqli->query($sql) !== true) {
                             $sqlErrors[$recID] = $mysqli->error;
                         }
 
