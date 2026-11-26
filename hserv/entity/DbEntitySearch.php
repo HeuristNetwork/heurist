@@ -340,11 +340,14 @@ class DbEntitySearch
         }
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        $query = 'SELECT '.implode(',', $this->data['details'])
         .' FROM '.$this->config['tableName'];
+
+        $query_count = 'SELECT COUNT(*) FROM '.$this->config['tableName'];
 
         if($sup_tables!=null){
             $query .= $sup_tables;
+            $query_count .= $sup_tables;
         }
         if($sup_where!=null){
             $this->whereConditions[] = $sup_where;
@@ -352,6 +355,7 @@ class DbEntitySearch
 
         if(!empty($this->whereConditions)){
             $query .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$this->whereConditions);
         }
 
 
@@ -361,7 +365,7 @@ class DbEntitySearch
 
         $query .= ' '.$this->getLimit().$this->getOffset();
 
-        $res = $this->execute($query, $is_ids_only);
+        $res = $this->execute($query, $query_count, $is_ids_only);
         return $res;
 
     }
@@ -644,6 +648,7 @@ class DbEntitySearch
      * - Supports the legacy `restapi=1` simplified output. When explicit `api_response_context` is supplied, the full internal result is retained for API controller formatting.
      *
      * @param string $query The SQL query to execute.
+     * @param string|null $query_count Count query without pagination; null only for unpaginated queries.
      * @param bool $is_ids_only If true, only primary key IDs are fetched and returned.
      * @param string|null $entityName The name of the entity, defaults to `$this->config['entityName']`.
      * @param callable|null $calculatedFields A callback function to add or modify fields/values in the result set.
@@ -652,16 +657,28 @@ class DbEntitySearch
      * @param array|null $multiLangs An array of field names that support multiple languages, for which translations should be fetched.
      * @return array|false The formatted search result array, or false on database error.
      */
-    public function execute($query, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
+    public function execute($query, $query_count, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
 
         $mysqli = $this->system->getMysqli();
+
+        if($query_count){
+            $count_row = mysql__select_row($mysqli, $query_count);
+            if($count_row===null){
+                $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
+                return false;
+            }
+            $total_count_rows = (int)$count_row[0];
+        }
 
         $res = $mysqli->query($query);
         if (!$res){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
             return false;
         }
-        $total_count_rows = mysql__found_rows($mysqli);
+
+        if(!$query_count){
+            $total_count_rows = $res->num_rows;
+        }
 
         if($entityName==null){
             $entityName = $this->config['entityName'];

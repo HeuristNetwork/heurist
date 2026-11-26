@@ -150,15 +150,18 @@ class DbSysImportFiles extends DbEntityBase
         $from_table = $this->config['tableName'];
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM '.$from_table;
+        $query = 'SELECT '.implode(',', $this->data['details']).' FROM '.$from_table;
+
+        $query_count = 'SELECT COUNT(*)'.' FROM '.$from_table;
 
          if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, $from_table);
+        $res = $this->searchMgr->execute($query, $query_count, $is_ids_only, $from_table);
         return $res;
 
     }

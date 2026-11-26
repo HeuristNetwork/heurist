@@ -247,11 +247,15 @@ class DbRecUploadedFiles extends DbEntityBase
         }
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        $query = 'SELECT '.implode(',', $this->data['details'])
+        .' FROM '.implode('', $from_table);
+
+        $query_count = 'SELECT COUNT(*)'
         .' FROM '.implode('', $from_table);
 
          if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$where);
          }
          if(!empty($order)){
             $query = $query.' ORDER BY '.implode(',',$order);
@@ -260,7 +264,7 @@ class DbRecUploadedFiles extends DbEntityBase
          $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
 
-         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['tableName'], $calculatedFields, $multiLanguage);
+         $result = $this->searchMgr->execute($query, $query_count, $is_ids_only, $this->config['tableName'], $calculatedFields, $multiLanguage);
 
         //find related records
         if($needRelations && !(is_bool($result) && $result==false) && !empty($result['order']) ){

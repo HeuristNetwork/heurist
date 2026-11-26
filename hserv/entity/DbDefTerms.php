@@ -215,14 +215,17 @@ class DbDefTerms extends DbEntityBase
         }
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
+        $query = 'SELECT '.implode(',', $this->data['details']).' FROM defTerms';
+
+        $query_count = 'SELECT COUNT(*)'.' FROM defTerms';
 
         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$where);
         }
         $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms', null, $multiLangs );
+        $res = $this->searchMgr->execute($query, $query_count, $is_ids_only, 'defTerms', null, $multiLangs );
         return $res;
 
     }

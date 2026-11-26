@@ -111,16 +111,20 @@ class DbDefVocabularyGroups extends DbEntityBase
         $is_ids_only = (count($this->data['details'])==1);
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        $query = 'SELECT '.implode(',', $this->data['details'])
+        .' FROM '.$this->config['tableName'];
+
+        $query_count = 'SELECT COUNT(*)'
         .' FROM '.$this->config['tableName'];
 
          if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$where);
          }
          $query = $query.' ORDER BY vcg_Order '.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
 
-        $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
+        $res = $this->searchMgr->execute($query, $query_count, $is_ids_only, $this->config['entityName']);
         return $res;
     }
 

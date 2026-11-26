@@ -236,11 +236,15 @@ class DbDefRecTypes extends DbEntityBase
         $is_ids_only = (count($this->data['details'])==1 && $this->data['details'][0]!=='*');
 
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
+        $query = 'SELECT '.implode(',', $this->data['details'])
+        .' FROM '.implode(',', $from_table);
+
+        $query_count = 'SELECT COUNT(*)'
         .' FROM '.implode(',', $from_table);
 
         if(!empty($where)){
             $query = $query.SQL_WHERE.implode(SQL_AND,$where);
+            $query_count .= SQL_WHERE.implode(SQL_AND,$where);
         }
         if($orderby!=null){
             $query = $query.' ORDER BY '.$orderby;
@@ -248,7 +252,7 @@ class DbDefRecTypes extends DbEntityBase
 
         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
-        $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
+        $result = $this->searchMgr->execute($query, $query_count, $is_ids_only, $this->config['entityName'], $calculatedFields);
 
         return $result;
     }
