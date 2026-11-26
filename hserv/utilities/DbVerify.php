@@ -1251,7 +1251,11 @@ ORDER BY child.dtl_RecID";
         QUERY
         );
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if(!$res){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check empty field values. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+        $total_count_rows = $res->num_rows;
 
         if($total_count_rows<1){
             $resMsg .= '<div><h3 class="res-valid">OK: There are no fields containing null values</h3></div>';
@@ -1328,7 +1332,11 @@ ORDER BY child.dtl_RecID";
             and a.rec_ID is not null
             and b.trm_ID is null ORDER BY a.rec_ID');
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if(!$res){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check invalid term values. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+        $total_count_rows = $res->num_rows;
 
         if($total_count_rows<1){
             $resMsg .= '<div><h3 class="res-valid">OK: All records have recognisable term values</h3></div>';
@@ -1382,7 +1390,11 @@ ORDER BY child.dtl_RecID";
             GROUP BY rec_ID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title
             HAVING cnt > 1 ORDER BY rec_ID');
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if(!$res){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check single value fields. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+        $total_count_rows = $res->num_rows;
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No single value fields exceed 1 value</h3></div>';
@@ -1593,7 +1605,11 @@ ORDER BY child.dtl_RecID";
             and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator' and dty_Type!='relmarker'
         order by rec_ID");
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if(!$res){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check required field values. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+        $total_count_rows = $res->num_rows;
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
@@ -1654,7 +1670,11 @@ ORDER BY child.dtl_RecID";
 
         $res = $mysqli->query( $query );
 
-        $total_count_rows = mysql__found_rows($mysqli);
+        if(!$res){
+            return array('status'=>false, 'message'=>$resMsg.errorDiv(
+                'Cannot check extraneous fields. SQL error: '.htmlspecialchars($mysqli->error)));
+        }
+        $total_count_rows = $res->num_rows;
 
         if($total_count_rows<1){
             $resMsg = '<div><h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3></div>';

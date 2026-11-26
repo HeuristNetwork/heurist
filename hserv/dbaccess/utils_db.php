@@ -28,7 +28,6 @@ use hserv\structure\ConceptCode;
     *  mysql__foreign_check - SET FOREIGN_KEY_CHECKS
     *  mysql__supress_trigger - SUPPRESS_UPDATE_TRIGGER
     *  mysql__safe_updatess  - SET SQL_SAFE_UPDATES
-    *  mysql__found_rows - total rows in databaase
     *
     *  mysql__getdatabases4 - get list of databases on the server
     *  mysql__check_dbname
@@ -291,18 +290,6 @@ use hserv\structure\ConceptCode;
      */
     function mysql__safe_updatess($mysqli, $is_on ){
         $mysqli->query('SET SQL_SAFE_UPDATES='.($is_on?'1':'0'));
-    }
-
-    /**
-     * Retrieves the number of rows found by the previous SELECT query.
-     *
-     * Note: `FOUND_ROWS()` is deprecated in newer MySQL versions.
-     *
-     * @param \mysqli $mysqli The mysqli connection object.
-     * @return int|null The number of found rows, or null on error.
-     */
-    function mysql__found_rows($mysqli){
-        return mysql__select_value($mysqli, 'SELECT FOUND_ROWS()');
     }
 
     /**

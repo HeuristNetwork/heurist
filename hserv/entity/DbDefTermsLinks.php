@@ -65,13 +65,22 @@ class DbDefTermsLinks extends DbEntityBase
         }
 
         $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks';
+        $query_count = 'SELECT COUNT(*) FROM defTermsLinks';
         if(!empty($where)){
             $query .= SQL_WHERE.implode(SQL_AND, $where);
+            $query_count .= SQL_WHERE.implode(SQL_AND, $where);
         }
         $query .= ' ORDER BY trl_ParentID, trl_TermID';
         $query .= $this->searchMgr->getLimit().$this->searchMgr->getOffset();
 
         $mysqli = $this->system->getMysqli();
+        $count_row = mysql__select_row($mysqli, $query_count);
+        if($count_row===null){
+            $this->system->addError(HEURIST_DB_ERROR, 'Search count error', $mysqli->error);
+            return false;
+        }
+        $total_count_rows = (int)$count_row[0];
+
         $result = $mysqli->query($query);
         if(!$result){
             $this->system->addError(HEURIST_DB_ERROR, 'Search error', $mysqli->error);
@@ -95,7 +104,7 @@ class DbDefTermsLinks extends DbEntityBase
             'entityName' => $this->config['entityName'],
             'pageno' => @$this->data['pageno'],
             'offset' => @$this->data['offset'],
-            'count' => mysql__found_rows($mysqli),
+            'count' => $total_count_rows,
             'reccount' => count($records),
             'records' => $records,
             'order' => $order,

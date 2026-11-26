@@ -584,7 +584,7 @@ function downloadFileReferences($system, $ids, $essentialOnly){
         $errMessage = 'File record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $resultCount = mysql__found_rows($mysqli);
+        $resultCount = $resFiles->num_rows;
         if($resultCount == 0){
             $errMessage = 'Empty result set';
         }
@@ -725,7 +725,7 @@ function downloadMapMarkers($system, $ids){
         $errMessage = 'Record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $resultCount = mysql__found_rows($mysqli);
+        $resultCount = $resRecords->num_rows;
         if($resultCount == 0){
             $errMessage = 'Empty result set';
         }
@@ -773,7 +773,7 @@ function downloadMapMarkers($system, $ids){
         $fieldFilter = count($handledFields[$recTypeID]) === 1 ? "dtl_DetailTypeID = {$handledFields[$recTypeID][0]}" : 'dtl_DetailTypeID IN ('. implode(',', $handledFields[$recTypeID]) .')';
         $valueResults = $mysqli->query("SELECT rst_DisplayName, dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND {$fieldFilter}");
 
-        if(mysql__found_rows($mysqli) === 0 || !$valueResults){
+        if(!$valueResults || $valueResults->num_rows === 0){
             continue;
         }
 
