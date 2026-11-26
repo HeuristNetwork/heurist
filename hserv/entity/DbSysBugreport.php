@@ -292,18 +292,17 @@ class DbSysBugreport extends DbEntityBase
         $new_record['details'][self::DTY_FIELD_MAPPING['bug_Title']] = $report_title;
         $reportDetails[self::DTY_FIELD_MAPPING['bug_Title']] = ['Title' => $report_title];
 
-        // Description: converted to HTML <br> line breaks for email / rich-text display.
-        $bug_descr = htmlspecialchars($record['bug_Description']);
-        if(!empty($bug_descr)){
-
-            $bug_descr = str_replace("\n",'<br>', $bug_descr);
-
-            $database = empty(@$record['bug_Database']) ? '' : "Database: {$record['bug_Database']}<br>";
-            $server = empty(@$record['bug_Server']) ? '' : "Server: {$record['bug_Server']}<br>";
-
-            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']] = "{$database}{$server}<p>{$bug_descr}</p>";
-            $reportDetails[self::DTY_FIELD_MAPPING['bug_Description']] = ['Issue description' => "{$database}{$server}{$bug_descr}"];
+        $bug_descr = self::formatDescription($record['bug_Description']);
+        $description = '';
+        foreach(['Database', 'Server'] as $label){
+            $value = $record['bug_'.$label] ?? '';
+            if($value !== ''){
+                $description .= $label.': '.htmlspecialchars($value).'<br>';
+            }
         }
+        $description .= $bug_descr;
+        $new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']] = $description;
+        $reportDetails[self::DTY_FIELD_MAPPING['bug_Description']] = ['Issue description' => $description];
 
         // Extra metadata fields (Type, Location, URL, etc.) are stored using fixed dty_IDs.
         $new_record['details'][self::DTY_FIELD_MAPPING['bug_Type']] = \array_key_exists('bug_Type', $record) ? $record['bug_Type'] : [6986];
@@ -462,7 +461,7 @@ class DbSysBugreport extends DbEntityBase
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+                $truncatedDesc = self::descriptionExcerpt($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']]);
                 $res = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
                     [$report_link, $record['bug_Title'], $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
@@ -489,6 +488,34 @@ class DbSysBugreport extends DbEntityBase
             $email_already_sent || $this->system->addError(HEURIST_ERROR, $error_msg);
             return false;
         }
+    }
+
+    private static function formatDescription(string $description): string
+    {
+        // The editor can submit either a plain string or a rich-text HTML fragment.
+        if(!preg_match('~<(?:p|br|div|span|strong|b|em|i|u|s|sub|sup|a|img|ul|ol|li|table|h[1-6]|pre|code|blockquote|hr)(?=[\s/>])~i', $description)){
+            return '<p>'.str_replace("\n", '<br>', htmlspecialchars($description)).'</p>';
+        }
+
+        require_once __DIR__.'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
+        $config = \HTMLPurifier_Config::createDefault();
+        $config->set('Cache.DefinitionImpl', null);
+        // TinyMCE stores Heurist media and links relative to the submitting installation.
+        $config->set('URI.Base', HEURIST_BASE_URL);
+        $config->set('URI.MakeAbsolute', true);
+        $definition = $config->getHTMLDefinition(true);
+        $definition->addAttribute('img', 'data-id', 'Text');
+        $definition->addAttribute('a', 'data-ref', 'Text');
+
+        $purifier = new \HTMLPurifier($config);
+        return $purifier->purify($description);
+    }
+
+    private static function descriptionExcerpt(string $description): string
+    {
+        $description = preg_replace('~<br\s*/?>|</(?:p|div|li|tr|td|th|h[1-6]|blockquote)>~i', ' ', $description);
+        $plainText = html_entity_decode(strip_tags($description), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return htmlspecialchars(mb_strimwidth(trim($plainText), 0, 250, '...', 'UTF-8'));
     }
 
     // ---------------------------------------------------------------------
@@ -643,7 +670,7 @@ class DbSysBugreport extends DbEntityBase
                 $memberString = '';
             }
 
-            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 250) . '...';
+            $truncateDesc = self::descriptionExcerpt($record['details'][self::DTY_FIELD_MAPPING['bug_Description']]);
             $msg = str_replace(['__LINK__', '__TITLE__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
              [$report_link, $bugTitle, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
