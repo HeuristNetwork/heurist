@@ -156,9 +156,9 @@ class ReportExecute
 
             // Load template content
             $content = $this->loadTemplateContent();
-            
+
             if ($content) {
-                
+
                 // Fetch record IDs based on search query
                 $query_result = $this->fetchRecordIDs();
                 $result = true;
@@ -229,7 +229,7 @@ class ReportExecute
             $this->outputmode = 'html'; //always html in test or snippet mode
 
             $this->replevel = isset($params['replevel']) ? intval($params['replevel']) : 0;
-            
+
             $this->testForWidgetTemplate = isset($params['testwidget']);
         }
 
@@ -278,15 +278,15 @@ class ReportExecute
         } else {
             // Perform a query/search for the recordset
             $qresult = $this->searchRecords();
-            
-            if($this->params['cmseditor'] == 1 && 
-                isset($this->params["limit"]) && 
-                isset($qresult['reccount']) && 
+
+            if($this->params['cmseditor'] == 1 &&
+                isset($this->params["limit"]) &&
+                isset($qresult['reccount']) &&
                 $qresult['reccount']==$this->params["limit"])
             {
                 $this->messageAboutTruncation = '<div><b>In design mode, report has been truncated to '.intval($this->params["limit"]).' records</b></div>';
             }
-            
+
         }
 
         return $qresult;
@@ -459,7 +459,7 @@ class ReportExecute
             $content = $template_body;
         }
 
-        
+
         if($content!==false && ($content==null || strlen(trim($content))==0)){
             $this->outputError('Template content is empty');
             return false;
@@ -483,23 +483,23 @@ class ReportExecute
         if (substr($templateFile, -4) !== ".tpl") {
             $templateFile .= ".tpl";
         }
-        
+
         if(strpos($templateFile,'def/')===0){
             $template_path = HEURIST_DIR.'hclient/widgets/HRecordList/'. basename($templateFile);
             $this->templateFile = null;
         }else{
             $templateFile = basename($templateFile);
-            $template_path = $this->system->getSysDir('smarty-templates') . $templateFile;    
+            $template_path = $this->system->getSysDir('smarty-templates') . $templateFile;
             $this->templateFile = $templateFile;
         }
-        
+
         if (!file_exists($template_path)) {
             $error = 'Template file ' . htmlspecialchars($templateFile) . ' does not exist';
             $this->outputError($error);
             return false;
         }
 
-        
+
         return file_get_contents($template_path);
     }
 
@@ -556,7 +556,7 @@ class ReportExecute
     {
         $results = $qresult["records"];  //reocrd ids
         $heuristRec = new ReportRecord($this->system);
-        
+
         if (!empty($this->smartySessionId)) {
             $timeoutSec = isset($this->params['timeout']) ? max(1, intval($this->params['timeout'])) : 60;
             $heuristRec->startInterrupt($this->smartySessionId, $results, $timeoutSec);
@@ -567,15 +567,15 @@ class ReportExecute
         } else {
             $this->smarty->assign('heurist', $heuristRec);
         }
-        
+
         if($this->publishmode == 4){
             //assign the only record for calculation field
             $this->smarty->assign('r', $heuristRec->getRecord($results[0]));
         }else{
-            $this->smarty->assign('results', $results);    
+            $this->smarty->assign('results', $results);
         }
 
-        
+
 
         $facet_value = isset($this->params['facet_val']) ? htmlspecialchars($this->params['facet_val']) : null;
         if (!empty($facet_value)) {
@@ -600,7 +600,7 @@ class ReportExecute
                 return false;
             }
         }
-        
+
         // Handle activity logging if required
         //if (!$this->isHeadless && !isset($this->params['template_body']) && !$this->is_fetch) {
         //    log_smarty_activity($this->system, $results);
@@ -614,7 +614,7 @@ class ReportExecute
      * Continues template execution: sets up filters, fetches, and handles output.
      *
      * - If `template_body` was used, saves it to a temporary file via `saveTemporaryTemplate()`.
-     * - Registers Smarty pre-filter `translateTerms` 
+     * - Registers Smarty pre-filter `translateTerms`
      * - Calls `smarty->fetch()` to process the template.
      * - Passes the fetched output to `handleTemplateOutput()`.
      * - Manages progress session updates and cleanup.
@@ -871,7 +871,7 @@ class ReportExecute
         return $tpl_source;
     }
 
-    
+
     private function removeHeadAndBodyTags($content){
 
             $dom = new \DOMDocument();
@@ -999,7 +999,7 @@ class ReportExecute
 
                  $baseURL = HEURIST_BASE_URL;
                  $head .= <<<EXP
-                            {$script_tag}external/jquery/jquery-3.7.1.js"></script>
+                            {$script_tag}hclient/bundles/external/jquery/jquery.min.js"></script>
                             {$script_tag}external/jquery/jquery-ui.js"></script>
                             {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
                             {$script_tag}hclient/core/detectHeurist.js"></script>
@@ -1038,7 +1038,7 @@ class ReportExecute
              if(strpos($tpl_source,'fancybox-thumb')>0){
 
                  $head = <<<EXP
-    {$script_tag}external/jquery/jquery-3.7.1.js"></script>
+    {$script_tag}hclient/bundles/external/jquery/jquery.min.js"></script>
     {$script_tag}external/jquery/jquery-ui.js"></script>
     {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
     {$script_tag}hclient/core/detectHeurist.js"></script>
@@ -1157,7 +1157,7 @@ class ReportExecute
                     'src' => 'URI',
                     'type' => 'Text',
                 ));
-                
+
                 //$config->set('HTML.AllowedAttributes','*.data-heurist-rec');
                 $def->addAttribute('div', 'data-heurist-rec', 'Number');
 
@@ -1221,16 +1221,16 @@ class ReportExecute
             }
             if($this->testForWidgetTemplate){
                 //$font_styles = '<style type="text/css"> @import url("hclient/widgets/HRecordList/HRecordList.css"); </style>'.$font_styles;
-                
+
                 $font_styles = '<script src="'.HEURIST_BASE_URL.'external/bootstrap/bootstrap.bundle.min.js"></script>'
                 .'<link href="'.HEURIST_BASE_URL.'external/bootstrap/bootstrap.min.css" rel="stylesheet">'
                 .'<link href="'.HEURIST_BASE_URL.'hclient/widgets/HRecordList/HRecordList.css" rel="stylesheet">'
                 .'<link href="'.HEURIST_BASE_URL.'h4styles.css" rel="stylesheet">'
                 .'<link href="'.HEURIST_BASE_URL.'h6styles.css" rel="stylesheet">'
                 .$font_styles;
-                
+
             }
-            
+
 
             // Allow JavaScript or sanitize HTML
             if ($this->isJsAllowed) {
@@ -1453,7 +1453,7 @@ $rps_recid = @$gparams['rps_id']; //report schedule iD
 if($rps_recid){
 
     //$link = str_replace('&amp;','&',htmlspecialchars(HEURIST_BASE_URL."?db=".$this->system->dbname()."&publish=3&template_id=".$rps_recid));
-    
+
     $link = HEURIST_BASE_URL.'?db='.htmlspecialchars($this->system->dbname()).'&publish=3&template_id='.intval($rps_recid);
 ?>
 
@@ -1700,7 +1700,7 @@ Javascript wrap:<br>
         }
 
         if(!is_array($values) || !array_key_exists(0,$values)) {$values = array($values);}
-        
+
         $allowedInfoTypes = ['caption','copyright','copyowner','description'];
 
         foreach ($values as $idx => $fileinfo){
@@ -1713,7 +1713,7 @@ Javascript wrap:<br>
             $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
             $mimeType = $fileinfo['fxm_MimeType'];
             $file_Ext= $fileinfo['ulf_MimeExt'];
-            
+
             /*in this version we use player tag  see fileGetPlayerTag
                 $file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
             */
@@ -1747,15 +1747,15 @@ Javascript wrap:<br>
             }else{ //player is default
 
                 $sres .= fileGetPlayerTag($this->system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
-                
-                
-                
+
+
+
                 if(is_array($info)){
                     foreach($info as $info_type){
                         if(in_array($info_type,$allowedInfoTypes)){
                             $sval = htmlspecialchars(strip_tags($fileinfo['ulf_'.ucfirst($info_type)]??''), ENT_QUOTES, 'UTF-8');
                             if($sval){
-                                $sres .= '<span class="file-info">'.$sval.'</span>';            
+                                $sres .= '<span class="file-info">'.$sval.'</span>';
                             }
                         }
                     }

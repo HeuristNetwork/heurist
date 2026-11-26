@@ -1,0 +1,31 @@
+name: Dependencies Audit with NPM and Composer
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  npm_audit:
+    name: NPM audit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-node@v7
+      with:
+        node-version: 26
+    - name: NPM clean install
+      run: npm clean-install --ignore-scripts
+    - name: NPM audit for critical issues
+      run: npm audit --audit-level=critical
+
+  composer_audit:
+    name: Composer audit
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: ./.github/actions/setup-php-composer
+    - name: Composer audit
+      run: composer audit --locked

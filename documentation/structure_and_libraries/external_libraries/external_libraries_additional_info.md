@@ -22,7 +22,6 @@ See also `documentation/modifications_to_external_functions.txt` for changes mad
 - `bootstrap-5.0.2` — responsive layout and interface components in users' custom websites based on Heurist CMS.
 - `codemirror-5.61.0` — code editor used for Smarty templates and direct HTML editing.
 - `tinymce5` — TinyMCE 5.0.11, used for WYSIWYG editing of block-text fields.
-- `jquery-3.7.1` — core JavaScript library.
 - `jquery-ui-1.14.0` and themes — interface widgets and interactions.
 - `jquery-file-upload` — version 9.12.1; used by term editing, Smarty templates, file management, and record editing. `UploadHandler.php` has been integrated into the Heurist repository and the JavaScript has minor modifications.
 - `jquery-ui-iconfont-master` — icon font compatible with jQuery UI icon class names. The upstream project is discontinued.

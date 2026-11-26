@@ -456,18 +456,18 @@ $rtDefines = array(
     'RT_CMS_MENU' => array(99, 52), // deprecated alias of RT_CMS_PAGE (kept for custom website scripts)
 
     'RT_BUG_REPORT' => array(8, 23),
-    
+
     'RT_IIIF_ANNOTATION' => array(2, 109),
     'RT_IIIF_MANIFEST' => array(2, 110),
     'RT_IIIF_CANVAS' => array(2, 111),
-    
+
     //System record type
     'RT_REPORT_TEMPLATE' => array(2, 1104),  // retired (plan 27q3): reports are Presentation sets
     'RT_PRESENTATION_SET' => array(2, 1112), // story map, crosstabs, export or report (card / list) settings
     'RT_REPORT_OUTPUT' => array(2, 1105),    // Smarty report output - generated report
-    
-    'RT_REGISTERED_FILE' => array(2, 1106)  //registered file - virtual system record type 
-    
+
+    'RT_REGISTERED_FILE' => array(2, 1106)  //registered file - virtual system record type
+
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -491,7 +491,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_EMAIL' => array(2, 23),
     'DT_GEO_OBJECT' => array(2, 28),  //extent
     // for MapSource - geo fields from linked record to be used to gather mapping data to be used as geogields parameter to api/map
-    // for Dataset - fields and linked paths to be used as field parameter to api/records    
+    // for Dataset - fields and linked paths to be used as field parameter to api/records
     'DT_IS_LOADED_BY_EXTENT' => array(2, 1160),   //is layer loads features for current extent only
     'DT_GEO_FIELDS' => array(2, 1161),
     'DT_GEO_OUTPUTMODE' => array(2, 1162),  //combined map features per record or individual features
@@ -499,7 +499,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_TABLE_FIELDS' => array(2, 1164),
     'DT_FILTER_FORM' => array(2, 1165), // QuerySource Filter Form layout JSON
     'DT_TIMELINE_FIELDS' => array(2, 1105),
-    
+
     'DT_FILE_EXT' => array(2, 29), // File type: extension term of 2-533; 2-41 and 2-64 merged into it (2026-10-27)
     'DT_IMAGE_TYPE' => array(2, 30),
     'DT_MAP_IMAGE_LAYER_SCHEMA' => array(2, 31),
@@ -524,12 +524,12 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ANNOTATION_MANIFEST' => array(2, 1151),  //ref to parent manifest
     'DT_IIIF_CANVAS' => array(2, 1152), //ref to canvas  former DT_ANNOTATION_TARGET
     'DT_ANNOTATION_STATE' => array(2, 1153),
-    'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),   
+    'DT_ANNOTATION_SELECTOR_TYPE' => array(2, 1154),
     'DT_ANNOTATION_SELECTOR_VALUE' => array(2, 1155),
     'DT_IIIF_ID' => array(2, 1156),
     'DT_ORIGINAL_IIIF_ID' => array(2, 1158),
     'DT_IIIF_IMAGE_SERVICE' => array(2, 1159), //iiif image service from manifest - specific for particular canvas
-    
+
     'DT_HEIGHT' => array(3, 1041),
     'DT_WIDTH' => array(3, 1040),
     'DT_DURATION' => array(2, 66),
@@ -622,14 +622,14 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_FOOTER_FIXED' => array(2, 941),    //fixed 2-532
     'DT_LANGUAGE' => array(2, 967),
     'DT_CMS_MENU_FORMAT' => array(2, 1104), //show name + icon, name only, or icon only, or hidden
-    'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu 
+    'DT_CMS_MENU_HOME' => array(2, 1149),  //show home entry in main menu
     'DT_CMS_ACTION' => array(2, 1148),
-    
+
 
     'DT_WORKFLOW_STAGE' => array(2, 1080),
     'DT_VERSION' => array(2, 49),
-    
-    'DT_ORIGINAL_NAME' => array(2, 1185), 
+
+    'DT_ORIGINAL_NAME' => array(2, 1185),
     'DT_REGISTERED_FILE_TYPE' => array(2, 1186),
     'DT_CONFIGURATION' => array(2, 1187),
     'DT_PRESENTATION_TYPE' => array(2, 1203), // kind of a Presentation set
@@ -807,7 +807,7 @@ function getConceptCode($val):array{
  * @return bool True if the server is considered localhost, false otherwise.
  */
 function isLocalHost(){
-    return isset($_SERVER["SERVER_NAME"]) && 
+    return isset($_SERVER["SERVER_NAME"]) &&
            ($_SERVER["SERVER_NAME"] === 'localhost' || $_SERVER["SERVER_NAME"] === '127.0.0.1');
 }
 
@@ -881,23 +881,23 @@ function includeJQuery($useBootstrap=false){
    // integrity has been got with https://www.srihash.org/
    if(isLocalHost()){
 ?>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery/jquery-3.7.1.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/bundles/external/jquery/jquery.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery/jquery-ui.js"></script>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery/jquery-ui.css"/>
 <?php
    }else{
 ?>
-        <script src="https://code.jquery.com/jquery-3.7.1.js"  crossorigin="anonymous"></script>
-       
+        <script src="<?php echo PDIR;?>hclient/bundles/external/jquery/jquery.min.js" ></script>
+
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
-        
-        <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
+
+        <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js"
                 crossorigin="anonymous"></script>
-                
-        
-        <script type="text/javascript"> 
-        if (window.Sentry && typeof window.Sentry.onLoad === "function") { 
+
+
+        <script type="text/javascript">
+        if (window.Sentry && typeof window.Sentry.onLoad === "function") {
   Sentry.onLoad(function() {
         Sentry.init({
           dsn: "https://bd493ee1a58acc612b6cc71d055d8ff9@o4509586661507072.ingest.de.sentry.io/4509586665701456",
@@ -910,32 +910,32 @@ function includeJQuery($useBootstrap=false){
         });
       });
         }
-        </script>        
+        </script>
 <?php
    }
         if($useBootstrap){
             if(isLocalHost()){
-?>            
+?>
     <script src="<?php echo PDIR;?>external/bootstrap/bootstrap.bundle.min.js"></script>
     <link href="<?php echo PDIR;?>external/bootstrap/bootstrap.min.css" rel="stylesheet">
 <?php
             }else{
-?>            
+?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <?php
             }
         }
         if(isLocalHost()){
-?>        
+?>
    <script src="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/jquery.fancytree-all.js"></script>
    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
         }else{
-?>        
+?>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.4/jquery.fancytree-all.min.js" integrity="sha512-y1CCIMXI/NTrfNJZYBgy/8p3GzJSElDQKWx9gEA6IT+cTQhXAKPRpKR3FXGfREsxdCp3ByeEK3ndCri4j3n3hw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
