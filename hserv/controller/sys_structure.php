@@ -184,15 +184,33 @@ ini_set('max_execution_time', 0);
             }
 
             if (@$req_params['detailtypes']) {
-                $ids = $req_params['detailtypes']=='all'?null
-                            :filter_var($req_params['detailtypes'], FILTER_SANITIZE_STRING);
+                $selector = USanitize::inputString($req_params['detailtypes']);
+                if($selector === 'all'){
+                    $ids = null;
+                }elseif(preg_match('/^[1-9][0-9]*(?:\s*,\s*[1-9][0-9]*)*$/D', $selector)){
+                    $ids = prepareIds($selector);
+                }elseif(in_array($selector, array('freetext','blocktext','integer','date','year','relmarker',
+                    'boolean','enum','relationtype','resource','float','file','geo','separator',
+                    'calculated','fieldsetmarker','urlinclude'), true)){
+                    $ids = $selector;
+                }else{
+                    $system->errorExit('Invalid detailtypes selector', HEURIST_INVALID_REQUEST);
+                }
                 $data["detailtypes"] = dbs_GetDetailTypes($system, $ids, intval(@$req_params['mode']) );
             }
 
 
             if (@$req_params['rectypes']) {
-                $ids = $req_params['rectypes']=='all'?null
-                            :filter_var($req_params['rectypes'], FILTER_SANITIZE_STRING);
+                $selector = USanitize::inputString($req_params['rectypes']);
+                if($selector === 'all'){
+                    $ids = null;
+                }elseif(preg_match('/^[1-9][0-9]*-[1-9][0-9]*$/D', $selector)){
+                    $ids = $selector; // Preserve registered database/record-type concept codes.
+                }elseif(preg_match('/^[1-9][0-9]*(?:\s*,\s*[1-9][0-9]*)*$/D', $selector)){
+                    $ids = prepareIds($selector);
+                }else{
+                    $system->errorExit('Invalid rectypes selector', HEURIST_INVALID_REQUEST);
+                }
                 $mode = intval(@$req_params['mode']);
 
                 if($mode>2){

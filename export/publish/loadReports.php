@@ -79,7 +79,7 @@ if ($method == "searchreports") {
     // Handles searching for scheduled reports.
     // Expects optional 'name' parameter for filtering by title.
     
-    $f_name = $mysqli->real_escape_string(filter_var(@$_REQUEST['name'], FILTER_SANITIZE_STRING));
+    $f_name = $mysqli->real_escape_string(\hserv\utilities\USanitize::inputString($_REQUEST['name'] ?? ''));
     // $f_userid = @$_REQUEST['usrID']; // not currently used in query.
 
     $records = array();

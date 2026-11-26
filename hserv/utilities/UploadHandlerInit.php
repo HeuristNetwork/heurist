@@ -36,7 +36,7 @@
 * 
 * @todo move controller
 */
-error_reporting(E_ALL | E_STRICT);
+error_reporting(E_ALL);
 
 use hserv\utilities\USanitize;
 use hserv\utilities\UploadHandler;

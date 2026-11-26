@@ -221,12 +221,12 @@ $failed_exts = array();
         // ---- visit #3 - PROCESS THE HARVESTING -----------------------------------------------------------------
 
         if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
-            $mediaFolders = filter_var($_REQUEST['media'], FILTER_SANITIZE_STRING);
+            $mediaFolders = USanitize::inputString($_REQUEST['media'] ?? '');
             print "<p>Now harvesting FieldHelper metadata into <b> ". $system->dbname(). "</b><br> ";
 
             $dirs = explode(';', $mediaFolders);// get an array of folders
 
-            $mediaExts = filter_var($_REQUEST['exts'], FILTER_SANITIZE_STRING);
+            $mediaExts = USanitize::inputString($_REQUEST['exts'] ?? '');
             $mediaExts = explode(',', $mediaExts);
 
             $rep_counter = 0;
@@ -239,7 +239,7 @@ $failed_exts = array();
 
             if(!empty($failed_exts)) {
 
-                $invalid_ext = implode(', ', $failed_exts);
+                $invalid_ext = htmlspecialchars(implode(', ', $failed_exts), ENT_QUOTES, 'UTF-8');
 
                 print "<br><div style='color: red;'>The following file types, which were encountered during media indexing,
                 are not currently being indexed as media files: $invalid_ext</div><br><br><div>You may wish to add some

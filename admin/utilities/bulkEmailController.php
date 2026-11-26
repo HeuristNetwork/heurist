@@ -573,7 +573,7 @@ class BulkEmailController{
             $count = 0;
         }
 
-        $lastmod_logic = $mysqli->real_escape_string( filter_var($dbRequest['lastmod_logic'],FILTER_SANITIZE_STRING) );
+        $lastmod_logic = $dbRequest['lastmod_logic'] ?? '';
         $lastmod_logic = $lastmod_logic == 'more' ? '<=' : '>=';
         $lastmod_period = intval($dbRequest['lastmod_period']);
 

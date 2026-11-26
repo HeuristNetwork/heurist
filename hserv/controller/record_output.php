@@ -157,7 +157,7 @@
     }
 
     $search_params = array();
-    $search_params['w'] = filter_var(@$params['w'], FILTER_SANITIZE_STRING);
+    $search_params['w'] = \hserv\utilities\USanitize::inputString($params['w'] ?? '');
 
     if($is_records_api){
         $search_params['limit'] = $params['limit'];
@@ -176,10 +176,15 @@
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>intval($params['recID']));
     }elseif(@$params['ids']){
-        $search_params['q'] = array('ids'=>filter_var(implode(',', prepareIds($params['ids']) ), FILTER_SANITIZE_STRING));
+        $search_params['q'] = array('ids'=>implode(',', prepareIds($params['ids'])));
     }elseif(@$params['iiif_image']){
         $params['format'] = 'iiif';
-        $search_params['q'] = '*file @'.filter_var($params['iiif_image'],FILTER_SANITIZE_STRING);
+        $file_id = filter_var($params['iiif_image'], FILTER_VALIDATE_REGEXP,
+            array('options'=>array('regexp'=>'/^[a-zA-Z0-9]+$/D')));
+        if($file_id === false){
+            $system->errorExit('Invalid image file ID', HEURIST_INVALID_REQUEST);
+        }
+        $search_params['q'] = '*file @'.$file_id;
 
     }else{
         $search_params['q'] = @$params['q'];

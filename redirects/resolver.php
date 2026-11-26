@@ -440,9 +440,9 @@ elseif(count($requestUri)>2
 
 //alowed
 if(@$_REQUEST['fmt']){
-    $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
+    $format = filter_var($_REQUEST['fmt'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z0-9]+$/D')));
 }elseif(@$_REQUEST['format']){
-    $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
+    $format = filter_var($_REQUEST['format'], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[a-z0-9]+$/D')));
 }else{
     $format = ($isMediaRequest)?'html':'hml';
 }
@@ -461,7 +461,7 @@ if(@$_REQUEST['recID'] || @$_REQUEST['recid'] || @$_REQUEST['id']){
     elseif(@$_REQUEST['dty']) {$entity = 'dty';}
     elseif(@$_REQUEST['trm']) {$entity = 'trm';}
 
-    $recid = filter_var($_REQUEST[$entity], FILTER_SANITIZE_STRING);
+    $recid = filter_var($_REQUEST[$entity], FILTER_VALIDATE_REGEXP, array('options'=>array('regexp'=>'/^[1-9][0-9]*(?:-[1-9][0-9]*)?$/D')));
     $format = 'xml';
 }
 

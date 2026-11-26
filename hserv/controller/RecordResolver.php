@@ -54,7 +54,7 @@ final class RecordResolver
      *
      * @return array|null ['url' => string, 'status' => int] or ['error' => array, 'status' => int]
      */
-    public static function resolve(string $version, array $params, string $serverRoot=null): ?array
+    public static function resolve(string $version, array $params, ?string $serverRoot=null): ?array
     {
         
         self::$version = $version;
@@ -320,7 +320,7 @@ final class RecordResolver
         return $out;
     }
 
-    private static function resolveRemoteDbUrl(string $recToken, string $dbParam=null): array
+    private static function resolveRemoteDbUrl(string $recToken, ?string $dbParam=null): array
     {
         // Load just enough to call DbRegis. This request will end with a redirect.
         //$autoload = rtrim($serverRoot, '/\\') . "/{$version}/autoload.php";

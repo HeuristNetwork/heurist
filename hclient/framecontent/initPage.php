@@ -44,9 +44,10 @@ $isSystemInited = false;
 global $system;
 $system = new hserv\System(true);
 
-if (@$_REQUEST['db']) {
+$pageDatabase = USanitize::inputString($_REQUEST['db'] ?? '');
+if ($pageDatabase !== '') {
     //if database is defined then connect to given database
-    $isSystemInited = $system->init(@$_REQUEST['db']);
+    $isSystemInited = $system->init($pageDatabase);
 }
 
 if (!$isSystemInited) {
@@ -225,7 +226,7 @@ if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))
 <html lang="en">
 <head>
 
-<title><?php echo (@$_REQUEST['db'] ? htmlspecialchars($_REQUEST['db']) : '') . '. ' . HEURIST_TITLE; ?></title>
+<title><?php echo htmlspecialchars($pageDatabase, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '. ' . HEURIST_TITLE; ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="robots" content="noindex,nofollow">
 
@@ -362,7 +363,7 @@ if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))
         }    
         
         if(!window.hWin.HAPI4){ // Standalone check
-            window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
+            window.hWin.HAPI4 = new hAPI(<?php echo json_encode($pageDatabase, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>, onHapiInit);
         }else if(!window.isHapiInited){
             // Not standalone, use HAPI from parent window
             onHapiInit( true );
@@ -545,7 +546,7 @@ if (!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS'))
         $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
         */
 
-        var layoutid = '<?php echo htmlspecialchars(@$_REQUEST['ll']);?>';
+        var layoutid = <?php echo json_encode(USanitize::inputString($_REQUEST['ll'] ?? ''), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_INVALID_UTF8_SUBSTITUTE); ?>;
 
         if(window.hWin.HEURIST4.util.isempty(layoutid)){
             layoutid = "H6Default";

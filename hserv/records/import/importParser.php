@@ -18,6 +18,7 @@ use hserv\utilities\USanitize;
 use hserv\utilities\UArchive;
 use hserv\utilities\Temporal;
 require_once __DIR__.'/importDate.php';
+require_once __DIR__.'/../../utilities/LineEndingReader.php';
 
 
 /**
@@ -646,24 +647,11 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $csv_delimiter = ",";
         }
         
-        //always autodetect
+        // Native CSV parsing handles quoted multiline fields. Normalize legacy bare CR
+        // to LF (also inside fields), leaving existing LF and CRLF bytes unchanged.
         $lb = null;
-        ini_set('auto_detect_line_endings', 'true');
         $csv_linebreak = 'auto';
-        $check_encoding = false;  //since $encoded_filename already utf-8
-        
-        /* 2024-10-31 - always autodetect
-        if($csv_linebreak=='auto'){
-            ini_set('auto_detect_line_endings', 'true');
-            $lb = null;
-        }elseif($csv_linebreak=='win'){
-            $lb = "\r\n";
-        }elseif($csv_linebreak=='nix'){
-            $lb = "\n";
-        }elseif($csv_linebreak=='mac'){
-            $lb = "\r";
-        }
-        */
+        $check_encoding = false; // $encoded_filename is already UTF-8.
 
         if($is_csv_data){
             $limitMBs = 10 * 1024 * 1024;
@@ -677,6 +665,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 return false;
             }
         }
+        \hserv\utilities\LineEndingReader::normalizeCsvStream($handle);
+
         //fgetcsv и str_getcsv depends on server locale
         // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
         setlocale(LC_ALL, 'en_US.utf8');

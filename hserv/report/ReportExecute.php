@@ -705,8 +705,8 @@ class ReportExecute
      *
      * - `$replevel` 0: Display errors off.
      * - `$replevel` 1: PHP display errors on, Smarty reports E_NOTICE.
-     * - `$replevel` 2: PHP display errors on, Smarty reports E_ALL & ~E_STRICT & ~E_NOTICE.
-     * - `$replevel` 3: PHP display errors on, Smarty debugging enabled, Smarty reports E_ALL & ~E_STRICT & ~E_NOTICE.
+     * - `$replevel` 2: PHP display errors on, Smarty reports E_ALL & ~E_NOTICE.
+     * - `$replevel` 3: PHP display errors on, Smarty debugging enabled, Smarty reports E_ALL & ~E_NOTICE.
      * Sets the Smarty debug template if `$replevel` > 0.
      *
      * @param int $replevel The reporting level (0-3).
@@ -719,7 +719,7 @@ class ReportExecute
         if($replevel==1 || $replevel==2){
             ini_set( 'display_errors' , 'true');// 'stdout' );
             if($replevel==2){
-                $this->smarty->error_reporting = E_ALL & ~E_STRICT & ~E_NOTICE;
+                $this->smarty->error_reporting = E_ALL & ~E_NOTICE;
             }else{
                 $this->smarty->error_reporting = E_NOTICE;
             }

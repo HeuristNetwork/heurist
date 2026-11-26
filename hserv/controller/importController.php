@@ -118,15 +118,40 @@ if(!$system->init(@$_REQUEST['db'])){
    }else{
 
         //for kml step2,step3,set_primary_rectype,step3
-        $action = @$_REQUEST["action"];
+        $action = USanitize::inputString($_REQUEST['action'] ?? '');
         $res = false;
+
+        // File-based actions require a real filename. An omitted filename for
+        // import_records selects the separate direct-database import route.
+        $filenameKeys = array('step1'=>'upload_file_name', 'step2'=>'original_filename',
+            'import_preview'=>'filename', 'import_definitions'=>'filename');
+        $filenameKey = $filenameKeys[$action] ?? null;
+        if($action === 'import_records' && array_key_exists('filename', $_REQUEST)){
+            $filenameKey = 'filename';
+        }
+        $requestFilename = null;
+        if($filenameKey !== null){
+            $inputFilename = $_REQUEST[$filenameKey] ?? null;
+            if(!is_string($inputFilename) || trim($inputFilename) === '' || strpos($inputFilename, "\0") !== false){
+                $system->errorExit('Missing or invalid '.$filenameKey, HEURIST_INVALID_REQUEST);
+            }
+            $requestFilename = basename($inputFilename);
+            if($requestFilename === '' || $requestFilename === '.' || $requestFilename === '..'){
+                $system->errorExit('Missing or invalid '.$filenameKey, HEURIST_INVALID_REQUEST);
+            }
+        }
+        $encodedFilenameId = $_REQUEST['encoded_filename_id'] ?? null;
+        if($action === 'step2' && ((!is_int($encodedFilenameId) && !is_string($encodedFilenameId))
+            || !isPositiveInt($encodedFilenameId))){
+            $system->errorExit('Missing or invalid encoded_filename_id', HEURIST_INVALID_REQUEST);
+        }
 
         if($action=='step0'){
             $res = ImportParser::saveToTempFile( @$_REQUEST['data'] );//it saves csv data in temp file  -returns array(filename)
 
         }elseif($action=='step1'){
             //file is uploaded with help fileupload widget and controller/fileUpload.php
-            $upload_file_name = @$_REQUEST["upload_file_name"];
+            $upload_file_name = $requestFilename;
             if($upload_file_name!=null){
                 $upload_file_name = USanitize::sanitizeFileName(basename($upload_file_name), false);//snyk SSRF
                 //encode and invoke parse_prepare with limit
@@ -137,7 +162,7 @@ if(!$system->init(@$_REQUEST['db'])){
 
             //vaidate values(dates,int) saves into import table
             $res = ImportParser::parseAndValidate( intval(@$_REQUEST["encoded_filename_id"]),
-                                                   filter_var(@$_REQUEST["original_filename"],FILTER_SANITIZE_STRING),
+                                                   $requestFilename,
                                                    0, $_REQUEST);
 
         }elseif($action=='step3'){ // matching - assign record ids
@@ -186,9 +211,9 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='records'){  //load records from temp import table
 
-            $table_name = filter_var(@$_REQUEST['table'],FILTER_SANITIZE_STRING);
+            $table_name = USanitize::inputString($_REQUEST['table'] ?? '');
 
-            if($table_name==null || $table_name==''){
+            if(!preg_match('/^[A-Za-z0-9_]{1,64}$/D', $table_name)){
                 $system->addError(HEURIST_INVALID_REQUEST, errorWrongParam('"table"'));
                 $res = false;
 
@@ -238,23 +263,23 @@ if(!$system->init(@$_REQUEST['db'])){
 
         }elseif($action=='import_preview'){
             //reads import file and returns list of record types to be imported
-            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+            $filename = $requestFilename;
 
             $res = ImportHeurist::getDefintions($filename);
 
         }elseif($action=='import_definitions'){ //import defs before import records
 
             //update record types from remote database
-            $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+            $filename = $requestFilename;
 
             $res = ImportHeurist::importDefintions($filename, @$_REQUEST['session']);
 
         }elseif($action=='import_records'){
 
             //returns count of imported records
-            if(@$_REQUEST['filename']!=null){
+            if($requestFilename !== null){
                 //filename - source hml or json file (in scratch), session - unique id for progress
-                $filename = filter_var(basename(@$_REQUEST['filename']),FILTER_SANITIZE_STRING);
+                $filename = $requestFilename;
 
                 $res = ImportHeurist::importRecords($filename, @$_REQUEST);
 
@@ -342,8 +367,8 @@ if(@$_REQUEST['output']=='csv' || @$_REQUEST['output']=='ods'){
         print $response['data'];
 
     }else{
-        print htmlspecialchars($response['message']).'. ';
-        print 'status: '.htmlspecialchars($response['status']);
+        print htmlspecialchars(USanitize::inputString($response['message'] ?? 'Import failed'), ENT_QUOTES, 'UTF-8').'. ';
+        print 'status: '.htmlspecialchars(USanitize::inputString($response['status'] ?? HEURIST_ERROR), ENT_QUOTES, 'UTF-8');
     }
 
 

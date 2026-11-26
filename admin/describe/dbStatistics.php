@@ -28,7 +28,7 @@ $is_csv = (@$_REQUEST['csv']==1);
 
 $folder_size = (@$_REQUEST['folder_size']==1);
 
-$starts_with = filter_var(@$_REQUEST['start'], FILTER_SANITIZE_STRING);
+$starts_with = \hserv\utilities\USanitize::inputString($_REQUEST['start'] ?? '');
 
 $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 
