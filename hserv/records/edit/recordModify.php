@@ -4739,13 +4739,14 @@ function bugreportUpdate($system, $recID){
     $reportersEmail = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
     $reportersEmail = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersEmail;
 
-    $reportersName = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
-    $reportersName = is_array($reportersEmail) ? array_pop($reportersName) : $reportersName;
-    $reportersName = empty($reportersName) ? $reportersEmail : $reportersName;
+    $reportersName = $details[$reporterNameDtyID] ?? null;
+    $reportersName = is_array($reportersName) ? array_pop($reportersName) : $reportersName;
 
     if(!$status || !$reportersEmail || !in_array($status, $terms)){
         return;
     }
+
+    $reportersName = htmlspecialchars(trim((string)$reportersName) ?: $reportersEmail, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
     // Retrieve specific report details (database, title, description) and prepare email
     $status = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $status]);
@@ -4769,19 +4770,13 @@ function bugreportUpdate($system, $recID){
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
 
     $updateEmail = <<<EMAIL
-    The status of the following ticket has been updated to: <strong>$status</strong>.<br>
-    
-    <i>Changes normally appear in the alpha version (/hx-alpha/, x = current version) overnight (UTC/western Europe) on any server with automated daily update (including HeuristAU.net & Heurist.Huma-Num.fr). The production version (/heurist/) receives these changes at irregular intervals (generally 1 - 3 months). Clear cache (ctrl-shift-delete: clear cached images and files only, not cookies) then reload the page before testing.</i> 
-    <hr>
-       
-    $resolution <br>
-     
-    <hr>
-    $desc<br><br>
-    Reporter: $reportersName <br>
-    $database <br>
-    Ticket: <a href="$url">$url</a><br> <br>
-    <hr>
+    <div>The status of the following ticket has been updated to: <strong>$status</strong>.</div>
+    <hr style="margin: 12px 0;">
+    <div>$resolution$desc</div>
+    <hr style="margin: 16px 0 10px;">
+    <div style="margin-bottom: 14px;"><i>Changes normally appear in the alpha version (/hx-alpha/, x = current version) overnight (UTC/western Europe) on any server with automated daily update (including HeuristAU.net &amp; Heurist.Huma-Num.fr). The production version (/heurist/) receives these changes at irregular intervals (generally 1 - 3 months). Clear cache (ctrl-shift-delete: clear cached images and files only, not cookies) then reload the page before testing.</i></div>
+    <div>Reporter: $reportersName<br>$database</div>
+    <div style="margin-top: 16px;">Ticket: <a href="$url">$url</a></div>
     EMAIL;
 
     $to = [$reportersEmail];
