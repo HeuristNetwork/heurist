@@ -12,13 +12,13 @@
 DROP TABLE IF EXISTS recLinks;
 
 CREATE TABLE recLinks (
-  rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
-  rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
-  rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
-  rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
-  rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
-  rl_DetailTypeID int(10) unsigned      COMMENT 'Record Pointer detail type ID',
-  rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
+  rl_ID   INT UNSIGNED NOT NULL auto_increment COMMENT 'Primary key',
+  rl_SourceID INT UNSIGNED NOT NULL COMMENT 'Source record ID',
+  rl_TargetID INT UNSIGNED NOT NULL COMMENT 'Target record ID',
+  rl_RelationID INT UNSIGNED        COMMENT 'Realtionship record ID',
+  rl_RelationTypeID INT UNSIGNED    COMMENT 'Realtionship type - defTerms.trm_ID',
+  rl_DetailTypeID INT UNSIGNED      COMMENT 'Record Pointer detail type ID',
+  rl_DetailID INT UNSIGNED          COMMENT 'Pointer Detail type',
   PRIMARY KEY  (rl_ID),
   KEY rl_SourcePtrKey (rl_SourceID),
   KEY rl_TargetPtrKey (rl_TargetID),

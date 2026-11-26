@@ -51,11 +51,11 @@
 --
 
 -- --------------------------------------------------------
-SET NAMES utf8mb4;
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 SET FOREIGN_KEY_CHECKS= 0;
 SET UNIQUE_CHECKS = 0;
 START TRANSACTION;
---  COLLATE utf8mb4_0900_ai_ci
+-- Use utf8mb4_unicode_ci for compatibility with both MySQL and MariaDB.
 
 --
 -- Table structure for table 'Records'
@@ -92,7 +92,7 @@ CREATE TABLE Records (
   KEY rec_Hash (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID),
   FULLTEXT KEY rec_Title_FullText (rec_Title)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -136,7 +136,7 @@ CREATE TABLE defCrosswalk (
 CREATE TABLE defDetailTypeGroups (
   dtg_ID tinyint unsigned NOT NULL auto_increment COMMENT 'Primary ID - Code for detail type groups',
   dtg_Name varchar(63) NOT NULL COMMENT 'Descriptive heading to be displayed for each group of details (fields)',
-  dtg_Order tinyint unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of detail type groups within pulldown lists',
+  dtg_Order tinyint unsigned NOT NULL default 2 COMMENT 'Ordering of detail type groups within pulldown lists',
   dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
   dtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dtg_ID)
@@ -162,7 +162,7 @@ CREATE TABLE defDetailTypes (
   dty_IDInOriginatingDB smallint unsigned default NULL COMMENT 'ID used in database where this detail type originated',
   dty_DetailTypeGroupID tinyint unsigned NOT NULL default '1' COMMENT 'The general role of this detail allowing differentiated lists of detail types',
   dty_OrderInGroup tinyint unsigned default '0' COMMENT 'The display order of DetailType within group, alphabetic if equal values',
-  dty_JsonTermIDTree varchar(5000) default NULL COMMENT 'Tree of Term IDs to show for this field (display-only header terms set in HeaderTermIDs)',
+  dty_JsonTermIDTree text default NULL COMMENT 'Tree of Term IDs to show for this field (display-only header terms set in HeaderTermIDs)',
   dty_TermIDTreeNonSelectableIDs varchar(1000) default NULL COMMENT 'Term IDs to use as non-selectable headers for this field',
   dty_PtrTargetRectypeIDs varchar(250) default NULL COMMENT 'CSVlist of target Rectype IDs, null = any',
   dty_FieldSetRectypeID smallint unsigned default NULL COMMENT 'For a FieldSetMarker, the record type to be inserted as a fieldset',
@@ -175,7 +175,7 @@ CREATE TABLE defDetailTypes (
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
   KEY dty_DetailTypeGroupID (dty_DetailTypeGroupID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='The detail types (fields) which can be attached to records';
 
 -- --------------------------------------------------------
 
@@ -210,7 +210,7 @@ CREATE TABLE defOntologies (
   ont_OriginatingDBID mediumint unsigned default NULL COMMENT 'Database where this ontology originated, 0 = locally',
   ont_NameInOriginatingDB varchar(63) default NULL COMMENT 'Name used in database where this ontology originated',
   ont_IDInOriginatingDB smallint unsigned default NULL COMMENT 'ID used in database where this ontology originated',
-  ont_Order tinyint unsigned zerofill NOT NULL default '255' COMMENT 'Ordering value to define alternate display order in interface',
+  ont_Order tinyint unsigned NOT NULL default 255 COMMENT 'Ordering value to define alternate display order in interface',
   ont_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   ont_locallyModified tinyint unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (ont_ID),
@@ -230,7 +230,7 @@ CREATE TABLE defRecStructure (
   rst_DisplayName varchar(255) NOT NULL default 'Please enter a prompt ...' COMMENT 'Display name for this dtl type in this rectype, autofill with dty_Name',
   rst_DisplayHelpText varchar(5000) default NULL COMMENT 'The user help text to be displayed for this detail type for this record type',
   rst_DisplayExtendedDescription varchar(5000) default NULL COMMENT 'The rollover text to be displayed for this detail type for this record type',
-  rst_DisplayOrder smallint unsigned zerofill NOT NULL default '999' COMMENT 'A sort order for display of this detail type in the record edit form',
+  rst_DisplayOrder smallint unsigned NOT NULL default 999 COMMENT 'A sort order for display of this detail type in the record edit form',
   rst_DisplayWidth tinyint unsigned NOT NULL default '100' COMMENT 'The field width displayed for this detail type in this record type',
   rst_DisplayHeight tinyint unsigned NOT NULL default '3' COMMENT 'The field height for this detail type in this record type, only relevant for memo fields',
   rst_DefaultValue text default NULL COMMENT 'The default value for this detail type for this record type',
@@ -277,7 +277,7 @@ CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
   rtg_Name varchar(40) NOT NULL COMMENT 'Name for this group of record types, shown as heading in lists',
   rtg_Domain enum('functionalgroup','modelview') NOT NULL default 'functionalgroup' COMMENT 'functionalgroup is normal record types group, modelview group for visualising actual structure based on data',
-  rtg_Order tinyint unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of record type groups within pulldown lists',
+  rtg_Order tinyint unsigned NOT NULL default 2 COMMENT 'Ordering of record type groups within pulldown lists',
   rtg_Description varchar(250) default NULL COMMENT 'A description of the record type group and its purpose',
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rtg_ID),
@@ -355,7 +355,7 @@ CREATE TABLE defVocabularyGroups (
   vcg_ID tinyint unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
   vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
   vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Normal vocabularies are termed enum, relational are for relationship types but can also be used as normal vocabularies',
-  vcg_Order tinyint unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Order tinyint unsigned NOT NULL default 2 COMMENT 'Ordering of vocabulary groups within pulldown lists',
   vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
   vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
   PRIMARY KEY  (vcg_ID),
@@ -394,7 +394,7 @@ CREATE TABLE defTerms (
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='Terms by detail type and the vocabulary they belong to';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
 
@@ -468,7 +468,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID),
   FULLTEXT KEY dtl_Value_FullText (dtl_Value)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The detail (field) values for each record - public data';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='The detail (field) values for each record - public data';
 -- --------------------------------------------------------
 
 --
@@ -628,7 +628,7 @@ CREATE TABLE sysWorkflowRules  (
   swf_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key',
   swf_RecTypeID  smallint unsigned NOT NULL COMMENT 'Record type, foreign key to defRecTypes table',
   swf_Stage int unsigned NOT NULL default '0' COMMENT 'trm_ID from vocabulary "Workflow stage" 2-9453',
-  swf_Order tinyint unsigned zerofill NOT NULL default '000' COMMENT 'Ordering of stage per record type',
+  swf_Order tinyint unsigned NOT NULL default 0 COMMENT 'Ordering of stage per record type',
   swf_StageRestrictedTo varchar(255) default NULL Comment 'Comma separated list of ugr_ID who are allowed to set workgroup stage to this value. Null = anyone',
   swf_SetOwnership smallint NULL default NULL COMMENT 'Workgroup to be set as the owner group, Null = No change, 0=everyone',
   swf_SetVisibility  varchar(255) default NULL COMMENT 'public=anyone, viewable=all logged in, hidden = private, hidden may be followed by comma separated list of ugr_ID that should be set to have view permission',
@@ -713,7 +713,7 @@ CREATE TABLE sysIdentification (
   sys_ExternalReferenceLookups TEXT default NULL COMMENT "Record type-function-field specifications for lookup to external reference sources such as GeoNames",  
   sys_NakalaKey varchar(250) default NULL COMMENT "Nakala API key. Retrieved from Nakala website",  
   PRIMARY KEY  (sys_ID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Identification/version for this Heurist database (single rec)';
 
 -- --------------------------------------------------------
 
@@ -830,7 +830,7 @@ CREATE TABLE usrHyperlinkFilters (
 CREATE TABLE usrRecTagLinks (
   rtl_ID int unsigned NOT NULL auto_increment COMMENT 'Primary link table key, one tag linked to one record',
   rtl_TagID mediumint unsigned NOT NULL COMMENT 'The tag being linked to the record/bookmark',
-  rtl_Order tinyint unsigned zerofill NOT NULL default '255' COMMENT 'Ordering of tags within the current record/bookmark',
+  rtl_Order tinyint unsigned NOT NULL default 255 COMMENT 'Ordering of tags within the current record/bookmark',
   rtl_AddedByImport tinyint unsigned NOT NULL default '0' COMMENT '0 indicates added while editing, 1 indicates added during import',
   rtl_RecID int unsigned NOT NULL COMMENT 'The record to which the tag is linked, should always be set',
   PRIMARY KEY  (rtl_ID),

@@ -210,7 +210,7 @@ use hserv\structure\ConceptCode;
     /**
      * Creates a new database.
      *
-     * The database is created with the utf8 character set and utf8_general_ci collation by default.
+     * Uses utf8mb4 and utf8mb4_unicode_ci for MySQL/MariaDB compatibility.
      *
      * @param \mysqli $mysqli The mysqli connection object.
      * @param string $db_name The full name of the database to create (e.g., including prefix).
@@ -223,13 +223,10 @@ use hserv\structure\ConceptCode;
         // Avoid illegal chars in db
         if ($res==null) {
             // Create database
-            // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
-            // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
-            //
+            // Use four-byte Unicode and a collation supported by MySQL and MariaDB.
+            // Tables and columns without explicit charset options inherit these defaults.
             $sql = 'CREATE DATABASE `'.$db_name.'` '
-                     .' DEFAULT CHARACTER SET = utf8 DEFAULT COLLATE = utf8_general_ci';
-                    //.' DEFAULT CHARACTER SET = utf8mb4 DEFAULT COLLATE = utf8mb4_0900_ai_ci';
-                    //
+                     .' DEFAULT CHARACTER SET = utf8mb4 DEFAULT COLLATE = utf8mb4_unicode_ci';
 
             if ($mysqli->query($sql)) {
                 $res = true;
