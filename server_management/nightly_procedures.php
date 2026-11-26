@@ -3,54 +3,58 @@
 declare(strict_types=1);
 
 /**
- * Heurist maintenance runner. PHP CLI 8.1+ with PDO MySQL and ZipArchive.
- *
- * Install under a root-controlled directory. Set these entries in
- * heuristConfigIni.php (the defaults below apply when omitted):
- *
- *   $monitoringBackupDir = '/data/BACKUP';
- *   $monitoringDir = '/data/MONITORING';
- *   $sysAdminEmail = 'admin@example.org'; // or existing administrator mailing group
- *   $monitoringEmailFrom = 'heurist@example.org'; // defaults to first admin
- *   $monitoringMysqlLoginPath = 'heurist-maintenance'; // optional root CLI login path for mysqldump
- *   $monitoringHeuristCodeDir = '/var/www/html/HEURIST/heurist'; // set for versioned installs
- *   $monitoringMembershipScript = '/absolute/path/to/refreshMembershipList.php'; // optional override
- *   $monitoringMembershipBatchScript = '/absolute/path/to/checkMembershipBatch.php'; // optional override
- *   $monitoringMembershipBatchDatabase = 'Heurist_Job_Tracker'; // optional
- *   $monitoringMembershipOutput = '/var/www/html/HEURIST/association_members.txt'; // optional
- *   $monitoringPackageScript = '/absolute/path/to/buildArchivePackagesCMD.php';
- *   $monitoringPackageDatabases = ['dbname']; // or 'ALL' (potentially very expensive)
- *   $monitoringBookStackDir = '/data/HEURIST_FILESTORE/_DBS_FROM_REMOTES/BookStack'; // receiver
- *   $monitoringBookStackBook = '7_Understanding_Heurist_2026_Vsn_7'; // receiver check target
- *   $monitoringBookStack = [ // producer, on HeuristRef only; requires PHP cURL
- *       'backupDir' => '/srv/BACKUP/BookStack',
- *       'mysqlLoginPath' => 'bookstack',
- *       'token' => 'TOKEN_ID:TOKEN_SECRET',
- *       'remote' => 'dbtunnel@heurist.huma-num.fr:/data/HEURIST_FILESTORE/_DBS_FROM_REMOTES/BookStack',
- *       'sshKey' => '/home/tunnel/.ssh/dbtunnel_ed25519',
- *       'gitRepo' => '/srv/BACKUP/BookStack_github_staging/heurist', // optional
- *   ];
- *   $monitoringWebsiteBaseUrl = 'https://heurist.example.org/heurist/';
- *   $monitoringPublishWebsiteList = true; // opt in to legacy public HTML
- *   $monitoringServerUrls = ['https://heurist.example.org/heurist/']; // optional inventory
- *   $monitoringPauseSeconds = 20;
- *
- * Existing config settings used: serverName, defaultRootFileUploadPath,
- * dbHost, dbPort, dbAdminUsername, dbAdminPassword and sysAdminEmail.
- *
- * Install at /var/www/html/HEURIST/heurist/server_managment/nightly_procedures.php
- * (The upstream directory is normally spelled server_management.) Run with
- * the server's PHP CLI from root's crontab. The runner finds heuristConfigIni.php
- * in an ancestor directory. Example HeuristRef selection:
- *   --runList=BOOKSTACK,STANDARD,MEMBERSHIP
- * Schedule ALERTSERVER independently every five minutes. On Huma-Num use
- * BOOKSTACK_CHECK after the expected transfer, without configuring the producer.
- *
- * CLI also accepts '?runList=STANDARD,BOOKSTACK,MEMBERSHIP' as one quoted
- * argument. HTTP execution is disabled. Use --list to inspect the job order
- * or combine --dry-run with a selection to inspect it without loading config.
- * All orchestration is PHP. External commands use argv arrays, without a shell.
- */
+* 
+* ########################################################################
+# Script: nightly_procedures.php (written by ChatGPT 6 Sol lite 25 Nov 2026)
+# Purpose: Replaces a bunch of nightly bash scripts developed over many years, 
+#          varying slightly between servers and sending lots of success and error
+#          messages, with a single coherent PHP script which runs everything and 
+#          provides a single report ready to review daily with a summary at the top.
+########################################################################
+
+* Heurist maintenance runner. PHP CLI 8.1+ with PDO MySQL and ZipArchive. HTTP execution is disabled. 
+* 
+* Run with the server's PHP CLI from root's crontab. All orchestration is PHP. 
+* External commands use argv arrays, without a shell.
+* Parameters example (for HeuristRef.net):  --runList=BOOKSTACK,STANDARD,MEMBERSHIP
+* CLI also accepts '?runList=STANDARD,BOOKSTACK,MEMBERSHIP' as one quoted argument. 
+* Typically run nightly but ALTERSERVER should be run every 5 minutes
+* On Huma-Num use BOOKSTACK_CHECK after the expected transfer, without configuring the producer.
+* Use --list to inspect the job order or combine --dry-run with a selection to inspect without loading config.
+
+* Finds heuristConfigIni.php in an ancestor directory. Existing config settings used: 
+* serverName, defaultRootFileUploadPath, dbHost, dbPort, dbAdminUsername, dbAdminPassword and sysAdminEmail.
+
+* Set these entries in heuristConfigIni.php (the defaults below apply when omitted):
+*
+*   $monitoringBackupDir = '/data/BACKUP';
+*   $monitoringDir = '/data/MONITORING';
+*   $sysAdminEmail = 'admin@example.org'; // or existing administrator mailing group
+*   $monitoringEmailFrom = 'heurist@example.org'; // defaults to first admin
+*   $monitoringMysqlLoginPath = 'heurist-maintenance'; // optional root CLI login path for mysqldump
+*   $monitoringHeuristCodeDir = '/var/www/html/HEURIST/heurist'; // set for versioned installs
+*   $monitoringMembershipScript = '/absolute/path/to/refreshMembershipList.php'; // optional override
+*   $monitoringMembershipBatchScript = '/absolute/path/to/checkMembershipBatch.php'; // optional override
+*   $monitoringMembershipBatchDatabase = 'Heurist_Job_Tracker'; // optional
+*   $monitoringMembershipOutput = '/var/www/html/HEURIST/association_members.txt'; // optional
+*   $monitoringPackageScript = '/absolute/path/to/buildArchivePackagesCMD.php';
+*   $monitoringPackageDatabases = ['dbname']; // or 'ALL' (potentially very expensive)
+*   $monitoringBookStackDir = '/data/HEURIST_FILESTORE/_DBS_FROM_REMOTES/BookStack'; // receiver
+*   $monitoringBookStackBook = '7_Understanding_Heurist_2026_Vsn_7'; // receiver check target
+*   $monitoringBookStack = [ // producer, on HeuristRef only; requires PHP cURL
+*       'backupDir' => '/data/BACKUP/BookStack',
+*       'mysqlLoginPath' => 'bookstack',
+*       'token' => 'TOKEN_ID:TOKEN_SECRET',
+*       'remote' => 'dbtunnel@heurist.huma-num.fr:/data/HEURIST_FILESTORE/_DBS_FROM_REMOTES/BookStack',
+*       'sshKey' => '/home/tunnel/.ssh/dbtunnel_ed25519',
+*       'gitRepo' => '/data/BACKUP/BookStack_github_staging/heurist', // optional
+*   ];
+*   $monitoringWebsiteBaseUrl = 'https://heurist.example.org/heurist/';
+*   $monitoringPublishWebsiteList = true; // opt in to legacy public HTML
+*   $monitoringServerUrls = ['https://heurist.example.org/heurist/']; // optional inventory
+*   $monitoringPauseSeconds = 20;
+*
+*/
 
 // Job registration defines execution order and documents every runnable task.
 const JOBS = [
@@ -136,7 +140,7 @@ function loadSettings(string $file): array
     }
     require $file;
     $recipients = is_array($sysAdminEmail ?? null)
-        ? $sysAdminEmail : preg_split('/[,;\s]+/', trim($sysAdminEmail ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+    ? $sysAdminEmail : preg_split('/[,;\s]+/', trim($sysAdminEmail ?? ''), -1, PREG_SPLIT_NO_EMPTY);
     $recipients = array_values(array_unique(array_map('trim', $recipients)));
     if (!$recipients) {
         throw new RuntimeException('Define $sysAdminEmail in heuristConfigIni.php.');
@@ -180,7 +184,7 @@ function loadSettings(string $file): array
         'bookstack' => $monitoringBookStackDir ?? "$filestore/_DBS_FROM_REMOTES/BookStack",
         'bookstackBook' => $monitoringBookStackBook ?? '7_Understanding_Heurist_2026_Vsn_7',
         'bookstackProducer' => ($monitoringBookStack ?? []) + [
-            'backupDir' => '/srv/BACKUP/BookStack', 'appDir' => '/var/www/bookstack',
+            'backupDir' => '/data/BACKUP/BookStack', 'appDir' => '/var/www/bookstack',
             'database' => 'bookstack', 'mysqlLoginPath' => '', 'url' => 'https://docs.heuristref.net',
             'token' => '', 'remote' => '', 'sshKey' => '/home/tunnel/.ssh/dbtunnel_ed25519',
             'gitRepo' => '', 'gitBranch' => 'h7dev', 'gitBook' => '7_Understanding_Heurist_2026_Vsn_7',
@@ -221,7 +225,7 @@ final class Context
                 throw new RuntimeException('Set $dbAdminUsername in Heurist configuration.');
             }
             $connection = $c['socket'] !== '' ? 'unix_socket=' . $c['socket']
-                : 'host=' . $c['host'] . ';port=' . $c['port'];
+            : 'host=' . $c['host'] . ';port=' . $c['port'];
             $this->pdo = new PDO("mysql:$connection;charset=utf8mb4", $c['user'], $c['password'], [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_NUM,
@@ -236,7 +240,7 @@ final class Context
         if ($this->schemas === null) {
             $schemas = $this->pdo()->query(
                 "SELECT SCHEMA_NAME FROM information_schema.SCHEMATA
-                 WHERE SCHEMA_NAME LIKE 'hdb!_%' ESCAPE '!' ORDER BY CAST(SCHEMA_NAME AS BINARY)"
+                WHERE SCHEMA_NAME LIKE 'hdb!_%' ESCAPE '!' ORDER BY CAST(SCHEMA_NAME AS BINARY)"
             )->fetchAll(PDO::FETCH_COLUMN);
             if (!$schemas) {
                 throw new RuntimeException('No hdb_ databases visible to the configured MySQL account.');
@@ -256,7 +260,7 @@ final class Context
                 yield $row;
             }
         } finally {
-            $stmt->closeCursor();
+        $stmt->closeCursor();
         }
     }
 }
@@ -289,9 +293,9 @@ function atomicWrite(string $path, callable $write): void
             throw new RuntimeException("Cannot replace $path");
         }
     } finally {
-        if (is_file($tmp)) {
-            unlink($tmp);
-        }
+    if (is_file($tmp)) {
+        unlink($tmp);
+    }
     }
 }
 
@@ -314,7 +318,7 @@ function rowLine(array $row): string
 {
     return implode("\t", array_map(static fn($v) => strtr((string) $v, [
         "\\" => "\\\\", "\t" => '\\t', "\r" => '\\r', "\n" => '\\n', "\0" => '\\0',
-    ]), $row));
+        ]), $row));
 }
 
 // Disk-backed command output avoids pipe deadlocks and unbounded PHP buffers.
@@ -326,7 +330,7 @@ function command(array $argv, string $dir, ?string $output = null, array $ok = [
         $process = proc_open($argv, [
             0 => ['file', '/dev/null', 'r'], 1 => ['file', $stdout, 'w'],
             2 => ['file', $stderr, 'w'],
-        ], $pipes, $cwd);
+            ], $pipes, $cwd);
         if (!is_resource($process)) {
             throw new RuntimeException('Cannot start ' . basename($argv[0]));
         }
@@ -338,10 +342,10 @@ function command(array $argv, string $dir, ?string $output = null, array $ok = [
         }
         return $output === null ? (string) file_get_contents($stdout, false, null, 0, 8192) : '';
     } finally {
-        unlink($stderr);
-        if ($output === null) {
-            unlink($stdout);
-        }
+    unlink($stderr);
+    if ($output === null) {
+        unlink($stdout);
+    }
     }
 }
 
@@ -364,19 +368,19 @@ function dumpOne(array $argv, string $target, Result $result, string $schema, st
     try {
         $dump = proc_open(lowPriority($argv), [
             0 => ['file', '/dev/null', 'r'], 1 => ['pipe', 'w'], 2 => ['file', $errors, 'w'],
-        ], $pipes);
+            ], $pipes);
         if (!is_resource($dump)) {
             throw new RuntimeException('Cannot start mysqldump.');
         }
         try {
             $zip = proc_open(lowPriority([$compressor, '-c']), [
                 0 => $pipes[1], 1 => ['file', $target, 'w'], 2 => ['file', $compressErrors, 'w'],
-            ], $zipPipes);
+                ], $zipPipes);
         } finally {
-            fclose($pipes[1]);
-            if (!isset($zip) || !is_resource($zip)) {
-                proc_close($dump);
-            }
+        fclose($pipes[1]);
+        if (!isset($zip) || !is_resource($zip)) {
+            proc_close($dump);
+        }
         }
         if (!is_resource($zip)) {
             throw new RuntimeException("Cannot start $compressor.");
@@ -393,8 +397,8 @@ function dumpOne(array $argv, string $target, Result $result, string $schema, st
             $result->issue("$schema: $diagnostics", 'Warning');
         }
     } finally {
-        unlink($errors);
-        unlink($compressErrors);
+    unlink($errors);
+    unlink($compressErrors);
     }
 }
 
@@ -438,7 +442,7 @@ function backupDatabases(Context $ctx, Result $result): void
             }
         }
     } finally {
-        unlink($options);
+    unlink($options);
     }
     $result->summary = count($ctx->newDumps) . '/' . count($schemas) . ' database dumps updated';
 }
@@ -518,7 +522,7 @@ function pruneDatedDumps(Context $ctx, Result $result, bool $latestFour): void
     $deleted = 0;
     foreach ($files as $file) {
         if (is_link($file) || !is_file($file) || !preg_match(
-            '/^(hdb_.+\.sql\.bz2)\.(\d{4}-\d{2}-\d{2})(?:\.\d{4,})?$/D', basename($file), $match
+        '/^(hdb_.+\.sql\.bz2)\.(\d{4}-\d{2}-\d{2})(?:\.\d{4,})?$/D', basename($file), $match
         )) {
             continue;
         }
@@ -553,29 +557,32 @@ function checkRequiredTables(Context $ctx, Result $result): void
     atomicWrite($ctx->results . '/required_tables_check.txt', static function ($tmp) use ($ctx, $result, $schemaCount): void {
         $pdo = $ctx->pdo();
         $pdo->exec('SET SESSION group_concat_max_len = 8192');
-        $stmt = $pdo->prepare(<<<'SQL'
-WITH expected AS (
-    SELECT table_name FROM JSON_TABLE(
-        ?, '$[*]' COLUMNS (table_name VARCHAR(64) PATH '$')
-    ) AS names
-)
-SELECT CONCAT(s.SCHEMA_NAME, ' (',
-       GROUP_CONCAT(e.table_name ORDER BY e.table_name SEPARATOR ', '), ')')
-FROM information_schema.SCHEMATA AS s
-CROSS JOIN expected AS e
-LEFT JOIN information_schema.TABLES AS t
-    ON t.TABLE_SCHEMA = s.SCHEMA_NAME AND t.TABLE_NAME = e.table_name
-    AND t.TABLE_TYPE = 'BASE TABLE'
-    AND (@@lower_case_table_names <> 0 OR (
-        CAST(t.TABLE_NAME AS BINARY) = CAST(e.table_name AS BINARY)
-        AND CAST(t.TABLE_SCHEMA AS BINARY) = CAST(s.SCHEMA_NAME AS BINARY)
-    ))
-WHERE s.SCHEMA_NAME LIKE 'hdb!_%' ESCAPE '!' AND t.TABLE_NAME IS NULL
-GROUP BY s.SCHEMA_NAME, CAST(s.SCHEMA_NAME AS BINARY)
-ORDER BY CAST(s.SCHEMA_NAME AS BINARY)
-SQL);
+        $sql = <<<'SQL'
+        WITH expected AS (
+            SELECT table_name FROM JSON_TABLE(
+                ?, '$[*]' COLUMNS (table_name VARCHAR(64) PATH '$')
+            ) AS names
+        )
+        SELECT CONCAT(s.SCHEMA_NAME, ' (',
+               GROUP_CONCAT(e.table_name ORDER BY e.table_name SEPARATOR ', '), ')')
+        FROM information_schema.SCHEMATA AS s
+        CROSS JOIN expected AS e
+        LEFT JOIN information_schema.TABLES AS t
+            ON t.TABLE_SCHEMA = s.SCHEMA_NAME AND t.TABLE_NAME = e.table_name
+            AND t.TABLE_TYPE = 'BASE TABLE'
+            AND (@@lower_case_table_names <> 0 OR (
+                CAST(t.TABLE_NAME AS BINARY) = CAST(e.table_name AS BINARY)
+                AND CAST(t.TABLE_SCHEMA AS BINARY) = CAST(s.SCHEMA_NAME AS BINARY)
+            ))
+        WHERE s.SCHEMA_NAME LIKE 'hdb!_%' ESCAPE '!' AND t.TABLE_NAME IS NULL
+        GROUP BY s.SCHEMA_NAME, CAST(s.SCHEMA_NAME AS BINARY)
+        ORDER BY CAST(s.SCHEMA_NAME AS BINARY)
+SQL;
+
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([json_encode(REQUIRED_TABLES, JSON_THROW_ON_ERROR)]);
         $out = fopen($tmp, 'wb');
+
         try {
             while (($line = $stmt->fetchColumn()) !== false) {
                 putLine($out, $line);
@@ -585,16 +592,18 @@ SQL);
             fclose($out);
             $stmt->closeCursor();
         }
-        $result->summary = "$result->issueCount/$schemaCount databases missing required tables";
+
+        $result->summary = "{$result->issueCount}/{$schemaCount} databases missing required tables";
     });
 }
 
+
 /**
- * Stream per-database rows to disk, with optional external merge sort.
- * The previous report survives a total query failure.
- */
+* Stream per-database rows to disk, with optional external merge sort.
+* The previous report survives a total query failure.
+*/
 function inventory(Context $ctx, Result $result, string $name, array $header,
-                   string $sql, callable $map, bool $unique = false, bool $sort = true): void
+    string $sql, callable $map, bool $unique = false, bool $sort = true): void
 {
     $schemas = $ctx->schemas();
     $raw = tempIn($ctx->results);
@@ -615,7 +624,7 @@ function inventory(Context $ctx, Result $result, string $name, array $header,
                 }
             }
         } finally {
-            fclose($out);
+        fclose($out);
         }
         if (!$checked) {
             throw new RuntimeException('No databases were queried successfully.');
@@ -639,18 +648,19 @@ function inventory(Context $ctx, Result $result, string $name, array $header,
                     throw new RuntimeException('Could not read complete inventory.');
                 }
             } finally {
-                fclose($in);
-                fclose($out);
+            fclose($in);
+            fclose($out);
             }
         });
     } finally {
-        unlink($raw);
-        if ($ordered !== null) {
-            unlink($ordered);
-        }
+    unlink($raw);
+    if ($ordered !== null) {
+        unlink($ordered);
+    }
     }
     $result->summary = "$count rows from $checked/" . count($schemas) . " databases ($name)";
 }
+
 
 function listDatabases(Context $ctx, Result $r): void
 {
@@ -658,21 +668,23 @@ function listDatabases(Context $ctx, Result $r): void
         ['Database', 'Owner email', 'Family name', 'Given name', 'Record count',
             'Last modified', 'Year', 'Month', 'Registration ID', 'Version', 'Subversion'],
         'SELECT (SELECT ugr_eMail FROM sysUGrps WHERE ugr_ID=2),
-            (SELECT ugr_LastName FROM sysUGrps WHERE ugr_ID=2),
-            (SELECT ugr_FirstName FROM sysUGrps WHERE ugr_ID=2),
-            n, modified, YEAR(modified), MONTH(modified),
-            (SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1),
-            (SELECT sys_dbVersion FROM sysIdentification LIMIT 1),
-            (SELECT sys_dbSubVersion FROM sysIdentification LIMIT 1)
-         FROM (SELECT COUNT(*) n, MAX(rec_Modified) modified FROM Records) AS stats',
+        (SELECT ugr_LastName FROM sysUGrps WHERE ugr_ID=2),
+        (SELECT ugr_FirstName FROM sysUGrps WHERE ugr_ID=2),
+        n, modified, YEAR(modified), MONTH(modified),
+        (SELECT sys_dbRegisteredID FROM sysIdentification LIMIT 1),
+        (SELECT sys_dbVersion FROM sysIdentification LIMIT 1),
+        (SELECT sys_dbSubVersion FROM sysIdentification LIMIT 1)
+        FROM (SELECT COUNT(*) n, MAX(rec_Modified) modified FROM Records) AS stats',
         static fn($row, $db) => [$db, ...$row], false, false);
 }
+
 
 function listRecordTypes(Context $ctx, Result $r): void
 {
     inventory($ctx, $r, 'list_of_rectypes_on_all_dbs.tsv', ['Record type'],
         'SELECT rty_Name FROM defRecTypes', static fn($row) => $row, true);
 }
+
 
 function listConceptIds(Context $ctx, Result $r): void
 {
@@ -682,6 +694,7 @@ function listConceptIds(Context $ctx, Result $r): void
         static fn($row, $db) => [...$row, $db], true);
 }
 
+
 function listFields(Context $ctx, Result $r): void
 {
     inventory($ctx, $r, 'list_of_fields_on_all_dbs.tsv', ['Display name', 'Help text'],
@@ -690,7 +703,8 @@ function listFields(Context $ctx, Result $r): void
 }
 
 const USER_FILTER = " FROM sysUGrps WHERE ugr_Type='user'
-    AND TRIM(ugr_eMail) NOT IN ('', 'guest@null', 'info@heuristscholar.org', 'info@heuristnetwork.org')";
+AND TRIM(ugr_eMail) NOT IN ('', 'guest@null', 'info@heuristscholar.org', 'info@heuristnetwork.org')";
+
 
 function listUsersWithDbs(Context $ctx, Result $r): void
 {
@@ -701,6 +715,7 @@ function listUsersWithDbs(Context $ctx, Result $r): void
         static fn($row, $db) => [...array_slice($row, 0, 3), $db, ...array_slice($row, 3)]);
 }
 
+
 function openZip(string $path): ZipArchive
 {
     $zip = new ZipArchive();
@@ -709,6 +724,7 @@ function openZip(string $path): ZipArchive
     }
     return $zip;
 }
+
 
 function listUniqueUsers(Context $ctx, Result $r): void
 {
@@ -748,11 +764,11 @@ function listUniqueUsers(Context $ctx, Result $r): void
                         throw new RuntimeException('Cannot read complete cumulative list.');
                     }
                 } finally {
-                    fclose($old);
+                fclose($old);
                 }
             }
         } finally {
-            fclose($out);
+        fclose($out);
         }
         atomicWrite($path, static function ($tmp) use ($raw, $ctx, &$count): void {
             command(lowPriority(['sort', '--stable', '-u', '-t', "\t", '-k1,1',
@@ -763,11 +779,11 @@ function listUniqueUsers(Context $ctx, Result $r): void
                     ++$count;
                 }
             } finally {
-                fclose($sorted);
+            fclose($sorted);
             }
         });
     } finally {
-        unlink($raw);
+    unlink($raw);
     }
     $zipPath = $ctx->results . '/' . date('Y-m') . '_archive_cumulative_list_of_users_unique.zip';
     atomicWrite($zipPath, static function ($tmp) use ($path): void {
@@ -779,10 +795,12 @@ function listUniqueUsers(Context $ctx, Result $r): void
     $r->summary = "$count cumulative unique users; $checked/" . count($schemas) . ' databases read';
 }
 
+
 function escapeHtml(string $s): string
 {
     return htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
+
 
 function listWebsites(Context $ctx, Result $r): void
 {
@@ -790,13 +808,13 @@ function listWebsites(Context $ctx, Result $r): void
     $base = $ctx->config['website'];
     inventory($ctx, $r, $tsv, ['Database', 'Record ID', 'URL', 'Title'],
         "SELECT rec_ID, rec_Title FROM Records WHERE NOT rec_FlagTemporary
-         AND rec_Title NOT LIKE '%Enter a website name here%'
-         AND rec_Title NOT LIKE '%UNCONFIGURED SITE TITLE%'
-         AND rec_RecTypeID IN (SELECT rty_ID FROM defRecTypes
-             WHERE rty_OriginatingDBID=99 AND rty_IDInOriginatingDB=51)",
+        AND rec_Title NOT LIKE '%Enter a website name here%'
+        AND rec_Title NOT LIKE '%UNCONFIGURED SITE TITLE%'
+        AND rec_RecTypeID IN (SELECT rty_ID FROM defRecTypes
+        WHERE rty_OriginatingDBID=99 AND rty_IDInOriginatingDB=51)",
         static fn($row, $db) => [$db, $row[0], $base . '?' . http_build_query([
             'db' => $db, 'website' => '', 'id' => $row[0],
-        ]), $row[1]]);
+            ]), $row[1]]);
     $html = "$ctx->results/list_of_websites_on_all_dbs.html";
     atomicWrite($html, static function ($tmp) use ($ctx, $tsv): void {
         $in = fopen("$ctx->results/$tsv", 'rb');
@@ -812,8 +830,8 @@ function listWebsites(Context $ctx, Result $r): void
             }
             putLine($out, '</ul>');
         } finally {
-            fclose($in);
-            fclose($out);
+        fclose($in);
+        fclose($out);
         }
     });
     if ($ctx->config['publishWebsites']) {
@@ -824,6 +842,7 @@ function listWebsites(Context $ctx, Result $r): void
         });
     }
 }
+
 
 function listFilestoreSizes(Context $ctx, Result $r): void
 {
@@ -851,11 +870,12 @@ function listFilestoreSizes(Context $ctx, Result $r): void
                 putLine($out, rowLine([$kib, $path]));
             }
         } finally {
-            fclose($out);
+        fclose($out);
         }
     });
     $r->summary = count($sizes) . ' entries measured in KiB';
 }
+
 
 function regularFiles(string $dir, bool $recursive = true): Generator
 {
@@ -869,14 +889,23 @@ function regularFiles(string $dir, bool $recursive = true): Generator
     }
 }
 
+
+/** BOOKSTACK now runs the five HeuristRef operations in dependency order. 
+* It backs up the SQL database and application files, exports the BookStack API data, 
+* builds the Markdown/JSON/files snapshot from those exports, and validates the local backups. 
+* It then mirrors the backups to Huma-Num and publishes the documentation to GitHub if configured. 
+* A failed local stage skips both transfers. 
+* BOOKSTACK_CHECK is available separately for the receiving server.
+*/
+
 function latestBookStackExport(string $path, string $day): string
 {
     $latest = '';
     foreach (new FilesystemIterator($path) as $entry) {
         $name = $entry->getFilename();
         if (!$entry->isLink() && $entry->isDir() && str_starts_with($name, $day . '_')
-            && preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/D', $name)
-            && strcmp($name, $latest) > 0) {
+        && preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/D', $name)
+        && strcmp($name, $latest) > 0) {
             $latest = $name;
         }
     }
@@ -886,8 +915,9 @@ function latestBookStackExport(string $path, string $day): string
     return "$path/$latest";
 }
 
+
 function countBookStackFiles(string $path, string $day, Result $r, int $minimum = 1,
-                            bool $recursive = true, bool $checkDate = true): int
+    bool $recursive = true, bool $checkDate = true): int
 {
     $count = $stale = 0;
     $examples = [];
@@ -909,7 +939,9 @@ function countBookStackFiles(string $path, string $day, Result $r, int $minimum 
     return $count;
 }
 
+
 /** BookStack producer steps. The receiver uses checkBookStack independently. */
+
 function bookStackWorkflow(Context $ctx, Result $result): void
 {
     $settings = $ctx->config['bookstackProducer'];
@@ -974,7 +1006,9 @@ function bookStackWorkflow(Context $ctx, Result $result): void
     }
 }
 
+
 /** Build a complete directory privately before publishing it on the same filesystem. */
+
 function bookStackPublish(string $destination, callable $build, bool $replace = false): string
 {
     $parent = dirname($destination);
@@ -1005,11 +1039,12 @@ function bookStackPublish(string $destination, callable $build, bool $replace = 
         }
         return $summary;
     } finally {
-        if (is_dir($stage)) {
-            bookStackRemoveTree($stage);
-        }
+    if (is_dir($stage)) {
+        bookStackRemoveTree($stage);
+    }
     }
 }
+
 
 function bookStackRemoveTree(string $path): void
 {
@@ -1028,6 +1063,7 @@ function bookStackRemoveTree(string $path): void
         throw new RuntimeException("Cannot remove $path");
     }
 }
+
 
 function bookStackSql(Context $ctx, array $config, string $parent, string $stamp, Result $r): string
 {
@@ -1048,7 +1084,9 @@ function bookStackSql(Context $ctx, array $config, string $parent, string $stamp
     });
 }
 
+
 /** Download via PHP cURL without exposing the API token in a process argument or following redirects. */
+
 function bookStackDownload(array $config, string $route, $stream, string $accept): void
 {
     $curl = curl_init(rtrim($config['url'], '/') . $route);
@@ -1065,9 +1103,10 @@ function bookStackDownload(array $config, string $route, $stream, string $accept
             throw new RuntimeException("BookStack API $route returned HTTP $status (cURL " . curl_errno($curl) . ').');
         }
     } finally {
-        curl_close($curl);
+    curl_close($curl);
     }
 }
+
 
 function bookStackItems(array $config, string $type): Generator
 {
@@ -1079,7 +1118,7 @@ function bookStackItems(array $config, string $type): Generator
             rewind($json);
             $page = json_decode(stream_get_contents($json), true, 512, JSON_THROW_ON_ERROR);
         } finally {
-            fclose($json);
+        fclose($json);
         }
         if (!isset($page['data'], $page['total']) || !is_array($page['data'])) {
             throw new RuntimeException("Unexpected BookStack $type listing.");
@@ -1094,6 +1133,7 @@ function bookStackItems(array $config, string $type): Generator
     } while ($offset < (int) $page['total']);
 }
 
+
 function bookStackSafeName(string $name): string
 {
     $name = preg_replace('/[\x00-\x20\x7F\x2F\x5C:*?"<>|]+/', '_', $name);
@@ -1104,10 +1144,11 @@ function bookStackSafeName(string $name): string
     return $name === '' ? '_' : $name;
 }
 
+
 function bookStackApi(array $config, string $parent, string $stamp): string
 {
     if (!str_starts_with($config['url'], 'https://') || $config['token'] === ''
-        || preg_match('/[\r\n]/', $config['token'])) {
+    || preg_match('/[\r\n]/', $config['token'])) {
         throw new RuntimeException('Configure BookStack HTTPS url and API token ID:secret.');
     }
     return bookStackPublish("$parent/$stamp", static function ($stage) use ($config): string {
@@ -1130,7 +1171,7 @@ function bookStackApi(array $config, string $parent, string $stamp): string
                     try {
                         bookStackDownload($config, "/api/$type/$id/export/$format", $file, '*/*');
                     } finally {
-                        fclose($file);
+                    fclose($file);
                     }
                 }
             }
@@ -1146,7 +1187,9 @@ function bookStackApi(array $config, string $parent, string $stamp): string
     });
 }
 
+
 /** Extract only normal files and directories within the target; never create links. */
+
 function bookStackExtract(string $archive, string $dir): void
 {
     $zip = new ZipArchive();
@@ -1157,7 +1200,7 @@ function bookStackExtract(string $archive, string $dir): void
         for ($i = 0; $i < $zip->numFiles; ++$i) {
             $name = $zip->getNameIndex($i);
             if ($name === false || $name === '' || str_contains($name, '\\')
-                || str_contains($name, ':') || preg_match('~(^/|(?:^|/)\.{1,2}(?:/|$))~', $name)) {
+            || str_contains($name, ':') || preg_match('~(^/|(?:^|/)\.{1,2}(?:/|$))~', $name)) {
                 throw new RuntimeException('Invalid ZIP entry path in BookStack export.');
             }
             $target = "$dir/$name";
@@ -1180,16 +1223,17 @@ function bookStackExtract(string $archive, string $dir): void
                         throw new RuntimeException("Incomplete BookStack ZIP entry $name");
                     }
                 } finally {
-                    fclose($out);
+                fclose($out);
                 }
             } finally {
-                fclose($in);
+            fclose($in);
             }
         }
     } finally {
-        $zip->close();
+    $zip->close();
     }
 }
+
 
 function bookStackImageNames(string $dir): void
 {
@@ -1212,8 +1256,8 @@ function bookStackImageNames(string $dir): void
     };
     $collect = static function (array $node) use (&$collect, $rename, &$names): void {
         if (isset($node['type'], $node['id'], $node['file'])
-            && in_array($node['type'], ['gallery', 'drawio'], true)
-            && preg_match('/^[0-9]+$/D', (string) $node['id']) === 1 && !isset($names[$node['file']])) {
+        && in_array($node['type'], ['gallery', 'drawio'], true)
+        && preg_match('/^[0-9]+$/D', (string) $node['id']) === 1 && !isset($names[$node['file']])) {
             $rename($node['file'], 'image-' . $node['id']);
         }
         foreach ($node as $child) {
@@ -1241,6 +1285,7 @@ function bookStackImageNames(string $dir): void
     unset($data['exported_at']);
     writeText($jsonPath, json_encode($data, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n");
 }
+
 
 function bookStackSnapshot(string $api, string $snapshot, string $requiredBook): string
 {
@@ -1275,8 +1320,9 @@ function bookStackSnapshot(string $api, string $snapshot, string $requiredBook):
             throw new RuntimeException(implode("\n", $check->details));
         }
         return count($index['books']) . ' books';
-    }, true);
+        }, true);
 }
+
 
 function bookStackRetention(array $parents): string
 {
@@ -1286,7 +1332,7 @@ function bookStackRetention(array $parents): string
         foreach (new FilesystemIterator($parent) as $item) {
             $name = $item->getFilename();
             if (!$item->isLink() && $item->isDir() && $name < $cutoff
-                && preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/D', $name)) {
+            && preg_match('/^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/D', $name)) {
                 bookStackRemoveTree($item->getPathname());
                 ++$removed;
             }
@@ -1295,6 +1341,7 @@ function bookStackRetention(array $parents): string
     return "$removed dated directories removed";
 }
 
+
 function bookStackRemote(Context $ctx, array $config, string $base): string
 {
     $remote = $config['remote'];
@@ -1302,7 +1349,7 @@ function bookStackRemote(Context $ctx, array $config, string $base): string
         return 'disabled';
     }
     if (!preg_match('~^[a-zA-Z0-9_-]+@[a-zA-Z0-9.-]+:/[a-zA-Z0-9_./-]+/BookStack/?$~D', $remote)
-        || str_contains($remote, '..') || !is_readable($config['sshKey'])) {
+    || str_contains($remote, '..') || !is_readable($config['sshKey'])) {
         throw new RuntimeException('Configure the dedicated BookStack remote path and a readable SSH identity.');
     }
     // rsync parses -e as a command specification. Restrict the identity value to one argument.
@@ -1318,6 +1365,7 @@ function bookStackRemote(Context $ctx, array $config, string $base): string
     return 'mirror transferred';
 }
 
+
 function bookStackGit(Context $ctx, array $config, string $snapshot): string
 {
     $repo = rtrim($config['gitRepo'], '/');
@@ -1329,7 +1377,7 @@ function bookStackGit(Context $ctx, array $config, string $snapshot): string
     }
     $git = static fn(array $args) => command(
         ['env', 'GIT_TERMINAL_PROMPT=0', 'git', '-C', $repo, ...$args], $ctx->results
-    );
+        );
     $branch = $config['gitBranch'];
     $folder = 'documentation/Understanding_Heurist_Vsn_7';
     if (trim($git(['branch', '--show-current'])) !== $branch || trim($git(['status', '--porcelain'])) !== '') {
@@ -1350,6 +1398,7 @@ function bookStackGit(Context $ctx, array $config, string $snapshot): string
     $git(['push', 'origin', $branch]);
     return $changed ? 'documentation committed and pushed' : 'no new documentation changes';
 }
+
 
 function checkBookStack(Context $ctx, Result $r): void
 {
@@ -1398,6 +1447,7 @@ function checkBookStack(Context $ctx, Result $r): void
     $r->summary = implode(', ', $counts) . " ($r->issueCount issues)";
 }
 
+
 function phpJob(Context $ctx, string $script, array $args, string $log): void
 {
     if (!str_starts_with($script, '/') || !is_file($script) || !is_readable($script)) {
@@ -1406,6 +1456,7 @@ function phpJob(Context $ctx, string $script, array $args, string $log): void
     // PHP processes stay separate because the existing entry points can call exit().
     command(lowPriority([PHP_BINARY, $script, ...$args]), $ctx->results, $log, [0], dirname($script));
 }
+
 
 function refreshMembership(Context $ctx, Result $r): void
 {
@@ -1419,6 +1470,7 @@ function refreshMembership(Context $ctx, Result $r): void
     $r->summary = '1 membership list published (' . filesize($path) . ' bytes)';
 }
 
+
 function checkMembershipBatch(Context $ctx, Result $r): void
 {
     $db = $ctx->config['membershipDb'];
@@ -1427,11 +1479,12 @@ function checkMembershipBatch(Context $ctx, Result $r): void
     $output = (string) file_get_contents($log, false, null, 0, 8192);
     // Some upstream error paths use exit with a string, which returns code 0.
     if (!preg_match('/^checkMembershipBatch:\s+(\d+) tickets for (\d+) members\s+(\d+) tickets for (\d+) non-members\s*$/m',
-        $output, $counts)) {
+    $output, $counts)) {
         throw new RuntimeException("No completion counts for $db. See membership_batch.log.");
     }
     $r->summary = "$db: $counts[1] tickets for $counts[2] members, $counts[3] for $counts[4] non-members";
 }
+
 
 function buildArchivePackages(Context $ctx, Result $r): void
 {
@@ -1469,6 +1522,7 @@ function buildArchivePackages(Context $ctx, Result $r): void
     $r->summary = "$done/" . count(array_unique($names)) . ' archive packages completed';
 }
 
+
 function listHeuristServers(Context $ctx, Result $r): void
 {
     $urls = $ctx->config['servers'];
@@ -1483,11 +1537,12 @@ function listHeuristServers(Context $ctx, Result $r): void
                 putLine($out, rowLine([$url]));
             }
         } finally {
-            fclose($out);
+        fclose($out);
         }
     });
     $r->summary = count($urls) . ' configured server URLs';
 }
+
 
 function scanLegacyLinks(Context $ctx, Result $r): void
 {
@@ -1515,7 +1570,7 @@ function scanLegacyLinks(Context $ctx, Result $r): void
                 }
             }
         } finally {
-            fclose($in);
+        fclose($in);
         }
     });
     $r->summary = "$matches matching lines in $files files (legacy_alpha_references.txt)";
@@ -1523,6 +1578,7 @@ function scanLegacyLinks(Context $ctx, Result $r): void
         $r->issue('Legacy alpha references found. See the working list.', 'Warning');
     }
 }
+
 
 function alertServer(Context $ctx, Result $r): void
 {
@@ -1543,7 +1599,7 @@ function alertServer(Context $ctx, Result $r): void
         $r->issue('Cannot read one-minute load average.');
     }
     $r->summary = 'Load ' . ($load[0] ?? 'unknown') . ' (limit ' . $c['loadLimit'] . '), disk '
-        . ($diskUse === null ? 'unknown' : "$diskUse%") . ' (limit ' . $c['diskLimit'] . '%)';
+    . ($diskUse === null ? 'unknown' : "$diskUse%") . ' (limit ' . $c['diskLimit'] . '%)';
     $metrics = [
         'cpu' => [$load === false ? null : $load[0] > $c['loadLimit'], 'One-minute load exceeded the threshold.'],
         'disk' => [$diskUse === null ? null : $diskUse >= $c['diskLimit'], $c['disk'] . ' reached the disk usage threshold.'],
@@ -1569,14 +1625,15 @@ function alertServer(Context $ctx, Result $r): void
         try {
             // Use process names in the email to avoid exposing command-line credentials.
             $sample = $key === 'cpu'
-                ? command(['ps', '-eo', 'pcpu,pid,user,comm', '--sort=-pcpu'], $c['monitor'])
-                : command(['df', '-hP'], $c['monitor']);
+            ? command(['ps', '-eo', 'pcpu,pid,user,comm', '--sort=-pcpu'], $c['monitor'])
+            : command(['df', '-hP'], $c['monitor']);
             $r->details[] = implode("\n", array_slice(explode("\n", trim($sample)), 0, 11));
         } catch (Throwable $e) {
             $r->details[] = $e->getMessage();
         }
     }
 }
+
 
 function purgeReports(string $dir, Result $result): void
 {
@@ -1585,7 +1642,7 @@ function purgeReports(string $dir, Result $result): void
     $previousMonth = $today->modify('first day of last month');
     $cutoff = $previousMonth->setDate((int) $previousMonth->format('Y'),
         (int) $previousMonth->format('m'), min((int) $today->format('d'), (int) $previousMonth->format('t')))
-        ->format('Y-m-d');
+    ->format('Y-m-d');
     $paths = glob("$dir/heurist-monitor-*.odt");
     if ($paths === false) {
         throw new RuntimeException('Cannot list monitoring reports.');
@@ -1595,8 +1652,8 @@ function purgeReports(string $dir, Result $result): void
     $removed = 0;
     foreach ($paths as $path) {
         if (!is_file($path) || is_link($path) || !preg_match(
-            '/^heurist-monitor-((\d{4}-\d{2})-\d{2})_\d{6}_\d{6}-[a-z]+\.odt$/D',
-            basename($path), $m
+        '/^heurist-monitor-((\d{4}-\d{2})-\d{2})_\d{6}_\d{6}-[a-z]+\.odt$/D',
+        basename($path), $m
         )) {
             continue;
         }
@@ -1613,6 +1670,7 @@ function purgeReports(string $dir, Result $result): void
     }
     $result->summary = "$removed old reports removed (latest older report per month kept)";
 }
+
 
 function reportText(array $results, string $server, string $selection, string $path): string
 {
@@ -1638,6 +1696,7 @@ function reportText(array $results, string $server, string $selection, string $p
     return implode("\n", $lines) . "\n";
 }
 
+
 function reportOdt(string $path, string $text): void
 {
     atomicWrite($path, static function ($tmp) use ($text): void {
@@ -1649,22 +1708,23 @@ function reportOdt(string $path, string $text): void
             $paragraphs .= '<text:p>' . $escaped . '</text:p>';
         }
         $content = '<?xml version="1.0" encoding="UTF-8"?>'
-            . '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"'
-            . ' xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">'
-            . '<office:body><office:text>' . $paragraphs . '</office:text></office:body></office:document-content>';
+        . '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"'
+        . ' xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" office:version="1.2">'
+        . '<office:body><office:text>' . $paragraphs . '</office:text></office:body></office:document-content>';
         $manifest = '<?xml version="1.0" encoding="UTF-8"?>'
-            . '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">'
-            . '<manifest:file-entry manifest:full-path="/" manifest:media-type="' . $mime . '" manifest:version="1.2"/>'
-            . '<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>'
-            . '</manifest:manifest>';
+        . '<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">'
+        . '<manifest:file-entry manifest:full-path="/" manifest:media-type="' . $mime . '" manifest:version="1.2"/>'
+        . '<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>'
+        . '</manifest:manifest>';
         $zip = openZip($tmp);
         if (!$zip->addFromString('mimetype', $mime) || !$zip->setCompressionName('mimetype', ZipArchive::CM_STORE)
-            || !$zip->addFromString('content.xml', $content)
-            || !$zip->addFromString('META-INF/manifest.xml', $manifest) || !$zip->close()) {
+        || !$zip->addFromString('content.xml', $content)
+        || !$zip->addFromString('META-INF/manifest.xml', $manifest) || !$zip->close()) {
             throw new RuntimeException('Cannot write ODT package.');
         }
     });
 }
+
 
 function parseCli(array $args): array
 {
@@ -1697,6 +1757,7 @@ function parseCli(array $args): array
     return [$config, implode(',', array_unique($labels)), $jobs, $mode];
 }
 
+
 function findConfig(?string $given): string
 {
     if ($given !== null) {
@@ -1712,6 +1773,7 @@ function findConfig(?string $given): string
     }
     return '/var/www/html/HEURIST/heuristConfigIni.php';
 }
+
 
 function main(array $args): int
 {
@@ -1787,8 +1849,8 @@ function main(array $args): int
                 } catch (Throwable $e) {
                     $r->issue($e->getMessage());
                 } finally {
-                    // In a mixed run hold the lock through the consolidated email.
-                    $r->seconds = microtime(true) - $start;
+                // In a mixed run hold the lock through the consolidated email.
+                $r->seconds = microtime(true) - $start;
                 }
             }
         }
@@ -1817,9 +1879,9 @@ function main(array $args): int
             $results['reportStorage']->issue($e->getMessage());
             $path = 'unavailable';
         } finally {
-            if (is_resource($reportsLock)) {
-                fclose($reportsLock);
-            }
+        if (is_resource($reportsLock)) {
+            fclose($reportsLock);
+        }
         }
 
         $counts = ['Failure' => 0, 'Warning' => 0, 'Success' => 0];
@@ -1832,7 +1894,7 @@ function main(array $args): int
             $mode === 'test-mail' ? 'mail test' : $selection);
         $body = reportText($results, $config['server'], $selection, $path);
         if (!mail($config['mailTo'], $subject, $body, [
-            'From' => $config['mailFrom'], 'Content-Type' => 'text/plain; charset=UTF-8',
+        'From' => $config['mailFrom'], 'Content-Type' => 'text/plain; charset=UTF-8',
         ])) {
             fwrite(STDERR, "Unable to submit consolidated Heurist email. ODT report: $path\n");
             return 1;
@@ -1842,10 +1904,10 @@ function main(array $args): int
         }
         return $counts['Failure'] > 0 ? 1 : 0;
     } finally {
-        if (is_resource($alertLock)) {
-            fclose($alertLock);
-        }
-        fclose($lock);
+    if (is_resource($alertLock)) {
+        fclose($alertLock);
+    }
+    fclose($lock);
     }
 }
 
