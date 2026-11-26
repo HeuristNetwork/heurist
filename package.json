@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:js": "npm run build:terser && npm run build:deps",
     "build:terser": "node server_management/server_synchronisation/code_synchronisation/build-terser.mjs",
-    "build:deps": "server_management/server_synchronisation/code_synchronisation/build-external-js.sh"
+    "build:deps": "node server_management/server_synchronisation/code_synchronisation/build-external-js.mjs"
   },
   "repository": {
     "type": "git",
