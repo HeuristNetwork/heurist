@@ -28,10 +28,14 @@ $mysqli = $system->getMysqli();
 
 header(CTYPE_JSON);
 
-$lastModified = mysql__select_value($mysqli, "select max(rty_Modified) from defRecTypes");
-$lastModified = strtotime($lastModified[0]);
+$modifiedValue = mysql__select_value($mysqli, "select max(rty_Modified) from defRecTypes");
+$lastModified = is_string($modifiedValue) && $modifiedValue !== '' ? strtotime($modifiedValue) : false;
+$modifiedSinceHeader = $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '';
+$modifiedSince = is_string($modifiedSinceHeader) && $modifiedSinceHeader !== ''
+    ? strtotime($modifiedSinceHeader) : false;
+$notModified = $lastModified !== false && $modifiedSince !== false && $modifiedSince >= $lastModified;
 
-if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {
+if ($notModified) {
   header('HTTP/1.1 304 Not Modified');
   exit;
 }
