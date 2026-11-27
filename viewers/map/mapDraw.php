@@ -96,7 +96,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 layout_params['controls'] = 'legend,bookmark,geocoder,draw';
                 layout_params['legend'] = 'basemaps,mapdocs,off';
 
-                initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
+                initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search) ?? initial_wkt;
 
                 mapping = $('#map_container').mapping({
                     element_map: '#map_digitizer',
@@ -105,7 +105,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                     ondraw_addstart: onMapDrawAdd,
                     ondraw_editstart: onMapDraw,
                     ondrawend:  onMapDraw,
-                    drawMode: 'full' //(is_geofilter?'filter':'full')
+                    drawMode: 'full'
                 });
 
                 //initialize buttons
@@ -159,6 +159,9 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                         $dlg.dialog('close');
                     };
 
+                    let defaultFormat = parseWKT($('#geodata_textarea').val()) ? 'get-coord-wkt' : 'get-coord-json';
+                    $(`#${defaultFormat}`).prop('checked', true);
+
                     $dlg = window.hWin.HEURIST4.msg.showElementAsDialog({
                         window:top,
                         element: document.getElementById( "get-set-coordinates" ),
@@ -192,7 +195,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                         const originalGeoJSON = getGeometryFromMap('geojson');
 
                         const hasOriginalGeo = !window.hWin.HEURIST4.util.isempty(originalWKT) && !window.hWin.HEURIST4.util.isempty(originalGeoJSON);
-                        const changedValue = $(e.target).val() !== originalWKT && $(e.target).val() !==originalGeoJSON;
+                        const changedValue = $(e.target).val() !== originalWKT && $(e.target).val() !== originalGeoJSON;
 
                         if(hasOriginalGeo && changedValue){
                             $resetBtn.show();
@@ -426,8 +429,6 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
                 if(!window.hWin.HEURIST4.util.isempty(tool_option) && tool_option != null){ // check if only one type of drawing tool is allowed
                     mapping.mapping( 'drawSetControls', tool_option);
                 }
-
-
 
                 if( !window.hWin.HEURIST4.util.isempty(initial_wkt) && initial_wkt!='undefined' ){ //params && params['wkt']
 
