@@ -32,6 +32,11 @@ final class WebsiteSetup
     public const IMPORT_TYPES = array('2-1106');
     /** Fields made optional: a new v4 website has no logo (plan 27b, Q3); the legacy editor still asks for it. */
     public const OPTIONAL = array('99-51' => array('2-38'));
+    /**
+     * Fields added to the web page by the setup but not needed for "installed" (27q3 review 8): the language of a
+     * standalone page (DT_LANGUAGE 2-967, as the languages of a website). Without it a page has no language of its own.
+     */
+    public const PAGE_FIELDS = array('2-967');
 
     private WebsiteDefinitionsInterface $definitions;
     private RuntimeContext $runtime;
@@ -52,6 +57,7 @@ final class WebsiteSetup
             throw new WebsiteException(403, 'Only database managers can install the website definitions');
         }
         return array_merge($this->definitions->install(self::FIELDS, self::RECTYPES, self::IMPORT_TYPES),
+            $this->definitions->install(self::PAGE_FIELDS, array('99-52')),
             $this->definitions->makeOptional(self::OPTIONAL));
     }
 }

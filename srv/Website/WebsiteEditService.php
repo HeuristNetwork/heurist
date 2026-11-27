@@ -92,8 +92,11 @@ final class WebsiteEditService
         foreach(WebsiteSetup::IMPORT_TYPES as $rectypeCode){
             if($definitions->localId('rty', $rectypeCode) < 1){ $missing[] = 'record type '.$rectypeCode; }
         }
+        // a standalone page has a language of its own (WebsiteSetup::PAGE_FIELDS, 27q3 review 8; the setup adds it)
+        $pageLanguage = $codes['page'] > 0 && $codes['languages'] > 0
+            && isset($definitions->structureRows($codes['page'])[$codes['languages']]);
         return array('installed' => empty($missing), 'missing' => $missing, 'canSetup' => $this->runtime->isAdmin,
-            'canCreate' => $this->runtime->isAdmin, 'codes' => $codes);
+            'canCreate' => $this->runtime->isAdmin, 'codes' => $codes, 'pageLanguage' => $pageLanguage);
     }
 
     /**
@@ -128,6 +131,9 @@ final class WebsiteEditService
         if($kind === 'website'){
             $menu = $this->repository->menu($record);
             $pages = $this->pageTree($menu['tree'], $menu['pages']);
+            $languages = $this->siteLanguages($record);
+        }elseif($kind === 'standalone'){
+            // the language of the page (27q3 review 8)
             $languages = $this->siteLanguages($record);
         }
         // a menu page: its website and /site/{website}/{page} (27q3 review 1, 2026-11-25)
@@ -254,7 +260,7 @@ final class WebsiteEditService
 
     /**
      * Widgets that Explorer publishes as a standalone page, as the modules (presentation-sources.md §6, plan 27q2 §17);
-     * storymap: with its story topic and its own map (27q3 §12, 2026-11-25).
+     * storymap: with its story topic, and its Map / Timeline elements beside it (`companions`, 27q3 review 7).
      */
     public const PUBLISHED_WIDGETS = array('crosstabs', 'storymap');
 
@@ -264,7 +270,17 @@ final class WebsiteEditService
      * content is kept). A widget of PUBLISHED_WIDGETS (crosstabs with the query shown in Explorer)
      * is published the same way.
      *
-     * @param array $input type (module or published widget), settings, state (bootstrap envelope of the module), title.
+     * A story map may come with `companions` (27q3 review 7): `[{role: map|timeline, type, settings, state}]`, the Map
+     * and Timeline elements of the page it draws on. A new page has the story map and the map in two columns and the
+     * timeline below; on a page published before, the elements the story map uses (or the first of the type) are kept
+     * as configured in the CMS editor and only missing ones are added. The story map is linked to them
+     * (`settings.map`, `settings.timeline` = their instance ids).
+     *
+     * The language chosen in Publish (`language`, 3 letters) is the language of the page (DT_LANGUAGE, 27q3 review 8)
+     * when the web page record type has the field (WebsiteSetup::PAGE_FIELDS).
+     *
+     * @param array $input type (module or published widget), settings, state (bootstrap envelope of the module), title,
+     *        companions (storymap only), language.
      * @return array{id:int,url:string,title:string,created:bool,issues:array}
      * @throws WebsiteException|RecordEditException
      */
@@ -291,20 +307,29 @@ final class WebsiteEditService
         );
         $title = trim(strip_tags((string)($input['title'] ?? '')));
         if($title === ''){ $title = ucfirst($type).' '.gmdate('Y-m-d'); }
+        $companions = $type === 'storymap' ? self::companions($input['companions'] ?? null) : array();
+        $language = $this->pageLanguageDetails(strtolower(trim((string)($input['language'] ?? ''))));
 
         if($pageId < 1){
             $node = WebsiteStarter::id('n');
             $instanceId = WebsiteStarter::id('i');
-            $config = array('schema' => CmsValidator::SCHEMA, 'instances' => array($instanceId => $instance),
-                'styles' => array('nodes' => array($node => array('height' => '100vh'))));
+            if(!empty($companions)){
+                $page = self::storyMapPage($instanceId, $instance, $companions);
+                $content = $page['content'];
+                $config = $page['config'];
+            }else{
+                $content = self::host($node, $instanceId);
+                $config = array('schema' => CmsValidator::SCHEMA, 'instances' => array($instanceId => $instance),
+                    'styles' => array('nodes' => array($node => array('height' => '100vh'))));
+            }
             $details = array(
                 $codes['name'] => $title,
                 $codes['version'] => WebsiteService::VERSION,
-                $codes['content'] => self::host($node, $instanceId),
+                $codes['content'] => $content,
                 $codes['configuration'] => self::json($config)
             );
             if($codes['standalonePage'] > 0){ $details[$codes['pageType']] = array($codes['standalonePage']); }
-            $details = $this->withPresentations($details);
+            $details = $this->withPresentations($details + $language);
             $result = $this->save->save('POST', 0, RecordInput::fromBody(array(
                 'rec_ID' => 0, 'rec_RecTypeID' => $codes['page'], 'rec_NonOwnerVisibility' => 'public', 'details' => $details
             )));
@@ -325,10 +350,12 @@ final class WebsiteEditService
         $html = WebsiteRepository::value($page, $codes['content']);
         // the first instance of this module that still has its host
         $instanceId = null;
+        $previous = array();
         foreach($config['instances'] as $id => $existing){
             if(is_array($existing) && ($existing['kind'] ?? '') === $kind && ($existing['type'] ?? '') === $type
                 && strpos($html, 'data-h-instance="'.$id.'"') !== false){
                 $instanceId = (string)$id;
+                $previous = is_array($existing['settings'] ?? null) ? $existing['settings'] : array();
                 if(isset($existing['mount'])){ $instance['mount'] = $existing['mount']; }
                 foreach(array('sync', 'records', 'selection', 'dataSource') as $key){
                     if(isset($existing[$key])){ $instance[$key] = $existing[$key]; }
@@ -340,6 +367,18 @@ final class WebsiteEditService
             $instanceId = WebsiteStarter::id('i');
             $html .= self::host(WebsiteStarter::id('n'), $instanceId);
         }
+        // the Map / Timeline elements of a story map: those it used (or the first of the type) kept, missing ones added
+        if(!empty($companions) && !is_array($instance['settings'])){ $instance['settings'] = array(); }
+        foreach($companions as $role => $companion){
+            $linked = is_string($previous[$role] ?? null) ? $previous[$role] : '';
+            $found = self::pageInstance($config, $html, $companion['type'], $linked);
+            if($found === null){
+                $found = WebsiteStarter::id('i');
+                $config['instances'][$found] = $companion['instance'];
+                $html .= self::host(WebsiteStarter::id('n'), $found);
+            }
+            $instance['settings'][$role] = $found;
+        }
         $config['instances'][$instanceId] = $instance;
         $names = WebsiteRepository::values($page, $codes['name']);
         $translated = array_values(array_filter($names, static function($value): bool {
@@ -349,7 +388,7 @@ final class WebsiteEditService
             $codes['name'] => array_merge(array($title), $translated),
             $codes['content'] => $html,
             $codes['configuration'] => self::json($config)
-        )))));
+        ) + $language))));
         return array('id' => $pageId, 'url' => $this->urls->page($pageId), 'title' => $title, 'created' => false,
             'issues' => $result['issues']);
     }
@@ -378,6 +417,104 @@ final class WebsiteEditService
             ? $this->repository->idsOfType(CmsRecordReferences::presentationIds($config), intval($codes['presentation'] ?? 0))
             : array();
         return $details;
+    }
+
+    /**
+     * The language of a published page as details (27q3 review 8): DT_LANGUAGE with the term of the code; none when
+     * no language is given or the web page has no language field (the setup adds it).
+     *
+     * @param string $language 3-letter code ('' / auto: none).
+     * @return array<int,array<int,int>>
+     * @throws WebsiteException 400 for a language without a term.
+     */
+    private function pageLanguageDetails(string $language): array
+    {
+        $codes = $this->repository->codes();
+        $field = intval($codes['languages'] ?? 0);
+        if($language === '' || $language === 'auto' || $field < 1 || $codes['page'] < 1){ return array(); }
+        if(!isset($this->repository->definitions()->structureRows($codes['page'])[$field])){ return array(); }
+        return array($field => $this->languageTerms(array($language)));
+    }
+
+    /**
+     * The Map / Timeline elements given with a story map (27q3 review 7), by role; anything else is left out.
+     *
+     * @param mixed $input `[{role, type, settings, state}]`.
+     * @return array<string,array{type:string,instance:array}>
+     */
+    private static function companions($input): array
+    {
+        $companions = array();
+        foreach(is_array($input) ? $input : array() as $item){
+            if(!is_array($item)){ continue; }
+            $role = strtolower(trim((string)($item['role'] ?? '')));
+            $type = strtolower(trim((string)($item['type'] ?? $role)));
+            if(!in_array($role, array('map', 'timeline'), true) || $type !== $role || isset($companions[$role])){ continue; }
+            $companions[$role] = array('type' => $type, 'instance' => array(
+                'kind' => 'module',
+                'type' => $type,
+                'configVersion' => CmsValidator::CONFIG_VERSION,
+                'settings' => is_array($item['settings'] ?? null) && !empty($item['settings']) ? $item['settings'] : new \stdClass(),
+                'state' => is_array($item['state'] ?? null) && !empty($item['state']) ? $item['state'] : null
+            ));
+        }
+        return $companions;
+    }
+
+    /**
+     * A new page of a story map with its Map and Timeline elements (27q3 review 7): the story map and the map in two
+     * columns (one on narrow screens), the timeline below across the width.
+     *
+     * @param string $storyId Instance id of the story map.
+     * @param array $story Its instance.
+     * @param array<string,array{type:string,instance:array}> $companions companions().
+     * @return array{content:string,config:array}
+     */
+    private static function storyMapPage(string $storyId, array $story, array $companions): array
+    {
+        $instances = array();
+        $nodes = array();
+        $hosts = array();
+        if(!is_array($story['settings'])){ $story['settings'] = array(); }
+        foreach($companions as $role => $companion){
+            $id = WebsiteStarter::id('i');
+            $instances[$id] = $companion['instance'];
+            $story['settings'][$role] = $id;
+            $hosts[$role] = array(WebsiteStarter::id('n'), $id);
+        }
+        $instances = array($storyId => $story) + $instances;
+        $storyNode = WebsiteStarter::id('n');
+        $nodes[$storyNode] = array('height' => '70vh');
+        $row = self::host($storyNode, $storyId);
+        if(isset($hosts['map'])){
+            $group = WebsiteStarter::id('n');
+            $nodes[$hosts['map'][0]] = array('height' => '70vh');
+            $nodes[$group] = array('display' => 'grid', 'gap' => '12px', 'grid-template-columns' => 'repeat(2, minmax(0, 1fr))',
+                'narrow' => array('grid-template-columns' => '1fr'));
+            $row = '<div data-h-node="'.$group.'" data-h-control="group">'.$row.self::host($hosts['map'][0], $hosts['map'][1]).'</div>';
+        }
+        if(isset($hosts['timeline'])){
+            $nodes[$hosts['timeline'][0]] = array('height' => '30vh');
+            $row .= self::host($hosts['timeline'][0], $hosts['timeline'][1]);
+        }
+        return array('content' => $row, 'config' => array('schema' => CmsValidator::SCHEMA, 'instances' => $instances,
+            'styles' => array('nodes' => $nodes)));
+    }
+
+    /**
+     * The instance of a module type on a page with its host: `$preferred` when it is one, else the first; null: none.
+     */
+    private static function pageInstance(array $config, string $html, string $type, string $preferred = ''): ?string
+    {
+        $hosted = static function($id, $instance) use ($html, $type): bool {
+            return is_array($instance) && ($instance['kind'] ?? '') === 'module' && ($instance['type'] ?? '') === $type
+                && strpos($html, 'data-h-instance="'.$id.'"') !== false;
+        };
+        if($preferred !== '' && $hosted($preferred, $config['instances'][$preferred] ?? null)){ return $preferred; }
+        foreach($config['instances'] as $id => $instance){
+            if($hosted((string)$id, $instance)){ return (string)$id; }
+        }
+        return null;
     }
 
     /** Host element of a module instance. */

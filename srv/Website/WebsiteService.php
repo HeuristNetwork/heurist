@@ -108,7 +108,11 @@ final class WebsiteService
         $siteTexts = $site !== null ? CmsValidator::translations(WebsiteRepository::values($site, $codes['translations'])) : array();
         $pageTexts = $home ? $siteTexts : CmsValidator::translations(WebsiteRepository::values($page, $codes['translations']));
 
-        $available = $site !== null ? $this->siteLanguages($site, $codes['languages']) : array_map('strtoupper', array_keys($pageTexts));
+        // a standalone page: its language first (DT_LANGUAGE, 27q3 review 8: the language chosen in Publish, the language
+        // of <html> and of the modules), then the languages of its translations
+        $available = $site !== null ? $this->siteLanguages($site, $codes['languages'])
+            : array_values(array_unique(array_merge($this->siteLanguages($page, $codes['languages']),
+                array_map('strtoupper', array_keys($pageTexts)))));
         $requested = $this->languages->code3($language);
         $current = $requested !== null && in_array($requested, $available, true) ? $requested : ($available[0] ?? null);
         // interface language of the modules: a standalone page takes any language asked in the URL
