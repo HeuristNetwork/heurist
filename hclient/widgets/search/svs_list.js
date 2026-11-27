@@ -1970,6 +1970,12 @@ $.widget( "heurist.svs_list", {
                 delegate: "li", //span.fancytree-node
                 menu: arr_menu,
 
+                position: {
+                    my: 'left top',
+                    at: 'right top',
+                    collision: 'flipfit'
+                },
+
                 open: function(){
                     //prevent collapse heurist main menu 
                     if(window.hWin.HEURIST4.util.isFunction(that.options.menu_locked)){
@@ -2810,7 +2816,7 @@ $.widget( "heurist.svs_list", {
                 let res = window.hWin.HEURIST4.query.hQueryStringify(prms); //json to string
 
                 if(!window.hWin.HEURIST4.util.isempty(res)){
-                    window.hWin.HEURIST4.util.copyStringToClipboard(res);      
+                    window.hWin.HEURIST4.util.copyStringToClipboard(res);
                 }    
             }
         }
