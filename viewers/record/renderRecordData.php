@@ -192,7 +192,6 @@ $system->defineConstant('DT_CMS_FOOTER');
 
 $connectedRecIDs = [];
 $already_linked_ids = [];
-$group_details = [];
 
 $font_styles = '';
 $font_families = [];
@@ -663,6 +662,42 @@ if(!$system->hasAccess()){
                 });
             }
 
+            function cleanupSeparators(recID){
+
+                let $recordElements = $('div[data-recdata]');
+                if(Number.isFinite(Number.parseInt(recID))){
+                    $recordElements = $(`div[data-recdata="${recID}"]`);
+                }
+
+                $.each($recordElements, (_, recordElement) => {
+
+                    let $recordElement = $(recordElement);
+
+                    if($recordElement.find('[name="show-unused-fields"]').is(':checked')){
+                        $recordElement.find('h5,h4,fieldset').show();
+                        return;
+                    }
+
+                    $.each($recordElement.find('h5,h4'), (idx, header) => {
+
+                        header = $(header);
+                        const fieldsetID = header.attr('data-order');
+                        if(!fieldsetID || fieldsetID === ''){
+                            return;
+                        }
+
+                        const $fieldset = $recordElement.find(`fieldset#${fieldsetID}`);
+                        if($fieldset.length === 0 || $fieldset.children('div:not(.emptyField)').length > 0){
+                            return;
+                        }
+
+                        header.hide();
+                        $fieldset.hide();
+                    });
+                });
+
+            }
+
             function openNetworkGraph(recID){
 
                 let $parentContainer = $(`div[data-recdata="${recID}"]`);
@@ -955,10 +990,13 @@ if(!$system->hasAccess()){
                 $('.pdf-download-link').button().on('click', (event) => downloadRecordAsPDF(event));
 
                 $('[name="show-unused-fields"]').on('change', (event) => {
+
                     const showUnusedFields = $(event.target).is(':checked');
                     const $parent = $(event.target).closest('div[data-recdata]');
                     const $fields = $parent.find('.emptyField');
                     showUnusedFields ? $fields.show() : $fields.hide();
+
+                    cleanupSeparators($parent.attr('data-recdata'));
                 });
 
                 $('[name="show-unused-fields"]').trigger('change');
@@ -1366,7 +1404,7 @@ exit(0);
 
 // this functions outputs common info.
 function print_details(array $bib) {
-    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details, $connectedRecIDs;
+    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $show_private_details, $connectedRecIDs;
 
     print_header_line($bib);
 
@@ -1382,7 +1420,7 @@ function print_details(array $bib) {
         $link_cnt = print_relation_details($bib);
         $link_cnt = print_linked_details($bib, $link_cnt);//links from
         if($is_map_popup){ // && $link_cnt>3 //linkRow
-/* createRecordGroups2(<?php echo intval($bib['rec_ID']); ?>,  <?php echo json_encode($group_details, JSON_FORCE_OBJECT);?> ); */
+
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
             <a href="#more" oncontextmenu="return false;"
@@ -1798,7 +1836,7 @@ function recviewer_add_iiif_manifest_thumb(array &$thumbs, array $bib): void {
 function print_public_details(array $bib) {
 
     global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language, $publishMode, $lang,
-        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
+        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $hide_images;
 
     $has_thumbs = false;
 
@@ -2301,6 +2339,7 @@ function print_public_details(array $bib) {
     QUERY;
 
     $recordFields = mysql__select_assoc($mysqli, $fieldQuery, 0);
+    $group_details = [];
     foreach($recordFields as $field){
 
         $dty_ID = $field['rst_DetailTypeID'];
