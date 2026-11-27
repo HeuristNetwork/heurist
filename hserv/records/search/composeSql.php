@@ -1761,7 +1761,6 @@ class HPredicate {
             case 'plain':            //query in old plain text format
                 //[{"t":"12"},{"plain":"0"},{"sortby":"t"}]
 
-
                 $query = parse_query($top_query->search_domain, urldecode($this->value), null, null, $top_query->currUserID);
 
                 $tab = 'r'.$this->qlevel;
@@ -1769,7 +1768,6 @@ class HPredicate {
                 $where_clause = $query->where_clause;
                 $where_clause = str_replace('TOPBIBLIO',$tab,$where_clause);//need to replace for particular level
                 $where_clause = str_replace('TOPBKMK','b',$where_clause);
-
 
                 return array("where"=>$where_clause);
             case 'typename':
@@ -2388,13 +2386,13 @@ class HPredicate {
                 ? heurist_legacy_contains_sql($mysqli, 'rd.dtl_Value', $val_wo_prefixes, 'recDetails') : null;
             $ftTitle = (!$this->negate && !$this->exact)
                 ? heurist_legacy_contains_sql($mysqli, 'link.rec_Title', $val_wo_prefixes, 'Records') : null;
-            $url_compare =  "link.rec_URL {$val} ";
             if($ftDetail!==null && $ftTitle!==null){
                 $detal_compare = $ftDetail;
                 $title_compare = $ftTitle;
+                $url_compare =  "{$url_compare} {$val} ";
             }else{
-                //$ignoreApostrophe = (stripos($val, 'LIKE') !== false);
-                $ignoreApostrophe = (strpos(trim($val), 'LIKE')===0);
+
+                $ignoreApostrophe = strpos(trim($val), 'LIKE') === 0;
                 if($ignoreApostrophe){
                     $detal_compare = "replace($detal_compare,\"'\",'') $val";
                     $title_compare = "replace($title_compare,\"'\",'') $val";
@@ -2402,6 +2400,7 @@ class HPredicate {
                 } else {
                     $detal_compare = "$detal_compare $val";
                     $title_compare = "$title_compare $val";
+                    $url_compare =  "{$url_compare} {$val} ";
                 }
             }
         }
@@ -3384,7 +3383,7 @@ QUERY;
         FALL IN:{"f:1113":"1450"}  1450 should fall between range in database    1400<=1450<=1500
         AFTER:  {"f:1113":">=1300"} 1400>=1300  (start of range is after the specified date)
         BEFORE: {"f:1113":"<=1600"} 1500<=1600  (end of range is before the specified date)
-        EXACT:  {"f:1113":"=1400"}  either start or end of range in db equals the specified date 
+        EXACT:  {"f:1113":"=1400"}  either start or end of range in db equals the specified date
                 {"f:1113":"=1400,1500"}  start of range in db is 1400 and end of range in db equals to 1500
         FALL IN/OVERLAP is default comparison.
     */

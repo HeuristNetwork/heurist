@@ -1104,7 +1104,7 @@ EOD;
 
                         $target_RecID = mysql__select_value($mysqli, $query3);
 
-                        if(!isPositiveInt($target_RecID) && (strpos($record_src_original_id, '0-') === 0 || defined('HEURIST_DBID') && strpos($record_src_original_id, HEURIST_DBID) === 0)){
+                        if(!isPositiveInt($target_RecID) && (strpos($record_src_original_id, '0-') === 0 || defined('HEURIST_DBID') && $record_src_original_id == HEURIST_DBID)){
 
                             $localRecID = explode('-', $record_src_original_id)[1];
                             $target_RecID = mysql__select_value($mysqli, "SELECT rec_ID FROM Records WHERE rec_ID = ?", ['i', $localRecID]);

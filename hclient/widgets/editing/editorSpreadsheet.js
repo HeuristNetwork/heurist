@@ -474,7 +474,7 @@ class EditorSpreadsheet{
 
             row.forEach((cell, x) => {
 
-                if(!cell.startsWith('<jss-cell') || !cell.endsWith('</jss-cell>')){
+                if(typeof cell !== 'string' || !cell.startsWith('<jss-cell') || !cell.endsWith('</jss-cell>')){
                     this.#initialAttributes[y][x] = '';
                     return;
                 }
@@ -738,7 +738,7 @@ class EditorSpreadsheet{
 
             const headers = this.#jspreadsheet[0].getHeaders().split(',');
 
-            data.map(row => {
+            data = data.map(row => {
 
                 let rowData = {};
                 for(let i = 0; i < headers.length; i++){
@@ -804,12 +804,13 @@ class EditorSpreadsheet{
             row.forEach(cell => {
 
                 const attributes = this.#options.export.styling ? this.#getCellAttributes(x, y) : '';
+                x ++;
 
                 cell.replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
 
-                table += `<td${attributes !== '' ? ` ${attributes}` : ''}>${cell ?? ''}</td>`
+                table += `<td${attributes !== '' ? ` ${attributes}` : ''}>${cell ?? ''}</td>`;
             });
             table += '</tr>';
 
