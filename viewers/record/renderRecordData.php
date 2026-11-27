@@ -1471,12 +1471,12 @@ function print_header_line(array $bib) {
     }
     ?>
 
-    <div class=HeaderRow style="margin-bottom:5px;min-height:0px;">
+    <div class=HeaderRow style="padding-bottom:0.5em;">
         <h2 style="text-transform:none;line-height:1.2em;font-size:1.3em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?php echo USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS);?>
         </h2>
 
-        <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;height:20px;background-repeat: no-repeat;background-image:url("
+        <div <?="style='padding:0 10px 0 22px;margin:10px 0 0;background-repeat: no-repeat;background-image:url("
                     .HEURIST_RTY_ICON.$bib['rty_ID'].")' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
             &nbsp;<?= '<strong>'. htmlspecialchars($bib['rty_Name']) .'</strong>: id '. htmlspecialchars($bib['rec_ID']) ?>
 
@@ -1504,7 +1504,7 @@ function print_header_line(array $bib) {
             $wfs_icon = HEURIST_BASE_URL . '?db=' . $system->dbname() . '&entity=defTerms&icon=' . intval($wfs_details[0]);
         ?>
 
-            <span style="cursor: default; padding-left: 20px;">
+            <span style="cursor: default; padding-left: 0.35em; display: block;">
                 Workflow stage: <?php echo htmlspecialchars($wfs_details[1]);?>
                 <image class="rft" style="background-image: url('<?php echo $wfs_icon; ?>')" src="<?php echo ICON_PLACEHOLDER;?>"></span>
             </span>
@@ -2878,9 +2878,18 @@ function composeRecTypeIcon(int $rty_ID){
 function composeRecLink(int $rec_ID, string $rec_Title){
     global $system;
 
-    return '<a target="_popup" href="'.$system->recordLink($rec_ID)
-                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, true):true;">'
+    $viewerLink = $system->recordLink($rec_ID);
+    $editLink = $system->recordLink($rec_ID, 'edit');
+
+    $rec_Link = "<a target='_popup' style='display: inline-block;max-width: 90%;min-width: unset;' href='$viewerLink' onclick='return (typeof link_open === \'function\')?link_open(this, true):true;'>"
                             .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';
+
+    $rec_Edit = !$system->hasAccess() ? '' : "<a target='_popup' style='display: inline-block;width: 1.5em;min-width: 1.5em; margin-left: 0.5em; vertical-align: top;' href='$editLink'
+        onclick='return (typeof link_open === \'function\')?link_open(this, true):true;'>
+            <img class='rv-editpencil' src='".HEURIST_BASE_URL."hclient/assets/edit-pencil.png' alt='Edit record' title='Edit record' style='vertical-align: top'>
+        </a>";
+
+    return "{$rec_Link}{$rec_Edit}";
 }
 
 

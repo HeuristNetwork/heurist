@@ -1939,6 +1939,9 @@ class System {
             ],
             'tpl' => [
                 "{$baseURL}?db={$this->dbname}&q=ids:{$rec_id_val}&template={$template}", "{$baseURLRewrite}{$this->dbname}/tpl/{$template}/{$rec_id_val}"
+            ],
+            'edit' => [
+                "{$baseURL}?fmt=edit&db={$this->dbname}&recID={$rec_id_val}", "{$baseURLRewrite}{$this->dbname}/edit/{$rec_id_val}"
             ]
         ];
 
