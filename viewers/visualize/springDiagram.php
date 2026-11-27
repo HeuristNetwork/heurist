@@ -560,10 +560,10 @@ function addNewConnections(recordIDs, data){
          */
         function showData(data, selectedRecordsIds, new_request, callbackFunctions, nodeSettings){
 
-            if(callbackFunctions === null && Object.keys(visualiserCallbackFunctions).length > 0){
+            if(callbackFunctions === null && typeof visualiserCallbackFunctions === 'object' && Object.keys(visualiserCallbackFunctions).length > 0){
                 callbackFunctions = visualiserCallbackFunctions;
             }
-            if(nodeSettings !== null && Object.keys(nodeSettings).length > 0){
+            if(typeof nodeSettings === 'object' && Object.keys(nodeSettings).length > 0){
                 nodeSettings = visualiserNodeSettings;
             }
 
