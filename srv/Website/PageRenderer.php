@@ -187,7 +187,15 @@ final class PageRenderer
             throw new WebsiteException(404, 'Instance '.$instanceId.' is not a module of this page');
         }
         $type = (string)$instance['type'];
-        $bootstrap = json_encode(array('runtime' => $this->runtime($context), 'settings' => $instance['settings'] ?? array(),
+        // no Help, Options and Publish buttons for a visitor (2026-11-28, as cmsModuleSettings.js)
+        $settings = is_array($instance['settings'] ?? null) ? $instance['settings'] : array();
+        if($type !== 'explorer'){
+            $options = is_array($settings['options'] ?? null) ? $settings['options'] : array();
+            $options['ui'] = array_merge(is_array($options['ui'] ?? null) ? $options['ui'] : array(),
+                array('showHelp' => false, 'showOptions' => false, 'showPublish' => false));
+            $settings['options'] = $options;
+        }
+        $bootstrap = json_encode(array('runtime' => $this->runtime($context), 'settings' => $settings,
             'state' => $instance['state'] ?? null), self::JSON_FLAGS);
         $module = 'heurist-'.$type;
         $assets = $this->environment['baseUrl'].'hclient/bundles/'.$module.'/';
